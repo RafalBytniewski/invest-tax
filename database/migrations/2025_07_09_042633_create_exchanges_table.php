@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('assets', function (Blueprint $table) {
+        Schema::create('exchanges', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('exchange_id')->constrained()->onDelete('cascade')->nullable();
-            $table->string('symbol');
             $table->string('name');
-            $table->enum('asset_type', ['stock', 'etf', 'cfd', 'crypto', 'futures', 'options', 'bond', 'forex', 'fund', 'commodity']);
-            $table->enum('currency', ['USD', 'EUR', 'GBP', 'PLN']);
+            $table->enum('type', ['broker', 'crypto_exchange']);
+            $table->string('image');
+            $table->string('url');
+            $table->string('country')->nullable();
+            $table->enum('currency', ['PLN', 'USD', 'EUR', 'GBP'])->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('assets');
+        Schema::dropIfExists('exchanges');
     }
 };

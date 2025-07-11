@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wallets', function (Blueprint $table) {
+        Schema::create('tax_reports', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('exchange_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->text('description')->nullable();
+            $table->year('year');
+            $table->decimal('total_income',20, 2);
+            $table->decimal('total_cost',20, 2);
+            $table->decimal('tax_due',20, 2);
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('wallets');
+        Schema::dropIfExists('tax_reports');
     }
 };
