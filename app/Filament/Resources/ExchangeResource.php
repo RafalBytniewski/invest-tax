@@ -46,11 +46,13 @@ class ExchangeResource extends Resource
                             ->required(),
                         TextInput::make('url')
                             ->required()
+                            ->url()
                             ->columnSpanFull(),
                         FileUpload::make('image')
                             ->image()
                             ->directory('exchanges')
                             ->imagePreviewHeight('200')
+                            ->visibility('public')
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
