@@ -20,7 +20,6 @@ class Asset extends Model
         'name',
         'symbol',
         'asset_type',
-        'currency',
         'exchange_id'
     ];
 

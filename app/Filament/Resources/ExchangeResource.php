@@ -17,6 +17,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\SelectAction as ActionsSelectAction;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -73,7 +75,18 @@ class ExchangeResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('name'),
+                ImageColumn::make('image'),
+                TextColumn::make('type')
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'broker' => 'Broker',
+                        'crypto_exchange' => 'Crypto exchange',
+                        default => $state,
+                    }),
+                TextColumn::make('url')
+                    ->copyable(),
+                TextColumn::make('country'),
+                TextColumn::make('currency'),
             ])
             ->filters([
                 //
