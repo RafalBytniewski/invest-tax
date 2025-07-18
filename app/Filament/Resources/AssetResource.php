@@ -12,7 +12,12 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -39,6 +44,7 @@ class AssetResource extends Resource
                             ->extraAttributes(['style' => 'text-transform: uppercase;'])
                             ->dehydrateStateUsing(fn ($state) => strtoupper($state)),
                         Select::make('asset_type')
+                            ->required()
                             ->label('Asset type')
                             ->options([
                                 'stock' => 'Stock',
@@ -49,6 +55,7 @@ class AssetResource extends Resource
                                 'forex' => 'Forex',
                             ]),
                         Select::make('exchange_id')
+                            ->required()
                             ->label('Exchange')
                             ->relationship('exchange', 'name'),
                     ])
@@ -59,13 +66,21 @@ class AssetResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('name'),
+                TextColumn::make('exchange.name'),
+                TextColumn::make('symbol'),
+                TextColumn::make('asset_type')
+                    ->label('Asset type'),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

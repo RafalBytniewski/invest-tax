@@ -18,6 +18,7 @@ class Transaction extends Model
     protected $fillable = [
         'type',
         'reward_type',
+        'currency',
         'quantity',
         'price_per_unit',
         'total_fees',
