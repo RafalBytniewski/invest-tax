@@ -23,6 +23,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\NumericColumn;
+
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
@@ -76,19 +77,29 @@ class TransactionResource extends Resource
                     TextInput::make('quantity')
                         ->label('Quantity')
                         ->required()
-                        ->numeric()
-                        ->inputMode('decimal')
                         ->placeholder(99.99999999)
                         ->minValue(0.00000001)
                         ->maxValue(99999999.99999999)
-                        ->step(0.00000001),
+                        ->step(0.00000001)
+                        ->afterStateHydrated(function (TextInput $component, $state) {
+                            $formatted = rtrim(rtrim(number_format($state, 8, '.', ' '), '0'), '.');
+                            $component->state($formatted);
+                        })
+                        ->dehydrateStateUsing(function ($state) {
+                            return str_replace(' ', '', $state);
+                        }),
                     TextInput::make('price_per_unit')
                         ->required()
-                        ->numeric()
-                        ->inputMode('decimal')
                         ->prefix(function (callable $get) {
                             $currency = strtoupper($get('currency'));
                             return $currency;
+                        })
+                        ->afterStateHydrated(function (TextInput $component, $state) {
+                            $formatted = rtrim(rtrim(number_format($state, 8, '.', ' '), '0'), '.');
+                            $component->state($formatted);
+                        })
+                        ->dehydrateStateUsing(function ($state) {
+                            return str_replace(' ', '', $state);
                         }),
                     TextInput::make('total_fees')
                         ->required()
@@ -96,6 +107,16 @@ class TransactionResource extends Resource
                         ->prefix(function (callable $get) {
                             $currency = strtoupper($get('currency'));
                             return $currency;
+                        })
+                        ->afterStateHydrated(function (TextInput $component, $state) {
+                            if ($state === null) {
+                                return;
+                            }
+                            $formatted = rtrim(rtrim(number_format($state, 8, '.', ' '), '0'), '.');
+                            $component->state($formatted);
+                        })
+                        ->dehydrateStateUsing(function ($state) {
+                            return str_replace(' ', '', $state);
                         }),
                     DatePicker::make('date')
                         ->required(),
@@ -117,25 +138,31 @@ class TransactionResource extends Resource
                 TextColumn::make('wallet.exchange.name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('type'),
+                TextColumn::make('type')
+                    ->sortable(),
                 TextColumn::make('reward_type')
                     ->label('Reward Type')
-                    ->hidden(fn ($record) => empty($record) || is_null($record->reward_type)),
+                    ->hidden(fn($record) => empty($record) || is_null($record->reward_type)),
                 TextColumn::make('quantity')
-                    ->formatStateUsing(
-                        fn($state) => (fmod($state, 1) === 0.0)
-                            ? number_format($state, 0, ',', ' ')
-                            : number_format($state, 8, ',', ' ')
-                    ),
+                    ->sortable()
+                    ->formatStateUsing(function ($state) {
+                        $formatted = number_format($state, 8, '.', ' ');
+                        return rtrim(rtrim($formatted, '0'), '.');
+                    }),
                 TextColumn::make('price_per_unit')
                     ->label('Price Per Unit')
-                    ->numeric(decimalPlaces: 0)
-                    ->suffix(function ($record) {
-                        return ' ' .  $record->currency;
-                    }),
+                    ->sortable()
+                    ->formatStateUsing(function ($state) {
+                        $formatted = number_format($state, 8, '.', ' ');
+                        return rtrim(rtrim($formatted, '0'), '.');
+                    })
+                    ->suffix(fn($record) => ' ' . ($record->currency ?? '')),
                 TextColumn::make('total_fees')
                     ->label('Total Fees')
-                    ->numeric(decimalPlaces: 0)
+                    ->sortable()
+                    ->formatStateUsing(
+                        fn($state) => rtrim(rtrim(sprintf('%.8f', $state), '0'), '.')
+                    )
                     ->suffix(function ($record) {
                         return ' ' .  $record->currency;
                     }),
@@ -144,9 +171,8 @@ class TransactionResource extends Resource
                     ->getStateUsing(function ($record) {
                         return ($record->quantity * $record->price_per_unit) - $record->total_fees;
                     })
-                    ->suffix(fn($record) => strtoupper($record->currency ?? ''))
-                    ->formatStateUsing(fn($state) => number_format($state, 2))
-
+                    ->suffix(fn($record) => ' ' . strtoupper($record->currency ?? ''))
+                    ->formatStateUsing(fn($state) => number_format($state, 2, '.', ' ')),
 
             ])
             ->filters([
