@@ -6,6 +6,7 @@ use App\Filament\Resources\AssetResource\Pages;
 use App\Filament\Resources\AssetResource\RelationManagers;
 use App\Models\Asset;
 use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -16,6 +17,7 @@ use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -37,7 +39,6 @@ class AssetResource extends Resource
                         TextInput::make('name')
                             ->required()
                             ->maxLength(255),
-
                         TextInput::make('symbol')
                             ->required()
                             ->maxLength(255)
@@ -58,7 +59,11 @@ class AssetResource extends Resource
                             ->required()
                             ->label('Exchange')
                             ->relationship('exchange', 'name'),
-                    ])
+                        FileUpload::make('image')
+                            ->image()
+                            ->directory('assets')
+                            ->columnSpanFull(),
+                    ])->columns(2)
             ]);
     }
 
@@ -67,10 +72,20 @@ class AssetResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name'),
+                ImageColumn::make('image'),
                 TextColumn::make('exchange.name'),
                 TextColumn::make('symbol'),
                 TextColumn::make('asset_type')
-                    ->label('Asset type'),
+                    ->label('Asset Type')
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'stock' => 'Stock',
+                        'etf' => 'ETF',
+                        'cfd' => 'CFD',
+                        'crypto' => 'Crypto',
+                        'bond' => 'Bond',
+                        'forex' => 'Forex',
+                        default => $state
+                    }),
             ])
             ->filters([
                 //

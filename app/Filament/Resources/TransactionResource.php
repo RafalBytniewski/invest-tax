@@ -7,6 +7,7 @@ use App\Filament\Resources\TransactionResource\RelationManagers;
 use App\Models\Transaction;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -118,6 +119,13 @@ class TransactionResource extends Resource
                         ->dehydrateStateUsing(function ($state) {
                             return str_replace(' ', '', $state);
                         }),
+                        Hidden::make('total_value')
+                            ->dehydrateStateUsing(function (callable $get) {
+                                $quantity = (float) str_replace(' ', '', $get('quantity'));
+                                $pricePerUnit = (float) str_replace(' ', '', $get('price_per_unit'));
+
+                                return $quantity * $pricePerUnit;
+                            }),
                     DatePicker::make('date')
                         ->required(),
                     Textarea::make('notes')->columnSpan(2)
@@ -139,7 +147,20 @@ class TransactionResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('type')
-                    ->sortable(),
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state){
+                        'buy' => 'success',
+                        'sell' => 'danger',
+                        'dividend' => 'primary',
+                        'crypto_reward' => 'primary'
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state){
+                        'buy' => 'Buy',
+                        'sell' => 'Sell',
+                        'dividend' => 'Dividend',
+                        'crypto_reward' => 'Crypto Reward'
+                    }),
                 TextColumn::make('reward_type')
                     ->label('Reward Type')
                     ->hidden(fn($record) => empty($record) || is_null($record->reward_type)),
@@ -168,9 +189,7 @@ class TransactionResource extends Resource
                     }),
                 TextColumn::make('total_value')
                     ->label('Total Value')
-                    ->getStateUsing(function ($record) {
-                        return ($record->quantity * $record->price_per_unit) - $record->total_fees;
-                    })
+                    ->sortable()
                     ->suffix(fn($record) => ' ' . strtoupper($record->currency ?? ''))
                     ->formatStateUsing(fn($state) => number_format($state, 2, '.', ' ')),
 

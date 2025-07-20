@@ -18,6 +18,7 @@ class Asset extends Model
      */
     protected $fillable = [
         'name',
+        'image',
         'symbol',
         'asset_type',
         'exchange_id'

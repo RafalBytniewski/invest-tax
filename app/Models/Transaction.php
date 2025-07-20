@@ -22,6 +22,7 @@ class Transaction extends Model
         'quantity',
         'price_per_unit',
         'total_fees',
+        'total_value',
         'date',
         'notes',
         'wallet_id',
