@@ -29,6 +29,10 @@ class Transaction extends Model
         'asset_id'
     ];
 
+    protected $casts = [
+        'date' => 'datetime',
+    ];
+
     public function wallet():BelongsTo{
         return $this->belongsTo(Wallet::class);
     }
