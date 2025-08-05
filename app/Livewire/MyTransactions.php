@@ -32,7 +32,7 @@ class MyTransactions extends Component
 
     public function render()
     {
-        $transactions = Transaction::search('type', $this->search)->orderBy($this->sortField, $this->sortDirection)->paginate(10);
+        $transactions = Transaction::search(['asset.name', 'asset.exchange.name', 'wallet.name', 'type'], $this->search)->orderBy($this->sortField, $this->sortDirection)->paginate(10);
 
         return view('livewire.my-transactions', [
             'transactions' => $transactions,

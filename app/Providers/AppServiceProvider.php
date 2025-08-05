@@ -20,8 +20,27 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Builder::macro('search', function($field, $string) {
-            return $string ? $this->where($field, 'like', '%'.$string.'%') : $this;
+        Builder::macro('search', function ($fields, $string) {
+            if (!$string) {
+                return $this;
+            }
+
+            return $this->where(function ($query) use ($fields, $string) {
+                foreach ((array) $fields as $field) {
+                    if (str_contains($field, '.')) {
+                        $parts = explode('.', $field);
+                        $column = array_pop($parts); // ostatnia część = nazwa kolumny
+                        $relation = implode('.', $parts); // wszystko przed ostatnią = relacja (nawet zagnieżdżona)
+
+                        $query->orWhereHas($relation, function ($q) use ($column, $string) {
+                            $q->where($column, 'like', '%' . $string . '%');
+                        });
+                    } else {
+                        // Zwykłe pole w tabeli
+                        $query->orWhere($field, 'like', '%' . $string . '%');
+                    }
+                }
+            });
         });
     }
 }
