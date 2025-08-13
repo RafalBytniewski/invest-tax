@@ -21,10 +21,10 @@ public function run(): void
         ['type' => 'buy',  'quantity' => 1321,   'price' => 1,      'asset_id' => 3],
         ['type' => 'buy',  'quantity' => 121,    'price' => 8888,   'asset_id' => 2],
         ['type' => 'buy',  'quantity' => 0.001,  'price' => 400000, 'asset_id' => 1],
-        ['type' => 'sell', 'quantity' => 2,      'price' => 777,    'asset_id' => 4],
+        ['type' => 'sell', 'quantity' => -2,      'price' => 777,    'asset_id' => 4],
         ['type' => 'buy',  'quantity' => 0.5,    'price' => 8787,   'asset_id' => 2],
-        ['type' => 'sell', 'quantity' => 1.1,    'price' => 8787,   'asset_id' => 2],
-        ['type' => 'sell', 'quantity' => 0.02,   'price' => 400000, 'asset_id' => 1],
+        ['type' => 'sell', 'quantity' => -1.1,    'price' => 8787,   'asset_id' => 2],
+        ['type' => 'sell', 'quantity' => -0.02,   'price' => 400000, 'asset_id' => 1],
     ];
 
     $dates = [

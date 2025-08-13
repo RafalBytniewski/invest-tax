@@ -88,6 +88,12 @@ class TransactionResource extends Resource
                         })
                         ->dehydrateStateUsing(function ($state) {
                             return str_replace(' ', '', $state);
+                        })
+                        ->mutateDehydratedStateUsing(function ($state, callable $get) {
+                            $type = $get('type');
+                            $numeric = floatval(str_replace(' ', '', $state));
+
+                            return $type === 'sell' ? -abs($numeric) : abs($numeric);
                         }),
                     TextInput::make('price_per_unit')
                         ->required()
@@ -119,13 +125,16 @@ class TransactionResource extends Resource
                         ->dehydrateStateUsing(function ($state) {
                             return str_replace(' ', '', $state);
                         }),
-                        Hidden::make('total_value')
-                            ->dehydrateStateUsing(function (callable $get) {
-                                $quantity = (float) str_replace(' ', '', $get('quantity'));
-                                $pricePerUnit = (float) str_replace(' ', '', $get('price_per_unit'));
+                    Hidden::make('total_value')
+                        ->dehydrateStateUsing(function (callable $get) {
+                            $quantity = (float) str_replace(' ', '', $get('quantity'));
+                            $pricePerUnit = (float) str_replace(' ', '', $get('price_per_unit'));
+                            $type = $get('type');
 
-                                return $quantity * $pricePerUnit;
-                            }),
+                            $adjustedQuantity = $type === 'sell' ? -abs($quantity) : abs($quantity);
+
+                            return $adjustedQuantity * $pricePerUnit;
+                        }),
                     DatePicker::make('date')
                         ->required(),
                     Textarea::make('notes')->columnSpan(2)
@@ -149,13 +158,13 @@ class TransactionResource extends Resource
                 TextColumn::make('type')
                     ->sortable()
                     ->badge()
-                    ->color(fn (string $state): string => match ($state){
+                    ->color(fn(string $state): string => match ($state) {
                         'buy' => 'success',
                         'sell' => 'danger',
                         'dividend' => 'primary',
                         'crypto_reward' => 'primary'
                     })
-                    ->formatStateUsing(fn (string $state): string => match ($state){
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
                         'buy' => 'Buy',
                         'sell' => 'Sell',
                         'dividend' => 'Dividend',

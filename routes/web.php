@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\MyAssets;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -22,4 +23,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
 });
 Route::get('/my-transactions', MyTransactions::class)->name('my-transactions');
+Route::get('/my-assets', MyAssets::class)->name('my-assets');
+
 require __DIR__.'/auth.php';

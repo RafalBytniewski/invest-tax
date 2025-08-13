@@ -40,10 +40,10 @@
                             <x-table.cell class="px-4 py-2">{{ $transaction->asset?->name }}</x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ $transaction->asset?->exchange?->name }}</x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ $transaction->wallet?->name }}</x-table.cell>
-                            <x-table.cell class="px-4 py-2">{{ ucfirst($transaction->type) }}</x-table.cell>
-                            <x-table.cell class="px-4 py-2">{{ $transaction->quantity }}</x-table.cell>
+                            <x-table.cell class="px-4 py-2  {{ $transaction->type === 'sell' ? 'text-red-500' : 'text-green-500' }}">{{ ucfirst($transaction->type) }}</x-table.cell>
+                            <x-table.cell class="px-4 py-2">{{ abs($transaction->quantity) }}</x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ $transaction->price_per_unit }}<span> {{  $transaction->currency}}</span></x-table.cell>
-                            <x-table.cell class="px-4 py-2">{{ $transaction->total_value }}<span> {{  $transaction->currency}}</span></x-table.cell>
+                            <x-table.cell class="px-4 py-2">{{ abs($transaction->total_value) }}<span> {{  $transaction->currency}}</span></x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ $transaction->date->format('M, d Y') }}</x-table.cell>
                             <x-table.cell>
                                 <button class="bg-blue-800 cursor-pointer m-1">V</button>
