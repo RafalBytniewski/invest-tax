@@ -40,4 +40,20 @@ class Transaction extends Model
     public function asset():BelongsTo{
         return $this->belongsTo(Asset::class);
     }
+    
+   public function scopeSearch($query, $value)
+    {
+        $query->where(function ($q) use ($value) {
+            $q->whereHas('asset', function ($q2) use ($value) {
+                $q2->where('name', 'like', "%{$value}%")
+                ->orWhereHas('exchange', function ($q3) use ($value) {
+                    $q3->where('name', 'like', "%{$value}%");
+                });
+            })
+            ->orWhereHas('wallet', function ($q2) use ($value) {
+                $q2->where('name', 'like', "%{$value}%");
+            });
+        });
+    }
+
 }

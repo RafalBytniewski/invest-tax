@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Builder::macro('search', function ($fields, $string) {
+/*         Builder::macro('search', function ($fields, $string) {
             if (!$string) {
                 return $this;
             }
@@ -41,6 +41,6 @@ class AppServiceProvider extends ServiceProvider
                     }
                 }
             });
-        });
+        }); */
     }
 }

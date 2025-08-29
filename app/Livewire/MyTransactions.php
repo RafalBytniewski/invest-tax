@@ -11,28 +11,61 @@ use Livewire\Attributes\Reactive;
 class MyTransactions extends Component
 {
     use WithPagination;
+    // paginate
+    public $perPage = '10';
 
+    // searching feature
     public $search = '';
-    public $sortField = 'type';
-    public $sortDirection = 'asc';
-
-    protected $queryString = ['sortField', 'sortDirection'];
-    
-    public function sortBy($field){
-        $this->sortDirection = $this->sortField === $field ? $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc' :'asc';
-        
-        $this->sortField = $field;
-    }
-
     public function updatedSearch()
     {
         $this->resetPage();
     }
 
+    // sorting feature
+    public $sortField = 'type';
+    public $sortDirection = 'asc';
+    protected $queryString = ['sortField', 'sortDirection'];
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+    }
+
+
+    // bulk actions 
+    public $selected = [];   // zaznaczone ID
+    public $selectAll = false;
+
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selected = Transaction::pluck('id')->toArray();
+        } else {
+            $this->selected = [];
+        }
+    }
+
+    // new transaction modal 
+    public $showModal = false;
+
+    public function openModal()
+    {
+        $this->showModal = true;
+    } 
+
+    public function closeModal()
+    {
+        $this->showModal = false;
+    }
 
     public function render()
     {
-        $transactions = Transaction::search(['asset.name', 'asset.exchange.name', 'wallet.name', 'type'], $this->search)->orderBy($this->sortField, $this->sortDirection)->paginate(10);
+        $transactions = Transaction::search( $this->search)->orderBy($this->sortField, $this->sortDirection)->paginate($this->perPage);
 
         return view('livewire.my-transactions', [
             'transactions' => $transactions,
