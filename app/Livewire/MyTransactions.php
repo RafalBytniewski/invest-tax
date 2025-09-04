@@ -37,7 +37,7 @@ class MyTransactions extends Component
     }
 
 
-    // bulk actions 
+    // bulk actions                                 ********** DOESNT WORKING 
     public $selected = [];   // zaznaczone ID
     public $selectAll = false;
 
@@ -50,18 +50,7 @@ class MyTransactions extends Component
         }
     }
 
-    // new transaction modal 
-    public $showModal = false;
-
-    public function openModal()
-    {
-        $this->showModal = true;
-    } 
-
-    public function closeModal()
-    {
-        $this->showModal = false;
-    }
+    
 
     public function render()
     {

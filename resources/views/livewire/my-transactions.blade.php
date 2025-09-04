@@ -1,3 +1,4 @@
+
 <div>
     <div>
         <div class="p-4">
@@ -11,7 +12,8 @@
                     <button class="px-4 py-2 border rounded h-14 w-36 hover:bg-gray-600 transition">
                         Columns
                     </button>
-                    <button wire:click="openModal" class="px-4 py-2 border bg-red-800 rounded h-14 w-46 hover:bg-red-400 transition">
+                    <button wire:click="$dispatch('openNewTransactionModal')"
+                        class="px-4 py-2 border bg-red-800 rounded h-14 w-46 hover:bg-red-400 transition">
                         New Transaction
                     </button>
                 </div>
@@ -29,7 +31,7 @@
                             class="px-4 py-2">Wallet</x-table.header>
                         <x-table.header sortable wire:click="sortBy('type')" :direction="$sortField === 'type' ? $sortDirection : null"
                             class="px-4 py-2">Type</x-table.header>
-                        <x-table.header sortable wire:click="sortBy('quantity')" :direction="$sortField === 'quantity' ? $sortDirection : null" 
+                        <x-table.header sortable wire:click="sortBy('quantity')" :direction="$sortField === 'quantity' ? $sortDirection : null"
                             class="px-4 py-2">Quantity</x-table.header>
                         <x-table.header class="px-4 py-2">Price</x-table.header>
                         <x-table.header sortable wire:click="sortBy('total_value')" :direction="$sortField === 'total_value' ? $sortDirection : null"
@@ -51,9 +53,11 @@
                             <x-table.cell
                                 class="px-4 py-2  {{ $transaction->type === 'sell' ? 'text-red-500' : 'text-green-500' }}">{{ ucfirst($transaction->type) }}</x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ abs($transaction->quantity) }}</x-table.cell>
-                            <x-table.cell class="px-4 py-2">{{ number_format($transaction->price_per_unit, 2, ',',' ') }}<span>
+                            <x-table.cell
+                                class="px-4 py-2">{{ number_format($transaction->price_per_unit, 2, ',', ' ') }}<span>
                                     {{ $transaction->currency }}</span></x-table.cell>
-                            <x-table.cell class="px-4 py-2">{{ number_format(abs($transaction->total_value), 2, ',', ' ') }}<span>
+                            <x-table.cell
+                                class="px-4 py-2">{{ number_format(abs($transaction->total_value), 2, ',', ' ') }}<span>
                                     {{ $transaction->currency }}</span></x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ $transaction->date->format('M, d Y') }}</x-table.cell>
                             <x-table.cell>
@@ -76,22 +80,23 @@
                 </x-slot>
                 </x-table>
             </div>
-<div class="mt-3 flex">
-    <label for=""class="mr-5">Per page</label>
-    <select wire:model.live="perPage">
-        <option value="10">10</option>
-        <option value="20">20</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
+            <div class="mt-3 flex">
+                <label for=""class="mr-5">Per page</label>
+                <select wire:model.live="perPage">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
 
-    </select>
-</div>
+                </select>
+            </div> 
             <div class="mt-4">
                 {{ $transactions->links() }}
             </div>
         </div>
     </div>
-    {{-- NEW TRANSACTION MODAL --}}
-    <x-modal wire:model="showModal">
-    </x-modal>
+    <div>
+    <livewire:new-transaction/>
 </div>
+</div>
+

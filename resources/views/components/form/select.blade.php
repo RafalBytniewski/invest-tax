@@ -19,7 +19,7 @@
                dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         @if ($required) required @endif>
 
-        <option value="">-- wybierz --</option>
+        <option value=""></option>
         @foreach($options as $key => $optionLabel)
             <option value="{{ $key }}" @if($value == $key) selected @endif>
                 {{ $optionLabel }}
