@@ -2,6 +2,22 @@
 <div>
     <div>
         <div class="p-4">
+{{-- komunikaty --}}
+    @if (session()->has('success'))
+        <div class="p-2 mb-3 text-green-700 bg-green-100 rounded">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="p-2 mb-3 text-red-700 bg-red-100 rounded">
+            <ul class="list-disc pl-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
             <div class="flex flex-row justify-between items-center mb-4 gap-4">
                 <input type="text" wire:model.live.debounce.500ms="search" placeholder="Find ..."
                     class="mb-4 px-4 py-2 border rounded h-14 w-94 shrink" />
