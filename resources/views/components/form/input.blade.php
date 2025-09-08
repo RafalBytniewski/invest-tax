@@ -2,31 +2,29 @@
     'type' => 'text',
     'model',
     'label',
-    'required' => false,
-    'placeholder' => null,
-    'value' => null,
-    'readonly' => false,
     'wireModifier' => null,
 ])
 
 <div class="relative z-0 w-full mb-5 group">
-    <label for="{{ $model }}"
-        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+    <label for="{{ $model }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
         {{ $label }}
     </label>
 
-    <input type="{{ $type }}"
+    <input 
+        type="{{ $type }}"
         wire:model{{ $wireModifier ? ".$wireModifier" : '' }}="{{ $model }}"
         id="{{ $model }}"
-        placeholder="{{ $placeholder }}"
-        value="{{ $value }}"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-               focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
-               dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
-               dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
-               @error($model) border-red-500 focus:border-red-500 focus:ring-red-500 @enderror"
-        @if ($required) required @endif
-        @if ($readonly) readonly @endif
+        {{ $attributes
+            ->merge([
+                'class' => 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
+                            focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
+                            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
+                            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+            ])
+            ->class([
+                'border-red-500 focus:border-red-500 focus:ring-red-500' => $errors->has($model)
+            ])
+        }}
     />
 
     @error($model)

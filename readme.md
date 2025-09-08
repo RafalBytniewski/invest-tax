@@ -17,7 +17,7 @@ An application for managing stock and cryptocurrency transactions, allowing tran
 ### 👤 Frontend (User)
 
 - Add stock and cryptocurrency transactions  
-- Filter transactions by date, type, exchange, or cryptocurrency  
+- Filter transactions by date, type, exchange, or asset  
 - View transaction history  
 - Generate tax reports including payable tax  
 - Register/login (email)  
@@ -25,7 +25,7 @@ An application for managing stock and cryptocurrency transactions, allowing tran
 ### 🔧 Admin Panel
 
 - User management  
-- Management of transaction types or exchanges (optional)  
+- Management of assets, wallets or exchanges (optional)  
 - View statistics (optional: number of transactions, amounts, taxes)  
 
 ### 🎨 UI/UX

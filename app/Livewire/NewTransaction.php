@@ -87,7 +87,7 @@ class NewTransaction extends Component
             'total_fees' => 'required|numeric', 
             'total_value' => 'required|numeric', 
             'date' => 'required|date', 
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string|max:500'
         ]);
 
         Transaction::create([

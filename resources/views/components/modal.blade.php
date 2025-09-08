@@ -13,18 +13,17 @@
             </x-form.section>
             <x-form.section label="Transaction Details">
                 <x-form.input model="currency" label="Currency" placeholder="PLN, USD, EUR, GBP" required />
-
-                <x-form.input type="number" model="quantity" wireModifier="live" label="Quantity" required />
-                <x-form.input type="number" model="price_per_unit" wireModifier="live" label="Price per unit"
+                <x-form.input type="number" model="quantity" wireModifier="lazy" label="Quantity" step="0.00000001" required />
+                <x-form.input type="number" model="price_per_unit" wireModifier="lazy" label="Price per unit"
                     required />
-                <x-form.input type="number" model="total_fees" wireModifier="live" label="Total fees" value="0"
+                <x-form.input type="number" model="total_fees" wireModifier="lazy" label="Total fees" value="0"
                     required />
                 <x-form.input type="number" model="total_value" label="Total value" value="0" readonly disabled />
                 <x-form.input type="date" model="date" label="Date" required />
             </x-form.section>
             <x-form.section label="Optional">
                 <div class="flex flex-col col-span-2">
-                    <x-form.textarea model="notes" label="Notes" placeholder="Write your notes..."></x-form.textarea>
+                    <x-form.textarea model="notes" label="Notes" placeholder="Write your notes..." maxlength="500"></x-form.textarea>
             </x-form.section>
 
             <div class="mt-6 flex justify-end gap-2">
