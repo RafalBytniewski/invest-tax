@@ -14,6 +14,8 @@ class MyTransactions extends Component
     // paginate
     public $perPage = '10';
 
+    //type
+    public $type = '';
     // searching feature
     public $search = '';
     public function updatedSearch()
@@ -22,7 +24,7 @@ class MyTransactions extends Component
     }
 
     // sorting feature
-    public $sortField = 'type';
+    public $sortField = 'date';
     public $sortDirection = 'asc';
     protected $queryString = ['sortField', 'sortDirection'];
 
@@ -54,7 +56,10 @@ class MyTransactions extends Component
 
     public function render()
     {
-        $transactions = Transaction::search( $this->search)->orderBy($this->sortField, $this->sortDirection)->paginate($this->perPage);
+        $transactions = Transaction::search( $this->search)
+            ->when($this->type !=='', function($query){$query->where('type',$this->type);})
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage);
 
         return view('livewire.my-transactions', [
             'transactions' => $transactions,
