@@ -1,7 +1,8 @@
 <div>
     <div>
         <div class="p-4">
-            {{-- komunikaty --}}
+
+            <!-- Messages -->
             @if (session()->has('success'))
                 <div class="p-2 mb-3 text-green-700 bg-green-100 rounded">
                     {{ session('success') }}
@@ -17,13 +18,18 @@
                     </ul>
                 </div>
             @endif
+
             <div class="flex flex-row justify-between items-center mb-4 gap-4">
                 <input type="text" wire:model.live.debounce.500ms="search" placeholder="Find ..."
                     class="mb-4 px-4 py-2 border rounded h-14 w-94 shrink" />
                 <div class="flex gap-2">
+
+                    <!-- Bulk Actions -->
                     <button class="px-4 py-2 border rounded h-14 w-36 hover:bg-gray-600 transition">
                         Bulk Actions
                     </button>
+
+                    <!-- Transaction Type -->
                     <select wire:model.live="type" id=""
                         class="px-4 py-2 border rounded h-14 w-36 hover:bg-gray-600 transition">
                         <option value="" disabled selected>Type</option>
@@ -31,42 +37,25 @@
                         <option value="buy">Buy</option>
                         <option value="sell">Sell</option>
                     </select>
-                    <button class="px-4 py-2 border rounded h-14 w-36 hover:bg-gray-600 transition">
-                        Columns
-                    </button>
-{{--                     <div x-data="{ open: false, selected: { date: true, asset: true, exchange: true, wallet: true } }" class="relative inline-block text-left">
 
-                        <!-- Przycisk -->
+                    <!-- Transaction Columns -->
+                    <div x-data="{ open: false, selected: { date: true, asset: true, exchange: true, wallet: true } }" class="relative inline-block text-left">
                         <button @click="open = !open"
                             class="px-4 py-2 border rounded h-14 w-36 hover:bg-gray-600 transition">
                             Columns
                         </button>
-
-                        <!-- Dropdown -->
                         <div x-show="open" @click.away="open = false"
-                            class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg p-2 z-50">
-
-                            <label class="flex items-center space-x-2 px-2 py-1 hover:bg-gray-100 rounded">
-                                <input type="checkbox" x-model="selected.date">
-                                <span>Date</span>
-                            </label>
-
-                            <label class="flex items-center space-x-2 px-2 py-1 hover:bg-gray-100 rounded">
-                                <input type="checkbox" x-model="selected.asset">
-                                <span>Asset</span>
-                            </label>
-
-                            <label class="flex items-center space-x-2 px-2 py-1 hover:bg-gray-100 rounded">
-                                <input type="checkbox" x-model="selected.exchange">
-                                <span>Exchange</span>
-                            </label>
-
-                            <label class="flex items-center space-x-2 px-2 py-1 hover:bg-gray-100 rounded">
-                                <input type="checkbox" x-model="selected.wallet">
-                                <span>Wallet</span>
-                            </label>
+                            class="absolute right-0 mt-2 w-36 bg-white dark:bg-gray-600 dark:border-gray-700 border rounded z-50">
+                            @foreach ($columns as $column)
+                                <label class="flex items-center space-x-2 px-2 py-1 bg-white dark:bg-gray-700 dark:hover:bg-gray-600">
+                                    <input type="checkbox" x-model="selected.{{  $column   }}" class="text-blue-600 focus:ring-blue-500">
+                                    <span class="text-gray-900 dark:text-white">{{  $column   }}</span>
+                                </label>
+                            @endforeach
                         </div>
-                    </div> --}}
+                    </div>
+
+                    <!-- New Transaction -->
                     <button wire:click="$dispatch('openNewTransactionModal')"
                         class="px-4 py-2 border bg-red-800 rounded h-14 w-46 hover:bg-red-400 transition">
                         New Transaction
@@ -74,6 +63,7 @@
                 </div>
             </div>
 
+            <!-- Transactions tabel -->
             <div class="overflow-x-auto">
                 <x-table>
                     <x-slot name="head">
@@ -135,9 +125,12 @@
                 </x-slot>
                 </x-table>
             </div>
+
+            <!-- Pagination -->
             <div class="mt-3 flex">
                 <label for=""class="pr-2 py-2 ">Per page:</label>
-                <select wire:model.live="perPage" class="px-4 py-2 border rounded h-11 w-22 hover:bg-gray-600 transition">
+                <select wire:model.live="perPage"
+                    class="px-4 py-2 border rounded h-11 w-22 hover:bg-gray-600 transition">
                     <option value="10">10</option>
                     <option value="20">20</option>
                     <option value="50">50</option>

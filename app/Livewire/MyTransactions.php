@@ -16,6 +16,8 @@ class MyTransactions extends Component
 
     //type
     public $type = '';
+    //columns
+    public $columns = ['asset', 'exchange', 'wallet', 'type', 'quantity', 'price', 'total_value', 'date'];
     // searching feature
     public $search = '';
     public function updatedSearch()
