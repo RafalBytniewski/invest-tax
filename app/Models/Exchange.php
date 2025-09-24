@@ -26,9 +26,9 @@ class Exchange extends Model
         'image',
     ];
 
-    public function brokers(): BelongsToMany
+    public function assets(): BelongsToMany
     {
-        return $this->belongsToMany(Broker::class, 'broker_exchange')
+        return $this->belongsToMany(Asset::class, 'asset_exchange')
                     ->withTimestamps();
     }
 }
