@@ -8,7 +8,7 @@
         <x-form wire:submit.prevent="save">
             <x-form.section label="Transaction Context">
                 <x-form.select model="wallet" label="Wallet" :options="$wallets" required />
-                <x-form.select model="asset" label="Asset/Exchange" :options="$assets" required />
+                <x-form.select model="asset" label="Asset/Broker" :options="$assets" required />
                 <x-form.select model="type" label="Type" :options="$types" required />
             </x-form.section>
             <x-form.section label="Transaction Details">
@@ -18,7 +18,7 @@
                     required />
                 <x-form.input type="number" model="total_fees" wireModifier="lazy" label="Total fees" value="0"
                     required />
-                <x-form.input type="number" model="total_value" label="Total value" value="0" readonly disabled />
+                <x-form.input type="number" model="total_value" label="Total value" step="0.01" value="0" readonly disabled />
                 <x-form.input type="date" model="date" label="Date" required />
             </x-form.section>
             <x-form.section label="Optional">

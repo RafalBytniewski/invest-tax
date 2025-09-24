@@ -55,10 +55,10 @@ class AssetResource extends Resource
                                 'bond' => 'Bond',
                                 'forex' => 'Forex',
                             ]),
-                        Select::make('exchange_id')
+                        Select::make('broker_id')
                             ->required()
-                            ->label('Exchange')
-                            ->relationship('exchange', 'name'),
+                            ->label('Broker')
+                            ->relationship('broker', 'name'),
                         FileUpload::make('image')
                             ->image()
                             ->directory('assets')
@@ -73,7 +73,7 @@ class AssetResource extends Resource
             ->columns([
                 TextColumn::make('name'),
                 ImageColumn::make('image'),
-                TextColumn::make('exchange.name'),
+                TextColumn::make('broker.name'),
                 TextColumn::make('symbol'),
                 TextColumn::make('asset_type')
                     ->label('Asset Type')

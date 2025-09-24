@@ -36,10 +36,10 @@ class WalletResource extends Resource
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Select::make('exchange_id')
+                Select::make('broker_id')
                     ->required()
-                    ->label('Exchange')
-                    ->relationship('exchange', 'name'),
+                    ->label('Broker')
+                    ->relationship('broker', 'name'),
                 Textarea::make('description')
                     ->maxLength(1024),
             ]);
@@ -51,7 +51,7 @@ class WalletResource extends Resource
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('user.name'),
-                TextColumn::make('exchange.name'),
+                TextColumn::make('broker.name'),
                 TextColumn::make('description')
             ])
             ->filters([

@@ -20,7 +20,7 @@ class Wallet extends Model
         'name',
         'description',
         'user_id',
-        'exchange_id'
+        'broker_id'
     ];
 
     public function transactions(): HasMany{
@@ -31,7 +31,7 @@ class Wallet extends Model
         return $this->belongsTo(User::class);
     }
     
-    public function exchange(): BelongsTo{
-        return $this->belongsTo(Exchange::class);
+    public function broker(): BelongsTo{
+        return $this->belongsTo(Broker::class);
     }
 }

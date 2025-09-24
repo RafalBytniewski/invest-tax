@@ -64,8 +64,8 @@ class NewTransaction extends Component
             ->pluck('name', 'id')
             ->toArray();
 
-        $this->assets = Asset::with('exchange')->get()->mapWithKeys(function ($asset) {
-            return [$asset->id => $asset->name . ' / ' . $asset->exchange->name];
+        $this->assets = Asset::with('broker')->get()->mapWithKeys(function ($asset) {
+            return [$asset->id => $asset->name . ' / ' . $asset->broker->name];
         })->toArray();
     }
     public $types = [

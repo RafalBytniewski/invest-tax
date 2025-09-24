@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ExchangeResource\Pages;
-use App\Filament\Resources\ExchangeResource\RelationManagers;
-use App\Models\Exchange;
+use App\Filament\Resources\brokerResource\Pages;
+use App\Filament\Resources\brokerResource\RelationManagers;
+use App\Models\broker;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
@@ -27,9 +27,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class ExchangeResource extends Resource
+class brokerResource extends Resource
 {
-    protected static ?string $model = Exchange::class;
+    protected static ?string $model = broker::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
 
@@ -39,7 +39,7 @@ class ExchangeResource extends Resource
             ->schema([
                 Group::make()
                     ->schema([
-                        Section::make('Exchange information')
+                        Section::make('broker information')
                             ->schema([
                                 TextInput::make('name')
                                     ->required()
@@ -47,7 +47,7 @@ class ExchangeResource extends Resource
                                 Select::make('type')
                                     ->options([
                                         'broker' => 'Broker',
-                                        'crypto_exchange' => 'Crypto exchange'
+                                        'crypto_broker' => 'Crypto broker'
                                     ])
                                     ->required(),
                                 TextInput::make('url')
@@ -56,7 +56,7 @@ class ExchangeResource extends Resource
                                     ->columnSpanFull(),
                                 FileUpload::make('image')
                                     ->image()
-                                    ->directory('exchanges')
+                                    ->directory('brokers')
                                     ->imagePreviewHeight('200')
                                     ->visibility('public')
                                     ->columnSpanFull(),
@@ -83,7 +83,7 @@ class ExchangeResource extends Resource
                 TextColumn::make('type')
                     ->formatStateUsing(fn($state) => match ($state) {
                         'broker' => 'Broker',
-                        'crypto_exchange' => 'Crypto exchange',
+                        'crypto_broker' => 'Crypto broker',
                         default => $state,
                     }),
                 TextColumn::make('url')
@@ -118,9 +118,9 @@ class ExchangeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListExchanges::route('/'),
-            'create' => Pages\CreateExchange::route('/create'),
-            'edit' => Pages\EditExchange::route('/{record}/edit'),
+            'index' => Pages\Listbrokers::route('/'),
+            'create' => Pages\Createbroker::route('/create'),
+            'edit' => Pages\Editbroker::route('/{record}/edit'),
         ];
     }
 }

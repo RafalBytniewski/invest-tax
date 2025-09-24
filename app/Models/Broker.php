@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Exchange extends Model
+class Broker extends Model
 {
     use HasFactory;
 
@@ -20,8 +20,7 @@ class Exchange extends Model
         'type',
         'image',
         'url',
-        'country',
-        'currency'
+        'country'
     ];
 
     public function assets(): HasMany{

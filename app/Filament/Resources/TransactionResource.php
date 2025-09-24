@@ -44,9 +44,9 @@ class TransactionResource extends Resource
                         ->required()
                         ->label('Asset')
                         ->options(function () {
-                            return \App\Models\Asset::with('exchange')->get()->mapWithKeys(function ($asset) {
+                            return \App\Models\Asset::with('broker')->get()->mapWithKeys(function ($asset) {
                                 return [
-                                    $asset->id => $asset->name . ' / ' . ($asset->exchange->name),
+                                    $asset->id => $asset->name . ' / ' . ($asset->broker->name),
                                 ];
                             });
                         }),
@@ -152,7 +152,7 @@ class TransactionResource extends Resource
                 TextColumn::make('wallet.user.name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('wallet.exchange.name')
+                TextColumn::make('wallet.broker.name')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('type')

@@ -46,7 +46,7 @@ class Transaction extends Model
         $query->where(function ($q) use ($value) {
             $q->whereHas('asset', function ($q2) use ($value) {
                 $q2->where('name', 'like', "%{$value}%")
-                ->orWhereHas('exchange', function ($q3) use ($value) {
+                ->orWhereHas('broker', function ($q3) use ($value) {
                     $q3->where('name', 'like', "%{$value}%");
                 });
             })

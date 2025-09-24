@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\ExchangeResource\Pages;
+namespace App\Filament\Resources\BrokerResource\Pages;
 
-use App\Filament\Resources\ExchangeResource;
+use App\Filament\Resources\BrokerResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListExchanges extends ListRecords
+class ListBrokers extends ListRecords
 {
-    protected static string $resource = ExchangeResource::class;
+    protected static string $resource = BrokerResource::class;
 
     protected function getHeaderActions(): array
     {
