@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Broker extends Model
@@ -29,5 +30,11 @@ class Broker extends Model
 
     public function wallets(): HasMany{
         return $this->hasMany(Wallet::class);
+    }
+
+    public function exchanges(): BelongsToMany
+    {
+        return $this->belongsToMany(Exchange::class, 'broker_exchange')
+                    ->withTimestamps();
     }
 }
