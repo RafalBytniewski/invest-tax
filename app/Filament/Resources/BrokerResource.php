@@ -39,7 +39,7 @@ class brokerResource extends Resource
             ->schema([
                 Group::make()
                     ->schema([
-                        Section::make('broker information')
+                        Section::make('Broker information')
                             ->schema([
                                 TextInput::make('name')
                                     ->required()

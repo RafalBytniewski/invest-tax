@@ -31,10 +31,4 @@ class Broker extends Model
     public function wallets(): HasMany{
         return $this->hasMany(Wallet::class);
     }
-
-    public function exchanges(): BelongsToMany
-    {
-        return $this->belongsToMany(Exchange::class, 'broker_exchange')
-                    ->withTimestamps();
-    }
 }
