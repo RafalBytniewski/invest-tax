@@ -83,7 +83,7 @@ class brokerResource extends Resource
                 TextColumn::make('type')
                     ->formatStateUsing(fn($state) => match ($state) {
                         'broker' => 'Broker',
-                        'crypto_broker' => 'Crypto broker',
+                        'crypto_broker' => 'Crypto exchange',
                         default => $state,
                     }),
                 TextColumn::make('url')

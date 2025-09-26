@@ -57,8 +57,12 @@ class AssetResource extends Resource
                             ]),
                         Select::make('broker_id')
                             ->required()
-                            ->label('Broker')
+                            ->label('Broker/Crypto exchange')
                             ->relationship('broker', 'name'),
+                        Select::make('exchange_id')
+                            ->required()
+                            ->label('Exchange')
+                            ->relationship('exchange', 'symbol'),
                         FileUpload::make('image')
                             ->image()
                             ->directory('assets')

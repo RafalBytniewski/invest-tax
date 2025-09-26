@@ -5,6 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ExchangeResource\Pages;
 use App\Filament\Resources\ExchangeResource\RelationManagers;
 use App\Models\Exchange;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
@@ -12,8 +16,11 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Actions\ActionGroup as ActionsActionGroup;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ViewAction as ActionsViewAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -39,7 +46,8 @@ class ExchangeResource extends Resource
                                         TextInput::make('name')
                                             ->required()
                                             ->maxLength(255),
-                                        TextInput::make('symbol')                                         
+                                        TextInput::make('symbol')
+                                            ->required()                                        
                                             ->maxLength(25),
                                     ])->columns(2),
                                 Group::make()
@@ -53,9 +61,12 @@ class ExchangeResource extends Resource
                                             ])
                                             ->required(),
                                         Select::make('currency')
-                                            ->options([
-                                                'PLN', 'USD','EUR','GBP'
-                                            ])
+                                               ->options([
+                                                    'PLN' => 'PLN',
+                                                    'USD' => 'USD',
+                                                    'EUR' => 'EUR',
+                                                    'GBP' => 'GBP',
+                                                ])
                                             ->required(),
                                     ])->columns(2),
                                 Group::make()
@@ -80,13 +91,25 @@ class ExchangeResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('name'),
+                TextColumn::make('symbol'),
+                TextColumn::make('country'),
+                TextColumn::make('currency'),
+                TextColumn::make('timezone'),
+                TextColumn::make('trading_hours'),
+
+
+
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
