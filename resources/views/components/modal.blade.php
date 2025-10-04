@@ -15,7 +15,7 @@
                 <x-form.input model="currency" label="Currency" placeholder="PLN, USD, EUR, GBP" required />
                 <x-form.input type="number" model="quantity" wireModifier="lazy" label="Quantity" step="0.00000001" required />
                 <x-form.input type="number" model="price_per_unit" wireModifier="lazy" label="Price per unit"
-                    required />
+                    suffix="" required />
                 <x-form.input type="number" model="total_fees" wireModifier="lazy" label="Total fees" value="0"
                     required />
                 <x-form.input type="number" model="total_value" label="Total value" step="0.01" value="0" readonly disabled />

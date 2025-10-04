@@ -58,6 +58,7 @@ class ExchangeResource extends Resource
                                                 'usa' => 'USA',
                                                 'germany' => 'Germany',
                                                 'great_britain' => 'Great Britain',
+                                                'france' => 'France'
                                             ])
                                             ->required(),
                                         Select::make('currency')

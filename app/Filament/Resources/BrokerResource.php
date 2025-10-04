@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\brokerResource\Pages;
 use App\Filament\Resources\brokerResource\RelationManagers;
-use App\Models\broker;
+use App\Models\Broker;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
@@ -66,8 +66,7 @@ class brokerResource extends Resource
                     ->columnSpan(2),
                 Section::make('Optional')
                     ->schema([
-                        TextInput::make('country'),
-                        TextInput::make('currency'),
+                        TextInput::make('country')
                     ])
                     ->columnSpan(1),
             ])
@@ -89,7 +88,6 @@ class brokerResource extends Resource
                 TextColumn::make('url')
                     ->copyable(),
                 TextColumn::make('country'),
-                TextColumn::make('currency'),
             ])
             ->filters([
                 //
