@@ -40,6 +40,14 @@ class WalletResource extends Resource
                     ->required()
                     ->label('Broker')
                     ->relationship('broker', 'name'),
+                Select::make('currency')
+                    ->required()
+                    ->options([
+                        'PLN' => 'PLN',
+                        'USD' => 'USD',
+                        'EUR' => 'EUR',
+                        'GBP' => 'GBP',
+                    ]),
                 Textarea::make('description')
                     ->maxLength(1024),
             ]);
@@ -52,6 +60,7 @@ class WalletResource extends Resource
                 TextColumn::make('name'),
                 TextColumn::make('user.name'),
                 TextColumn::make('broker.name'),
+                TextColumn::make('currency'),
                 TextColumn::make('description')
             ])
             ->filters([
