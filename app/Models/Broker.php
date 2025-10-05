@@ -24,11 +24,11 @@ class Broker extends Model
         'country'
     ];
 
-    public function assets(): HasMany{
-        return $this->hasMany(Asset::class);
-    }
-
     public function wallets(): HasMany{
         return $this->hasMany(Wallet::class);
+    }
+
+    public function assets(): BelongsToMany{
+        return $this->belongsToMany(Asset::class);
     }
 }

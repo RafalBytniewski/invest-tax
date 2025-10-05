@@ -39,7 +39,7 @@
                     </select>
 
                     <!-- Transaction Columns -->
-                    <div x-data="{ open: false, selected: { date: true, asset: true, broker: true, wallet: true } }" class="relative inline-block text-left">
+                    <div x-data="{ open: false, selected: { date: true, asset: true, brokers: true, wallet: true } }" class="relative inline-block text-left">
                         <button @click="open = !open"
                             class="px-4 py-2 border rounded h-14 w-36 hover:bg-gray-600 transition">
                             Columns
@@ -70,7 +70,7 @@
                         <x-table.header><input type="checkbox"wire:model="selectAll"></x-table.header>
                         <x-table.header sortable wire:click="sortBy('asset')" :direction="$sortField === 'asset' ? $sortDirection : null"
                             class="px-4 py-2">Asset</x-table.header>
-                        <x-table.header sortable wire:click="sortBy('broker')" :direction="$sortField === 'broker' ? $sortDirection : null"
+                        <x-table.header sortable wire:click="sortBy('brokers')" :direction="$sortField === 'brokers' ? $sortDirection : null"
                             class="px-4 py-2">Broker</x-table.header>
                         <x-table.header sortable wire:click="sortBy('wallet')" :direction="$sortField === 'wallet' ? $sortDirection : null"
                             class="px-4 py-2">Wallet</x-table.header>
@@ -93,7 +93,7 @@
                                 <input type="checkbox" value="{{ $transaction->id }}" wire:model="selected">
                             </x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ $transaction->asset?->name }}</x-table.cell>
-                            <x-table.cell class="px-4 py-2">{{ $transaction->asset?->broker?->name }}</x-table.cell>
+                            <x-table.cell class="px-4 py-2">{{ $transaction->asset?->brokers->pluck('name')->join(', ') }}</x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ $transaction->wallet?->name }}</x-table.cell>
                             <x-table.cell
                                 class="px-4 py-2  {{ $transaction->type === 'sell' ? 'text-red-500' : 'text-green-500' }}">{{ ucfirst($transaction->type) }}</x-table.cell>

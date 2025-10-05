@@ -20,6 +20,7 @@ class Wallet extends Model
         'name',
         'description',
         'user_id',
+        'currency',
         'broker_id'
     ];
 

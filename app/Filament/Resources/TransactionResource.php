@@ -44,12 +44,15 @@ class TransactionResource extends Resource
                         ->required()
                         ->label('Asset')
                         ->options(function () {
-                            return \App\Models\Asset::with('broker')->get()->mapWithKeys(function ($asset) {
+                            return \App\Models\Asset::with('brokers')->get()->mapWithKeys(function ($asset) {
+                                // pobieramy wszystkie nazwy brokerów i łączymy w jeden string
+                                $brokersNames = $asset->brokers->pluck('name')->join(', ');
                                 return [
-                                    $asset->id => $asset->name . ' / ' . ($asset->broker->name),
+                                    $asset->id => $asset->name . ' / ' . $brokersNames,
                                 ];
                             });
                         }),
+
                 ])->columns(2),
                 Section::make('Transaction Type')->schema([
                     Select::make('type')
