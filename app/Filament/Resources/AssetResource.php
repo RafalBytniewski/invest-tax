@@ -55,10 +55,6 @@ class AssetResource extends Resource
                                 'bond' => 'Bond',
                                 'forex' => 'Forex',
                             ]),
-                        Select::make('broker_id')
-                            ->required()
-                            ->label('Broker/Crypto exchange')
-                            ->relationship('brokers', 'name'),
                         Select::make('exchange_id')
                             ->required()
                             ->label('Exchange')
@@ -77,7 +73,6 @@ class AssetResource extends Resource
             ->columns([
                 TextColumn::make('name'),
                 ImageColumn::make('image'),
-                TextColumn::make('brokers.name'),
                 TextColumn::make('symbol'),
                 TextColumn::make('asset_type')
                     ->label('Asset Type')

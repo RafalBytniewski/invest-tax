@@ -44,13 +44,7 @@ class TransactionResource extends Resource
                         ->required()
                         ->label('Asset')
                         ->options(function () {
-                            return \App\Models\Asset::with('brokers')->get()->mapWithKeys(function ($asset) {
-                                // pobieramy wszystkie nazwy brokerów i łączymy w jeden string
-                                $brokersNames = $asset->brokers->pluck('name')->join(', ');
-                                return [
-                                    $asset->id => $asset->name . ' / ' . $brokersNames,
-                                ];
-                            });
+                            return \App\Models\Asset::pluck('name')->toArray();
                         }),
 
                 ])->columns(2),

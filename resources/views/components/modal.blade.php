@@ -8,7 +8,7 @@
         <x-form wire:submit.prevent="save">
             <x-form.section label="Transaction Context">
                 <x-form.select model="wallet" label="Wallet" :options="$wallets" required />
-                <x-form.select model="asset" label="Asset/Broker" :options="$assets" required />
+                <x-form.select model="asset" label="Asset" :options="$assets" required />
                 <x-form.select model="type" label="Type" :options="$types" required />
             </x-form.section>
             <x-form.section label="Transaction Details">

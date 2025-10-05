@@ -93,7 +93,7 @@
                                 <input type="checkbox" value="{{ $transaction->id }}" wire:model="selected">
                             </x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ $transaction->asset?->name }}</x-table.cell>
-                            <x-table.cell class="px-4 py-2">{{ $transaction->asset?->brokers->pluck('name')->join(', ') }}</x-table.cell>
+                            <x-table.cell class="px-4 py-2">{{ $transaction->wallet->broker->name}}</x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ $transaction->wallet?->name }}</x-table.cell>
                             <x-table.cell
                                 class="px-4 py-2  {{ $transaction->type === 'sell' ? 'text-red-500' : 'text-green-500' }}">{{ ucfirst($transaction->type) }}</x-table.cell>

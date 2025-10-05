@@ -41,20 +41,24 @@ class Transaction extends Model
         return $this->belongsTo(Asset::class);
     }
     
-   public function scopeSearch($query, $value)
-    {
-        $query->where(function ($q) use ($value) {
-            $q->whereHas('asset', function ($q2) use ($value) {
-                $q2->where('name', 'like', "%{$value}%")
-                ->orWhereHas('brokers', function ($q3) use ($value) {
+public function scopeSearch($query, $value)
+{
+    $query->where(function ($q) use ($value) {
+        // Szukaj po nazwie assetu
+        $q->whereHas('asset', function ($q2) use ($value) {
+            $q2->where('name', 'like', "%{$value}%");
+        })
+        // Szukaj po nazwie walletu
+        ->orWhereHas('wallet', function ($q2) use ($value) {
+            $q2->where('name', 'like', "%{$value}%")
+                // Szukaj także po nazwie brokera przez wallet
+                ->orWhereHas('broker', function ($q3) use ($value) {
                     $q3->where('name', 'like', "%{$value}%");
                 });
-            })
-            ->orWhereHas('wallet', function ($q2) use ($value) {
-                $q2->where('name', 'like', "%{$value}%");
-            });
         });
-    }
+    });
+}
+
 
 
 }
