@@ -43,10 +43,7 @@ class TransactionResource extends Resource
                     Select::make('asset_id')
                         ->required()
                         ->label('Asset')
-                        ->options(function () {
-                            return \App\Models\Asset::pluck('name')->toArray();
-                        }),
-
+                       ->options(\App\Models\Asset::pluck('name', 'id')->toArray()),
                 ])->columns(2),
                 Section::make('Transaction Type')->schema([
                     Select::make('type')

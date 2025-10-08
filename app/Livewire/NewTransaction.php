@@ -64,7 +64,7 @@ class NewTransaction extends Component
             ->pluck('name', 'id')
             ->toArray();
 
-        $this->assets = Asset::pluck('name')->toArray();
+        $this->assets = Asset::pluck('name','id')->toArray();
 
     }
     public $types = [

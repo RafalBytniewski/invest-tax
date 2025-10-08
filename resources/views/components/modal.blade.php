@@ -18,7 +18,7 @@
                     suffix="" required />
                 <x-form.input type="number" model="total_fees" wireModifier="lazy" label="Total fees" value="0"
                     required />
-                <x-form.input type="number" model="total_value" label="Total value" step="0.01" value="0" readonly disabled />
+                <x-form.input type="number" model="total_value" label="Total value" step="0.01" value="0"   />
                 <x-form.input type="date" model="date" label="Date" required />
             </x-form.section>
             <x-form.section label="Optional">
