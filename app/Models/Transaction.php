@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Transaction extends Model
 {
@@ -21,7 +22,6 @@ class Transaction extends Model
         'currency',
         'quantity',
         'price_per_unit',
-        'total_fees',
         'total_value',
         'date',
         'notes',
@@ -39,6 +39,10 @@ class Transaction extends Model
 
     public function asset():BelongsTo{
         return $this->belongsTo(Asset::class);
+    }
+
+    public function fees():HasMany{
+        return $this->hasMany(Fee::class);
     }
     
 public function scopeSearch($query, $value)

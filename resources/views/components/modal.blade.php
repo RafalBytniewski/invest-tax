@@ -14,7 +14,7 @@
             <x-form.section label="Transaction Details">
                 <x-form.input model="currency" label="Currency" placeholder="PLN, USD, EUR, GBP" required />
                 <x-form.input type="number" model="quantity" wireModifier="lazy" label="Quantity" step="0.00000001" required />
-                <x-form.input type="number" model="price_per_unit" wireModifier="lazy" label="Price per unit"
+                <x-form.input type="number" model="price_per_unit" wireModifier="lazy" label="Price per unit" step="0.01"
                     suffix="" required />
                 <x-form.input type="number" model="total_fees" wireModifier="lazy" label="Total fees" value="0"
                     required />

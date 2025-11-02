@@ -100,7 +100,7 @@
                             <x-table.cell class="px-4 py-2">{{ abs($transaction->quantity) }}</x-table.cell>
                             <x-table.cell
                                 class="px-4 py-2">{{ number_format($transaction->price_per_unit, 2, ',', ' ') }}<span>
-                                    {{ $transaction->currency }}</span></x-table.cell>
+                                    {{ $transaction->asset->exchange->currency ?? $transaction->currency}}</span></x-table.cell>
                             <x-table.cell
                                 class="px-4 py-2">{{ number_format(abs($transaction->total_value), 2, ',', ' ') }}<span>
                                     {{ $transaction->currency }}</span></x-table.cell>
