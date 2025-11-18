@@ -1,4 +1,6 @@
-# 💰 Invest-Tax
+# 💰 Invest-Tax 
+
+🚧⏳🔄🔜
 
 An application for managing stock and cryptocurrency transactions, allowing transaction filtering and generating tax reports.
 
