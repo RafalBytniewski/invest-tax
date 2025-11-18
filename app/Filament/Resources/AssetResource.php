@@ -56,7 +56,7 @@ class AssetResource extends Resource
                                 'forex' => 'Forex',
                             ]),
                         Select::make('exchange_id')
-                            ->required()
+                           
                             ->label('Exchange')
                             ->relationship('exchange', 'symbol'),
                         FileUpload::make('image')
