@@ -113,11 +113,10 @@ class TransactionResource extends Resource
                         ->afterStateUpdated(function (callable $set, callable $get) {
                             $quantity = (float) $get('quantity');
                             $pricePerUnit = (float) $get('price_per_unit');
-                            $totalFees = (float) $get('total_fees');
                             $type = $get('type');
 
                             $adjustedQuantity = $type === 'sell' ? -abs($quantity) : abs($quantity);
-                            $set('total_value', $adjustedQuantity * $pricePerUnit - $totalFees);
+                            $set('total_value', $adjustedQuantity * $pricePerUnit);
                         }),
 
                     TextInput::make('price_per_unit')
@@ -130,11 +129,10 @@ class TransactionResource extends Resource
                         ->afterStateUpdated(function (callable $set, callable $get) {
                             $quantity = (float) $get('quantity');
                             $pricePerUnit = (float) $get('price_per_unit');
-                            $totalFees = (float) $get('total_fees');
                             $type = $get('type');
 
                             $adjustedQuantity = $type === 'sell' ? -abs($quantity) : abs($quantity);
-                            $set('total_value', $adjustedQuantity * $pricePerUnit - $totalFees);
+                            $set('total_value', $adjustedQuantity * $pricePerUnit);
                         }),
 
                     /* TextInput::make('total_fees')
@@ -171,10 +169,10 @@ class TransactionResource extends Resource
                             ->relationship('fees')
                             ->label('Transaction Fees')
                             ->schema([
-                                Select::make('type')
+                                Select::make('fee_type')
                                     ->label('Fee Type')
                                     ->options([
-                                        'exchange' => 'Exchange fee',
+                                        'exchange/broker' => 'Exchange/Broker fee',
                                         'network' => 'Network fee',
                                         'withdrawal' => 'Withdrawal fee',
                                     ])
@@ -223,6 +221,9 @@ class TransactionResource extends Resource
                 TextColumn::make('asset.name')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('wallet.name')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('wallet.user.name')
                     ->searchable()
                     ->sortable(),
@@ -262,7 +263,15 @@ class TransactionResource extends Resource
                     })
                     ->suffix(fn($record) => ' ' . ($record->currency ?? '')),
                 TextColumn::make('total_fees')
-                    ->label('Total Fees'),
+                    ->label('Total Fees')
+                    ->getStateUsing(function ($record) {
+                        return $record->fees
+                            ->map(fn($fee) => number_format($fee->value, 2, '.', '') . ' ' . strtoupper($fee->currency)) // edytowacv !!!!
+                            ->join(', ');
+                    })
+                    ->sortable(false)
+                    ->searchable(false)
+                    ->wrap(),
                 TextColumn::make('total_value')
                     ->label('Total Value')
                     ->sortable()
