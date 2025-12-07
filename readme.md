@@ -37,7 +37,8 @@ An application for managing stock and cryptocurrency transactions, allowing tran
 - Built with Tailwind CSS and Preline UI for a clean and intuitive design  
 
 <img width="1611" height="444" alt="image" src="https://github.com/user-attachments/assets/4db51242-b1b7-4aa2-908e-f67d6e9b8948" />
-<img width="1392" height="658" alt="image" src="https://github.com/user-attachments/assets/517555db-f58b-4ed1-bc1b-76ed195e1f2d" />
+<img width="1395" height="662" alt="image" src="https://github.com/user-attachments/assets/aeb741c6-8689-4d3d-aaae-bd00df965425" />
+
 
 
 
