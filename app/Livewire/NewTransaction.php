@@ -64,8 +64,7 @@ class NewTransaction extends Component
             ->pluck('name', 'id')
             ->toArray();
 
-        $this->assets = Asset::pluck('name','id')->toArray();
-
+        $this->assets = Asset::pluck('name', 'id')->toArray();
     }
     public $types = [
         'buy' => 'Buy',
@@ -76,35 +75,39 @@ class NewTransaction extends Component
     public function save()
 
     {
-        $this->validate([
+        $validated = $this->validate([
             'wallet' => 'required|exists:wallets,id',
-            'asset' => 'required|exists:assets,id', 
-            'type' => 'required|string', 'currency' => 
-            'required|string|max:3', 
-            'quantity' => 'required|numeric', 
-            'price_per_unit' => 'required|numeric', 
-            'total_fees' => 'required|numeric', 
-            'total_value' => 'required|numeric', 
-            'date' => 'required|date', 
+            'asset' => 'required|exists:assets,id',
+            'type' => 'required|string',
+            'currency' =>
+            'required|string|max:3',
+            'quantity' => 'required|numeric',
+            'price_per_unit' => 'required|numeric',
+            'total_fees' => 'required|numeric',
+            'total_value' => 'required|numeric',
+            'date' => 'required|date',
             'notes' => 'nullable|string|max:500'
         ]);
-
+        if ($this->type === 'sell') {
+            $validated['quantity'] = -abs($validated['quantity']);
+            $validated['total_value'] = -abs($validated['total_value']);
+        }
         Transaction::create([
             'wallet_id' => $this->wallet,
             'asset_id'  => $this->asset,
             'type' => $this->type,
             'currency' => $this->currency,
-            'quantity' => $this->quantity,
+            'quantity' => $validated['quantity'],
             'price_per_unit' => $this->price_per_unit,
             'total_fees' => $this->total_fees,
-            'total_value' => $this->total_value,
+            'total_value' => $validated['total_value'],
             'date' => $this->date,
             'notes' => $this->notes,
         ]);
 
-     // Tutaj flash i redirect
-    session()->flash('success', 'Transaction saved!');
-    return redirect()->route('my-transactions');
+        // Tutaj flash i redirect
+        session()->flash('success', 'Transaction saved!');
+        return redirect()->route('my-transactions');
     }
     public function render()
     {

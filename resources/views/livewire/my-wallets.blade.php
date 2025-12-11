@@ -1,12 +1,8 @@
 <div>
-
-    {{--     <head>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    </head> --}}
     @foreach ($wallets as $wallet)
-        @php
+    {{--     @php
             $assets = $wallet->transactions->pluck('asset')->unique('id')->values();
-        @endphp
+        @endphp --}}
         <div
             class="relative p-5 my-5 mr-50 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 h-auto bg-[#1f1f1f] bg-[repeating-linear-gradient(135deg,#2a2a2a_0px,#2a2a2a_1px,transparent_1px,transparent_8px)]">
             <div class="flex">
@@ -21,22 +17,22 @@
                             <span>Currency: {{ $wallet->currency }}</span>
                             <span>Broker/Exchange: {{ $wallet->broker->name }}</span>
                             <span>Owner: -</span>
-                            <span>Date: {{ $wallet->created_at }}</span>
+                            <span>Date: {{ $wallet->created_at->format('d.m.Y') }}</span> {{-- DODAC METODe- 1 transakcja->date --}}
                         </div>
                     </div>
                     <div class="mx-12 mb-6">
                         <div class="p-2 flex justify-around bg-gray-800">
-                            <span>Assets: {{ $assets->count() }}</span>
+                            <span>Assets: {{ $wallet->assetsCollection()->count() }}</span>
                             <span>Transactions: {{ $wallet->transactions->count() }}</span>
-                            <span>Cost: {{ $wallet->transactions->sum('total_value') }}</span>
+                            <span>Cost: {{ $wallet->transactions->sum('total_value') }}<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span></span>
                             <span>Current value:</span>
-                            <span>Profit:</span>
+                            <span>Profit: {{ round($wallet->realizedPL(),2) }}@if($wallet->realizedPL() !== 0)<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span>@endif</span>
 
                         </div>
                     </div>
                     <div class="mx-12">
                         <div>
-                            @foreach ($assets as $asset)
+                            @foreach ($wallet->assetsCollection() as $asset)
                                 @php
                                     $transactionsForAsset = $wallet->transactions->where('asset_id', $asset->id);
                                 @endphp
@@ -47,20 +43,17 @@
                                                 .{{ $asset->exchange->symbol }}
                                             @endif
                                         </span>
-                                        <span>Average price:
-                                            {{ round($wallet->transactions()->where('asset_id', $asset->id)->sum('total_value') / $asset->transactions->sum('quantity'), 2) }}</span>
-                                        <span>Value(3% 123 PLN red): </span>
+                                        <span title="Average buy prize">Avg price: {{ round($wallet->averageBuyPrice($asset->id), 2) }}<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span></span>
+                                        <span>Value{{-- (3% 123 PLN red) --}}: {{ round($wallet->transactions()->where('asset_id', $asset->id)->sum('total_value'),2) }}<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span></span>
                                         <button wire:click="toggleTransactions({{ $asset->id }})"
                                             class="flex items-center cursor-pointer gap-1">
                                             {{ $transactionsForAsset->count() }} transactions
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor">
                                                 @if (isset($visibleTransactions[$asset->id]))
-                                                    <!-- Strzałka w górę -->
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="2" d="M5 15l7-7 7 7" />
                                                 @else
-                                                    <!-- Strzałka w dół -->
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="2" d="M19 9l-7 7-7-7" />
                                                 @endif
@@ -125,7 +118,7 @@
                                 (function() {
                                     // Pobieramy dane z Blade (PHP)
                                     const walletsData = {!! json_encode(
-                                        $assets->map(
+                                        $wallet->assetsCollection()->map(
                                             fn($a) => [
                                                 'id' => $a->id,
                                                 'name' => $a->name,
