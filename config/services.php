@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'alphavantage' => [
+        'key' => env('ALPHAVANTAGE_KEY'),
+    ],
+
+    'twelvedata' => [
+        'key' => env('TWELVEDATA_KEY'),
+    ],
+    'eodhd' => [
+        'key' => env('EODHD_KEY'),
+    ],
 ];

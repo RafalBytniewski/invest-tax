@@ -4,29 +4,32 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Wallet;
+use App\Services\MarketData\StockPriceService;
 
 class MyWallets extends Component
 {
-/*     public $chartLabels = [];
-    public $chartData = [];
- */
+    public $price = [];
+
+    protected $stockPriceService;
+
+    public function loadPrice(
+        StockPriceService $stockPriceService,
+        $symbol,
+        $exchange
+    ) {
+        $this->price[$symbol] = $stockPriceService->getTodayOpenPrice($symbol, $exchange);
+    }
+
 
     public $wallets;
     public $visibleTransactions = [];
 
-    public function mount()
+    public function mount(StockPriceService $stockPriceService)
     {
         $this->wallets = Wallet::with('transactions.asset.exchange')->get();
-
-        /* $this->loadChartData(); */
+        $this->stockPriceService = $stockPriceService;
     }
-/* 
-    public function loadChartData()
-    {
-        // przykładowe dane do testu wykresu
-        $this->chartLabels = ['Bitcoin', 'Ethereum', 'AAPL', 'TSLA'];
-        $this->chartData = [4500, 2500, 3000, 2000]; // wartości w USD
-    } */
+
 
     public function toggleTransactions($assetId)
     {

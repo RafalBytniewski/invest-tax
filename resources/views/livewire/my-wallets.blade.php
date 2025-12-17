@@ -1,4 +1,20 @@
 <div>
+
+{{-- 
+
+<div>
+    <div>
+        NVIDIA - cena otwarcia: 
+        @if($cdProjectOpenPrice)
+            {{ number_format($cdProjectOpenPrice, 2) }} PLN
+        @else
+            Brak danych
+        @endif
+    </div>
+
+    <button wire:click="loadPrice">Odśwież cenę</button>
+</div> --}}
+
     @foreach ($wallets as $wallet)
     {{--     @php
             $assets = $wallet->transactions->pluck('asset')->unique('id')->values();
@@ -44,7 +60,12 @@
                                             @endif
                                         </span>
                                         <span title="Average buy prize">Avg price: {{ round($wallet->averageBuyPrice($asset->id), 2) }}<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span></span>
-                                        <span>Value{{-- (3% 123 PLN red) --}}: {{ round($wallet->transactions()->where('asset_id', $asset->id)->sum('total_value'),2) }}<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span></span>
+
+                                        <span><button class="btn" wire:click="loadPrice('{{ $asset->symbol }}', '{{ $asset->exchange?->symbol }}')">Value:</button> {{ isset($price[$asset->symbol])
+    ? $price[$asset->symbol] * $wallet->transactions->where('asset_id', $asset->id)->sum('quantity')
+    : '-' }}
+                                            
+                                            {{-- {{ round($wallet->transactions()->where('asset_id', $asset->id)->sum('total_value'),2) }} --}}<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span></span>
                                         <button wire:click="toggleTransactions({{ $asset->id }})"
                                             class="flex items-center cursor-pointer gap-1">
                                             {{ $transactionsForAsset->count() }} transactions
