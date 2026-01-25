@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\brokerResource\Pages;
-use App\Filament\Resources\brokerResource\RelationManagers;
+use App\Filament\Resources\BrokerResource\Pages;
+use App\Filament\Resources\BrokerResource\RelationManagers;
 use App\Models\Broker;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\DeleteAction;
@@ -27,9 +27,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class brokerResource extends Resource
+class BrokerResource extends Resource
 {
-    protected static ?string $model = broker::class;
+    protected static ?string $model = Broker::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
 
@@ -116,9 +116,9 @@ class brokerResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\Listbrokers::route('/'),
-            'create' => Pages\Createbroker::route('/create'),
-            'edit' => Pages\Editbroker::route('/{record}/edit'),
+            'index' => Pages\ListBrokers::route('/'),
+            'create' => Pages\CreateBroker::route('/create'),
+            'edit' => Pages\EditBroker::route('/{record}/edit'),
         ];
     }
 }
