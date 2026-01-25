@@ -55,8 +55,7 @@ class AssetResource extends Resource
                                 'bond' => 'Bond',
                                 'forex' => 'Forex',
                             ]),
-                        Select::make('exchange_id')
-                           
+                        Select::make('exchange_id')                
                             ->label('Exchange')
                             ->relationship('exchange', 'symbol'),
                         FileUpload::make('image')
