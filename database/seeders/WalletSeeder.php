@@ -14,10 +14,10 @@ class WalletSeeder extends Seeder
     public function run(): void
     {
         Wallet::create([
-            'name' => 'Crypto',
-            'description' => 'Crypto assets',
+            'name' => 'Test',
+            'description' => 'testing wallet',
             'user_id' => 1,
-            'exchange_id' => 1
+            'broker_id' => 1
         ]);
     }
 }

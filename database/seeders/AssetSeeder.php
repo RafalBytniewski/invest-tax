@@ -17,43 +17,20 @@ class AssetSeeder extends Seeder
             'name' => 'Bitcoin',
             'image' => '',
             'symbol' => 'BTC',
-            'asset_type' => 'crypto',
-            'exchange_id' => 1
+            'asset_type' => 'crypto'
         ]);
         Asset::create([
             'name' => 'Ethereum',
             'image' => '',
             'symbol' => 'ETH',
-            'asset_type' => 'crypto',
-            'exchange_id' => 1
-        ]);
-        Asset::create([
-            'name' => 'Tron',
-            'image' => '',
-            'symbol' => 'TRX',
-            'asset_type' => 'crypto',
-            'exchange_id' => 2
-        ]);
-        Asset::create([
-            'name' => 'Solana',
-            'image' => '',
-            'symbol' => 'SOL',
-            'asset_type' => 'crypto',
-            'exchange_id' => 2
-        ]);
-        Asset::create([
-            'name' => 'XRP',
-            'image' => '',
-            'symbol' => 'XRP',
-            'asset_type' => 'crypto',
-            'exchange_id' => 2
+            'asset_type' => 'crypto'
         ]);
         Asset::create([
             'name' => 'CD Projekt',
             'image' => '',
             'symbol' => 'CDR',
             'asset_type' => 'stock',
-            'exchange_id' => 3
+            'exchange_id' => 1
         ]);
     }
 }

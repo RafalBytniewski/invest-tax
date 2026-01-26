@@ -14,43 +14,81 @@ class TransactionSeeder extends Seeder
 public function run(): void
 {
     $transactions = [
-        ['type' => 'buy',  'quantity' => 12,     'price' => 400000, 'asset_id' => 1],
-        ['type' => 'buy',  'quantity' => 2,      'price' => 9000,   'asset_id' => 2],
-        ['type' => 'buy',  'quantity' => 1123,   'price' => 0.9,    'asset_id' => 3],
-        ['type' => 'buy',  'quantity' => 11,     'price' => 777,    'asset_id' => 4],
-        ['type' => 'buy',  'quantity' => 1321,   'price' => 1,      'asset_id' => 3],
-        ['type' => 'buy',  'quantity' => 121,    'price' => 8888,   'asset_id' => 2],
-        ['type' => 'buy',  'quantity' => 0.001,  'price' => 400000, 'asset_id' => 1],
-        ['type' => 'sell', 'quantity' => -2,      'price' => 777,    'asset_id' => 4],
-        ['type' => 'buy',  'quantity' => 0.5,    'price' => 8787,   'asset_id' => 2],
-        ['type' => 'sell', 'quantity' => -1.1,    'price' => 8787,   'asset_id' => 2],
-        ['type' => 'sell', 'quantity' => -0.02,   'price' => 400000, 'asset_id' => 1],
+        // CD Projekt (asset_id = 3)
+        [
+            'type' => 'buy',
+            'asset_id' => 3,
+            'quantity' => 10,
+            'price' => 120.50,
+            'date' => '2021-06-15',
+        ],
+        [
+            'type' => 'sell',
+            'asset_id' => 3,
+            'quantity' => 4,
+            'price' => 155.00,
+            'date' => '2023-09-20',
+        ],
+
+        // PKN Orlen (asset_id = 4)
+        [
+            'type' => 'buy',
+            'asset_id' => 4,
+            'quantity' => 20,
+            'price' => 68.30,
+            'date' => '2022-03-10',
+        ],
+        [
+            'type' => 'sell',
+            'asset_id' => 4,
+            'quantity' => 10,
+            'price' => 72.90,
+            'date' => '2024-01-12',
+        ],
+
+        // PKO BP (asset_id = 5)
+        [
+            'type' => 'buy',
+            'asset_id' => 5,
+            'quantity' => 50,
+            'price' => 31.20,
+            'date' => '2021-11-05',
+        ],
+
+        // KGHM (asset_id = 6)
+        [
+            'type' => 'buy',
+            'asset_id' => 6,
+            'quantity' => 15,
+            'price' => 142.00,
+            'date' => '2022-07-18',
+        ],
+        [
+            'type' => 'sell',
+            'asset_id' => 6,
+            'quantity' => 5,
+            'price' => 165.50,
+            'date' => '2024-05-08',
+        ],
     ];
 
-    $dates = [
-        '2024-11-21', '2024-10-10', '2021-08-04', '2022-10-10', '2022-10-10',
-        '2022-10-10', '2025-05-10', '2022-10-10', '2021-02-13', '2023-09-23', '2024-01-10'
-    ];
-
-    foreach ($transactions as $index => $data) {
-        $quantity = $data['quantity'];
-        $price = $data['price'];
-        $fees = 0;
+    foreach ($transactions as $data) {
+        $fees = round($data['quantity'] * $data['price'] * 0.001, 2); // 0.1% prowizji
+        $totalValue = ($data['quantity'] * $data['price']) + $fees;
 
         Transaction::create([
-            'type'            => $data['type'],
-            'reward_type'     => null,
-            'currency'        => 'PLN',
-            'quantity'        => $quantity,
-            'price_per_unit'  => $price,
-            'total_fees'      => $fees,
-            'total_value'     => ($quantity * $price) + $fees,
-            'date'            => $dates[$index],
-            'notes'           => 'test data',
-            'wallet_id'       => 1,
-            'asset_id'        => $data['asset_id'],
+            'type'           => $data['type'],
+            'reward_type'    => null,
+            'currency'       => 'PLN',
+            'quantity'       => $data['quantity'],
+            'price_per_unit' => $data['price'],
+            'total_fees'     => $fees,
+            'total_value'    => $totalValue,
+            'date'           => $data['date'],
+            'notes'          => 'Seeder GPW demo',
+            'wallet_id'      => 1,
+            'asset_id'       => $data['asset_id'],
         ]);
     }
 }
-
 }

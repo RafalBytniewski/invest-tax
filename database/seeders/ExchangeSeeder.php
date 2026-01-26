@@ -14,28 +14,13 @@ class ExchangeSeeder extends Seeder
     public function run(): void
     {
         Exchange::create([
-            'name' => 'Binance',
-            'type' => 'crypto_exchange',
-            'image' => '',
-            'url' => 'https://bitcoin.com',
-            'country' => NULL,
-            'currency' => NULL,
-        ]);
-        Exchange::create([
-            'name' => 'Coinbase',
-            'type' => 'crypto_exchange',
-            'image' => '',
-            'url' => 'https://coinbase.com',
-            'country' => NULL,
-            'currency' => NULL,
-        ]);
-        Exchange::create([
-            'name' => 'XTB',
-            'type' => 'broker',
-            'image' => '',
-            'url' => 'https://xtb.com',
-            'country' => NULL,
-            'currency' => NULL,
+            'name' => 'Giełda Papierów Wartościowych',
+            'symbol' => 'GPW',
+            'country' => 'Poland',
+            'currency' => 'PLN',
+            'url' => 'https://www.gpw.pl/',
+            'timezone' => 'Europe/Warsaw',
+            'trading_hours' => '9-17'
         ]);
     }
 }

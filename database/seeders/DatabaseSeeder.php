@@ -11,10 +11,14 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      */
-    public function run(): void
+public function run(): void
     {
-        // User::factory(10)->create();
-
-
+        $this->call([
+            ExchangeSeeder::class,
+            BrokerSeeder::class,
+            WalletSeeder::class,
+            AssetSeeder::class,
+            TransactionSeeder::class,
+        ]);
     }
 }
