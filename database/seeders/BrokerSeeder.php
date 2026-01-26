@@ -18,8 +18,7 @@ class BrokerSeeder extends Seeder
             'type' => 'broker',
             'image' => '',
             'url' => 'https://xtb.com',
-            'country' => NULL,
-            'currency' => NULL,
+            'country' => NULL
         ]);
     }
 }
