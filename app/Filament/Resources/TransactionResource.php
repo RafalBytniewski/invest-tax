@@ -43,28 +43,39 @@ class TransactionResource extends Resource
                         ->label('Wallet')
                         ->relationship('wallet', 'name'),
                     Select::make('asset_id')
-                        ->label('Asset')
-                        ->required()
-                        ->searchable()
-                        ->preload(false)
-                        ->extraAttributes([
-                            'class' => 'font-mono text-sm',
-                        ])
-                        ->relationship(
-                            'asset',
-                            'name',
-                            modifyQueryUsing: fn ($query) => $query->with('exchange')
-                        )
-                        ->getOptionLabelFromRecordUsing(function (Asset $asset) {
-                            $exchange = $asset->exchange?->symbol ?? '';
+    ->label('Asset')
+    ->required()
+    ->searchable()
+    ->preload(false)
+    ->extraAttributes([
+        'class' => 'font-mono text-sm',
+    ])
+    ->getSearchResultsUsing(function (string $search) {
+        return Asset::query()
+            ->with('exchange')
+            ->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('symbol', 'like', "%{$search}%")
+                  ->orWhereHas('exchange', function ($q) use ($search) {
+                      $q->where('symbol', 'like', "%{$search}%");
+                  });
+            })
+            ->limit(50)
+            ->get()
+            ->mapWithKeys(fn (Asset $asset) => [
+                $asset->id => sprintf(
+                    "%-12s %-32s %-8s",
+                    $asset->symbol . '.' . ($asset->exchange?->symbol ?? '') . ' — ',
+                    $asset->name,
+                    strtoupper($asset->asset_type),
+                ),
+            ]);
+    })
+    ->getOptionLabelUsing(fn ($value): ?string =>
+        Asset::with('exchange')->find($value)?->symbol
+    )
 
-                            return sprintf(
-                                "%-12s %-32s %-8s",
-                                $asset->symbol . '.' . $exchange.' — ',
-                                $asset->name,
-                                strtoupper($asset->asset_type),
-                            );
-                        }),
+
                 ])->columns(2),
                 Section::make('Transaction Type')->schema([
                     Select::make('type')
