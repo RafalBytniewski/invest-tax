@@ -73,8 +73,8 @@ public function run(): void
     ];
 
     foreach ($transactions as $data) {
-        $fees = round($data['quantity'] * $data['price'] * 0.001, 2); // 0.1% prowizji
-        $totalValue = ($data['quantity'] * $data['price']) + $fees;
+        
+        $totalValue = ($data['quantity'] * $data['price']);
 
         Transaction::create([
             'type'           => $data['type'],
@@ -82,7 +82,6 @@ public function run(): void
             'currency'       => 'PLN',
             'quantity'       => $data['quantity'],
             'price_per_unit' => $data['price'],
-            'total_fees'     => $fees,
             'total_value'    => $totalValue,
             'date'           => $data['date'],
             'notes'          => 'Seeder GPW demo',
