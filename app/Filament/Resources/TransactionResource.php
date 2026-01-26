@@ -43,11 +43,28 @@ class TransactionResource extends Resource
                         ->label('Wallet')
                         ->relationship('wallet', 'name'),
                     Select::make('asset_id')
-                        ->required()
                         ->label('Asset')
-                        ->options(\App\Models\Asset::pluck('name', 'id')->toArray())
-                        ->afterStateUpdated(fn($state, callable $set) => $set('currency_type', null)),
+                        ->required()
+                        ->searchable()
+                        ->preload(false)
+                        ->extraAttributes([
+                            'class' => 'font-mono text-sm',
+                        ])
+                        ->relationship(
+                            'asset',
+                            'name',
+                            modifyQueryUsing: fn ($query) => $query->with('exchange')
+                        )
+                        ->getOptionLabelFromRecordUsing(function (Asset $asset) {
+                            $exchange = $asset->exchange?->symbol ?? '';
 
+                            return sprintf(
+                                "%-12s %-32s %-8s",
+                                $asset->symbol . '.' . $exchange.' — ',
+                                $asset->name,
+                                strtoupper($asset->asset_type),
+                            );
+                        }),
                 ])->columns(2),
                 Section::make('Transaction Type')->schema([
                     Select::make('type')
