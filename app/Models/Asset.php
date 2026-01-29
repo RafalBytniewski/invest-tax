@@ -36,4 +36,8 @@ class Asset extends Model
     public function brokers(): BelongsToMany{
         return $this->belongsToMany(Broker::class);
     }
+
+    public function assetPrices(): HasMany{
+        return $this->hasMany(AssetPrice::class);
+    }
 }

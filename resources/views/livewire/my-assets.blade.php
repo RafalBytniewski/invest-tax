@@ -39,6 +39,14 @@
                 </div>
             </span>
         @endif
+                    {{-- WYKRES --}}
+            <div wire:ignore class="mt-4">
+                <canvas id="chart-asset-{{ $asset->id }}"></canvas>
+            </div>
+            @foreach ($asset->assetPrices as $price)
+            {{$price->date}}    :
+            {{$price->close_price}}
+            @endforeach
     @endforeach
 </div>
 
@@ -63,4 +71,53 @@ function calculateValue(assetId, transactionValue) {
         percentSpan.style.color = percentChange > 0 ? 'green' : (percentChange < 0 ? 'red' : 'black');
     }
 }
+
+
+// chart.js
+document.addEventListener('livewire:load', () => {
+
+    @this.assets.forEach(asset => {
+
+        // jeśli asset nie ma cen – pomijamy
+        if (!asset.asset_prices.length) return;
+
+        const ctx = document
+            .getElementById(`chart-asset-${asset.id}`)
+            .getContext('2d');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: asset.asset_prices.map(p => p.date),
+                datasets: [{
+                    label: 'Close price',
+                    data: asset.asset_prices.map(p => p.close_price),
+                    borderWidth: 2,
+                    tension: 0.2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Dzień'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Close price'
+                        }
+                    }
+                }
+            }
+        });
+
+    });
+
+});
 </script>
