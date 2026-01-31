@@ -1,66 +1,78 @@
 <div>
-    @foreach ($assets as $asset)
-        @php
-            $quantity = $asset->transactions->sum('quantity');
-            $transactionValue = $asset->transactions->sum('total_value');
-            $currency = $asset->transactions->first()?->currency ?? '';
-        @endphp
+<div>
+    @php
+    $groupedAssets = $assets->groupBy(function ($asset) {
+        return strtoupper(mb_substr($asset->name, 0, 1));
+    });
+    @endphp
+    @php
+         $crypto = count($assets->where('asset_type', 'crypto'));
+         $stock = count($assets->where('asset_type', 'stock'));
+         $etf = count($assets->where('asset_type', 'etf'));
 
-        @if ($quantity !== 0)
-            <span class="flex flex-row my-2">
-                @if ($asset->image)
-                    <img class="mx-2" src="{{ asset('storage/' . $asset->image) }}" width="80" height="80" alt="Image">
-                @endif
+    @endphp 
+    <div class="flex">
+    <div class="p-3">
+        <div>
+            <label for="stocks">Stocks</label>
+            <input type="checkbox" name="stocks" id="">
+        </div>
+        <div>
+            <label for="etf">ETF</label>
+            <input type="checkbox" name="etf" id="">
+        </div>
+        <div>
+            <label for="crypto">Crypto</label>
+            <input type="checkbox" name="crypto" id="">
+        </div>
+    </div>
+    <div class="p-3">
+        <div>
+            <label for="stocks">PL</label>
+            <input type="checkbox" name="stocks" id="">
+        </div>
+        <div>
+            <label for="etf">USA</label>
+            <input type="checkbox" name="etf" id="">
+        </div>
 
-                <div class="flex flex-col p-4 rounded">
-                    <!-- Dane assetu -->
-                    <span class="flex flex-row items-center gap-2">
-                        {{ $asset->name }} — Quantity: {{ $quantity }} — 
-                        Transactions value: {{ number_format($transactionValue, 2, ',', ' ') }} {{ $currency }}
-                    </span>
-
-                    <!-- Obliczenia -->
-                    <span class="flex flex-row items-center gap-2 mt-2">
-                        Quantity:
-                        <span id="quantity-{{ $asset->id }}">{{ $quantity }}</span> ×
-                        <input type="number" id="currentPrice-{{ $asset->id }}" placeholder="Enter current price" class="border rounded px-1">
-
-                        <button type="button" 
-                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded"
-                                onclick="calculateValue({{ $asset->id }}, {{ $transactionValue }})">
-                            Count
-                        </button>
-
-                        Current value =
-                        <span id="current-value-{{ $asset->id }}">0</span> {{ $currency }}
-
-                        <span id="percent-change-{{ $asset->id }}" style="display:none">0%</span>
-                    </span>
-                </div>
-            </span>
-        @endif
+    </div>
+    </div>
+    <div>
+        <span class="px-2">Crypto: {{ $crypto }}</span>
+        <span class="px-2">Stock: {{ $stock }}</span>
+        <span class="px-2">ETF: {{ $etf }}</span>
+    </div>
+<div class="flex flex-wrap gap-2 mb-6 sticky top-0 bg-white py-2 z-10">
+    @foreach($groupedAssets as $letter => $items)
+        <a
+            href="#letter-{{ $letter }}"
+            class="px-2 py-1 text-sm font-medium rounded
+                   text-blue-600 hover:bg-blue-100"
+        >
+            {{ $letter }}
+        </a>
     @endforeach
 </div>
 
-<script>
-function calculateValue(assetId, transactionValue) {
-    const quantity = parseFloat(document.getElementById(`quantity-${assetId}`).textContent) || 0;
-    const price = parseFloat(document.getElementById(`currentPrice-${assetId}`).value) || 0;
-    const currentValue = quantity * price;
+</div>
+<div class="space-y-8">
+    @foreach($groupedAssets as $letter => $items)
+        <div id="letter-{{ $letter }}">
+            <h2 class="text-xl font-bold text-gray-800 mb-3">
+                {{ $letter }}
+            </h2>
 
-    // Aktualizacja wartości
-    document.getElementById(`current-value-${assetId}`).textContent = currentValue.toFixed(2);
+            <ul class="space-y-1 pl-4">
+                @foreach($items as $asset)
+                    <li class="py-1 border-b border-gray-100">
+                        {{ $asset->name }}
+                        <span class="text-gray-500 font-bold">{{ $asset->asset_type}}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endforeach
+</div>
 
-    // Wyliczenie różnicy procentowej
-    if (transactionValue !== 0) {
-        const diff = currentValue - transactionValue;
-        const percentChange = (diff / transactionValue) * 100;
-
-        const percentSpan = document.getElementById(`percent-change-${assetId}`);
-        percentSpan.style.display = 'block';
-        percentSpan.textContent = (percentChange > 0 ? '+' : '') + percentChange.toFixed(2) + '%';
-        percentSpan.textContent += ' - ' + diff.toFixed(2) + ' PLN';
-        percentSpan.style.color = percentChange > 0 ? 'green' : (percentChange < 0 ? 'red' : 'black');
-    }
-}
-</script>
+</div>

@@ -9,7 +9,7 @@ class MyAssets extends Component
 {
     public function render()
     {
-        $assets = Asset::with('transactions')->get();
+        $assets = Asset::with('transactions')->orderBy('name')->get();
 
 
         return view('livewire.my-assets', [
