@@ -11,29 +11,6 @@
     <!-- FILTER PANEL -->
     <div class="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl px-4 py-4 space-y-5 max-w-7xl mx-auto">
 
-        <!-- CHECKBOX FILTERS -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            <!-- Market -->
-            <div>
-                <p class="text-xs font-semibold text-gray-500 dark:text-zinc-400 mb-2 uppercase">
-                    Market
-                </p>
-                <div class="flex flex-wrap gap-2">
-                    @foreach(['PL','USA'] as $market)
-                        <label class="px-3 py-1 rounded-full border border-gray-300 dark:border-zinc-700
-                            text-sm font-medium text-gray-700 dark:text-zinc-300
-                            cursor-pointer transition
-                            hover:bg-gray-100 dark:hover:bg-zinc-800
-                            peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">
-                            <input type="checkbox" class="hidden peer">
-                            {{ $market }}
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
         <!-- MAIN FILTER GRID -->
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
 
@@ -91,25 +68,38 @@
         @endforeach
     </div>
 
-    <!-- LIST -->
-    <div class="space-y-10 max-w-7xl mx-auto px-4">
-        @foreach($groupedAssets as $letter => $items)
-            <div id="letter-{{ $letter }}">
-                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-3">
-                    {{ $letter }}
-                </h2>
+<!-- LIST -->
+<div class="space-y-10 max-w-7xl mx-auto px-4">
+    @foreach($groupedAssets as $letter => $items)
+        <div id="letter-{{ $letter }}">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-3">
+                {{ $letter }}
+            </h2>
 
-                <ul class="divide-y divide-gray-100 dark:divide-zinc-700">
-                    @foreach($items as $asset)
-                        <li class="py-2 flex justify-between items-center">
-                            <span>{{ $asset->name }}</span>
-                            <span class="text-xs font-semibold uppercase text-gray-400 dark:text-zinc-400">
-                                {{ $asset->asset_type }}
+            <ul class="divide-y divide-gray-100 dark:divide-zinc-700">
+                @foreach($items as $asset)
+                    <li class="py-2 flex justify-between items-center">
+                        <div>
+                        <span class=" font-semibold uppercase text-gray-400 dark:text-zinc-400">
+                            @if($asset->asset_type == 'crypto')
+                                {{ $asset->symbol}}
+                            @elseif($asset->exchange_id)
+                                {{ $asset->symbol }}.{{ $asset->exchange->symbol }}
+                            @endif
                             </span>
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
-        @endforeach
-    </div>
+                            {{ $asset->name }}
+                        
+                        </div>
+                        <div>
+                        <span class="text-xs font-semibold uppercase text-gray-400 dark:text-zinc-400">
+                            {{ $asset->asset_type }}
+                        </span>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endforeach
+</div>
+
 </div>
