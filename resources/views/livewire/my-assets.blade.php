@@ -8,6 +8,8 @@
         $etf    = $assets->where('asset_type', 'etf')->count();
     @endphp
 
+    
+
     <!-- FILTER PANEL -->
     <div class="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl px-4 py-4 space-y-5 max-w-7xl mx-auto">
 
@@ -15,7 +17,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
 
             <!-- STOCK -->
-            <button class="h-12 px-4 rounded-xl border border-gray-300 dark:border-zinc-700
+            <button wire:click="$set('type', 'stock')" class="h-12 px-4 rounded-xl border border-gray-300 dark:border-zinc-700
                 bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-zinc-100
                 font-semibold flex items-center justify-between
                 hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
@@ -24,7 +26,7 @@
             </button>
 
             <!-- ETF -->
-            <button class="h-12 px-4 rounded-xl border border-gray-300 dark:border-zinc-700
+            <button wire:click="$set('type', 'etf')" class="h-12 px-4 rounded-xl border border-gray-300 dark:border-zinc-700
                 bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-zinc-100
                 font-semibold flex items-center justify-between
                 hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
@@ -33,7 +35,7 @@
             </button>
 
             <!-- CRYPTO -->
-            <button class="h-12 px-4 rounded-xl border border-purple-300 dark:border-purple-500/40
+            <button wire:click="$set('type', 'crypto')" class="h-12 px-4 rounded-xl border border-purple-300 dark:border-purple-500/40
                 bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-zinc-100
                 font-semibold flex items-center justify-between
                 hover:bg-purple-50 dark:hover:bg-purple-500/10 transition
@@ -43,7 +45,7 @@
             </button>
 
             <!-- ALL -->
-            <button class="h-12 px-4 rounded-xl
+            <button wire:click="$set('type', null)" class="h-12 px-4 rounded-xl
                 bg-blue-600 text-white font-semibold
                 flex items-center justify-between
                 hover:bg-blue-500 transition
