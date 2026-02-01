@@ -8,7 +8,16 @@
         $etf    = $assets->where('asset_type', 'etf')->count();
     @endphp
 
-    
+    @php
+    $baseClasses = 'h-12 px-4 rounded-xl border
+        border-gray-300 dark:border-zinc-700
+        bg-gray-50 dark:bg-zinc-800
+        text-gray-900 dark:text-zinc-100
+        font-semibold flex items-center justify-between
+        hover:bg-gray-100 dark:hover:bg-zinc-700
+        transition';
+    @endphp
+
 
     <!-- FILTER PANEL -->
     <div class="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl px-4 py-4 space-y-5 max-w-7xl mx-auto">
@@ -45,11 +54,12 @@
             </button>
 
             <!-- ALL -->
-            <button wire:click="$set('type', null)" class="h-12 px-4 rounded-xl
-                bg-blue-600 text-white font-semibold
-                flex items-center justify-between
-                hover:bg-blue-500 transition
-                col-span-2 sm:col-span-3">
+            <button     wire:click="$set('type', null)"
+    class="{{ $baseClasses }}
+        {{ is_null($type)
+            ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
+            : '' }}"
+>
                 <span>All</span>
                 <span class="text-xs text-white/70">{{ $assets->count() }}</span>
             </button>
