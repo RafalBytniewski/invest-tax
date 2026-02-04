@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Models\Asset;
 use Livewire\Component;
 
-class MyAssets extends Component
+class Assets extends Component
 {
     public $type = '';
     public function render()
@@ -15,7 +15,7 @@ class MyAssets extends Component
         })->get();
 
 
-        return view('livewire.my-assets', [
+        return view('livewire.assets', [
             'assets' => $assets
         ]);
     }
