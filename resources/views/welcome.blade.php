@@ -11,6 +11,7 @@
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @fluxAppearance
     </head>
     <body class="bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
         <div class="relative overflow-x-clip">
@@ -30,6 +31,19 @@
                     </div>
 
                     <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="inline-flex items-center rounded-lg border border-zinc-200 bg-white p-1 shadow-sm dark:border-zinc-700 dark:bg-zinc-900" role="group" aria-label="Przełącznik motywu">
+                            <button type="button" data-theme-toggle="light" class="theme-toggle-btn inline-flex h-8 w-8 items-center justify-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100" aria-label="Tryb jasny">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path d="M10 2a.75.75 0 0 1 .75.75v1.5a.75.75 0 1 1-1.5 0v-1.5A.75.75 0 0 1 10 2Zm0 11.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Zm0 1.5a5.25 5.25 0 1 1 0-10.5 5.25 5.25 0 0 1 0 10.5Zm6.25-5.25a.75.75 0 0 1 .75-.75h1.5a.75.75 0 1 1 0 1.5H17a.75.75 0 0 1-.75-.75Zm-14.25 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 1 1 0 1.5h-1.5A.75.75 0 0 1 2 10Zm11.53-5.28a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 0 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06Zm-8.12 8.12a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 0 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06Zm9.18 1.06a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0Zm-8.12-8.12a.75.75 0 0 1 0 1.06L5.41 7.9a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0Z" />
+                                </svg>
+                            </button>
+                            <button type="button" data-theme-toggle="dark" class="theme-toggle-btn inline-flex h-8 w-8 items-center justify-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100" aria-label="Tryb ciemny">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path d="M11.713 2.043A8 8 0 1 0 17.957 8.287a.75.75 0 0 0-.945-.914 6.5 6.5 0 0 1-8.385-8.385.75.75 0 0 0-.914-.945Z" />
+                                </svg>
+                            </button>
+                        </div>
+
                         @guest
                             <a href="/login" class="rounded-lg px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
                                 Zaloguj się
@@ -212,5 +226,49 @@
                 </div>
             </footer>
         </div>
+
+        <script>
+            (() => {
+                const buttons = document.querySelectorAll('[data-theme-toggle]');
+
+                const getCurrentTheme = () => {
+                    const forced = localStorage.getItem('flux.appearance');
+
+                    if (forced === 'dark' || forced === 'light') {
+                        return forced;
+                    }
+
+                    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+                };
+
+                const applyActiveState = () => {
+                    const theme = getCurrentTheme();
+
+                    buttons.forEach((button) => {
+                        const isActive = button.dataset.themeToggle === theme;
+
+                        button.classList.toggle('bg-zinc-900', isActive);
+                        button.classList.toggle('text-white', isActive);
+                        button.classList.toggle('dark:bg-zinc-100', isActive);
+                        button.classList.toggle('dark:text-zinc-900', isActive);
+                        button.classList.toggle('text-zinc-500', !isActive);
+                        button.classList.toggle('dark:text-zinc-400', !isActive);
+                    });
+                };
+
+                buttons.forEach((button) => {
+                    button.addEventListener('click', () => {
+                        const selectedTheme = button.dataset.themeToggle;
+
+                        localStorage.setItem('flux.appearance', selectedTheme);
+                        document.documentElement.classList.toggle('dark', selectedTheme === 'dark');
+
+                        applyActiveState();
+                    });
+                });
+
+                applyActiveState();
+            })();
+        </script>
     </body>
 </html>
