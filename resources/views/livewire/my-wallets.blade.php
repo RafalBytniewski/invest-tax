@@ -1,229 +1,216 @@
-<div>
-
-{{-- 
-
-<div>
-    <div>
-        NVIDIA - cena otwarcia: 
-        @if($cdProjectOpenPrice)
-            {{ number_format($cdProjectOpenPrice, 2) }} PLN
-        @else
-            Brak danych
-        @endif
-    </div>
-
-    <button wire:click="loadPrice">Odśwież cenę</button>
-</div> --}}
-
+<div class="space-y-6">
     @foreach ($wallets as $wallet)
-    {{--     @php
-            $assets = $wallet->transactions->pluck('asset')->unique('id')->values();
-        @endphp --}}
-        <div
-            class="relative p-5 my-5 mr-50 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 h-auto bg-[#1f1f1f] bg-[repeating-linear-gradient(135deg,#2a2a2a_0px,#2a2a2a_1px,transparent_1px,transparent_8px)]">
-            <div class="flex">
-                <div class="flex flex-col flex-3">
-                    <div class="mx-12 my-6">
-                        <div class="pt-3 rounded-t-lg border-b-2 border-gray-200 bg-neutral-700">
-                            <span class="text-2xl flex justify-center ">
-                                {{ $wallet->name }}
-                            </span>
-                        </div>
-                        <div class="p-2 flex justify-around bg-gray-800">
-                            <span>Currency: {{ $wallet->currency }}</span>
-                            <span>Broker/Exchange: {{ $wallet->broker->name }}</span>
-                            <span>Owner: -</span>
-                            <span>Date: {{ $wallet->created_at->format('d.m.Y') }}</span> {{-- DODAC METODe- 1 transakcja->date --}}
-                        </div>
-                    </div>
-                    <div class="mx-12 mb-6">
-                        <div class="p-2 flex justify-around bg-gray-800">
-                            <span>Assets: {{ $wallet->assetsCollection()->count() }}</span>
-                            <span>Transactions: {{ $wallet->transactions->count() }}</span>
-                            <span>Cost: {{ $wallet->transactions->sum('total_value') }}<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span></span>
-                            <span>Current value:</span>
-                            <span>Profit: {{ round($wallet->realizedPL(),2) }}@if($wallet->realizedPL() !== 0)<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span>@endif</span>
+        @php
+            $summary = $walletSummaries[$wallet->id] ?? null;
+            $assets = $summary['assets'] ?? [];
+            $currency = strtoupper($wallet->currency ?? '');
+            $currentValue = $summary['current_value'] ?? null;
+            $coverage = $summary['current_value_coverage'] ?? 0;
+        @endphp
 
-                        </div>
+        <section
+            wire:key="wallet-card-{{ $wallet->id }}"
+            class="overflow-hidden rounded-xl border border-neutral-700 bg-neutral-900 shadow-lg"
+        >
+            <div class="border-b border-neutral-700 px-4 py-4 sm:px-6">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 class="text-xl font-semibold text-white">{{ $wallet->name }}</h2>
+                    <div class="grid grid-cols-2 gap-2 text-xs text-neutral-300 sm:flex sm:gap-4">
+                        <span>Currency: <span class="font-semibold text-white">{{ $currency }}</span></span>
+                        <span>Broker: <span class="font-semibold text-white">{{ $wallet->broker?->name ?? 'Unknown' }}</span></span>
+                        <span>Created: <span class="font-semibold text-white">{{ $wallet->created_at->format('d.m.Y') }}</span></span>
+                        <span>Owner: <span class="font-semibold text-white">-</span></span>
                     </div>
-                    <div class="mx-12">
-                        <div>
-                            @foreach ($wallet->assetsCollection() as $asset)
-                                @php
-                                    $transactionsForAsset = $wallet->transactions->where('asset_id', $asset->id);
-                                @endphp
-                                <div class="asset-section text-xs bg-neutral-800 border-b-1 border-gray-200">
-                                    <div class="grid grid-cols-4 items-center p-1 gap-2 ">
-                                        <span title="{{ $asset->name }}">{{ $asset->symbol}}
-                                            @if ($asset->exchange)
-                                                .{{ $asset->exchange->symbol }}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 border-b border-neutral-700 px-4 py-4 sm:grid-cols-3 lg:grid-cols-5 sm:px-6">
+                <div class="rounded-lg border border-neutral-700 bg-neutral-800 p-3">
+                    <p class="text-xs text-neutral-400">Assets</p>
+                    <p class="text-lg font-semibold text-white">{{ $summary['asset_count'] ?? 0 }}</p>
+                </div>
+                <div class="rounded-lg border border-neutral-700 bg-neutral-800 p-3">
+                    <p class="text-xs text-neutral-400">Transactions</p>
+                    <p class="text-lg font-semibold text-white">{{ $summary['transaction_count'] ?? 0 }}</p>
+                </div>
+                <div class="rounded-lg border border-neutral-700 bg-neutral-800 p-3">
+                    <p class="text-xs text-neutral-400">Invested</p>
+                    <p class="text-lg font-semibold text-white">
+                        {{ number_format($summary['invested_capital'] ?? 0, 2, '.', ' ') }}
+                        <span class="text-xs">{{ $currency }}</span>
+                    </p>
+                </div>
+                <div class="rounded-lg border border-neutral-700 bg-neutral-800 p-3">
+                    <p class="text-xs text-neutral-400">Current Value</p>
+                    <p class="text-lg font-semibold text-white">
+                        @if ($currentValue === null)
+                            -
+                        @else
+                            {{ number_format($currentValue, 2, '.', ' ') }}
+                        @endif
+                        <span class="text-xs">{{ $currency }}</span>
+                    </p>
+                    @if (($summary['asset_count'] ?? 0) > 0 && $coverage < 100)
+                        <p class="text-[11px] text-amber-300">Loaded prices for {{ $coverage }}% of assets</p>
+                    @endif
+                </div>
+                <div class="rounded-lg border border-neutral-700 bg-neutral-800 p-3">
+                    <p class="text-xs text-neutral-400">Realized P/L</p>
+                    @php $realized = $summary['realized_pl'] ?? 0; @endphp
+                    <p class="text-lg font-semibold {{ $realized >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">
+                        {{ number_format($realized, 2, '.', ' ') }}
+                        <span class="text-xs">{{ $currency }}</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid gap-4 p-4 sm:p-6 xl:grid-cols-5">
+                <div class="xl:col-span-3">
+                    <div class="space-y-2">
+                        @forelse ($assets as $asset)
+                            <article class="rounded-lg border border-neutral-700 bg-neutral-800">
+                                <div class="grid items-center gap-2 p-3 text-xs text-neutral-200 sm:grid-cols-2 lg:grid-cols-4">
+                                    <div>
+                                        <p class="font-semibold text-white" title="{{ $asset['name'] }}">
+                                            {{ $asset['symbol'] }}{{ $asset['exchange_symbol'] ? '.' . $asset['exchange_symbol'] : '' }}
+                                        </p>
+                                        <p class="text-neutral-400">{{ $asset['name'] }}</p>
+                                    </div>
+
+                                    <div>
+                                        <p class="text-neutral-400">Avg buy price</p>
+                                        <p class="font-semibold text-white">
+                                            {{ number_format($asset['avg_buy_price'], 2, '.', ' ') }}
+                                            <span class="text-[11px]">{{ $currency }}</span>
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <button
+                                            wire:click="loadPrice('{{ $asset['symbol'] }}', '{{ $asset['exchange_symbol'] }}')"
+                                            wire:loading.attr="disabled"
+                                            wire:target="loadPrice"
+                                            class="rounded border border-neutral-600 px-2 py-1 text-[11px] font-medium hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            Refresh price
+                                        </button>
+                                        <p class="pt-1 font-semibold text-white">
+                                            @if ($asset['current_value'] === null)
+                                                -
+                                            @else
+                                                {{ number_format($asset['current_value'], 2, '.', ' ') }}
+                                                <span class="text-[11px]">{{ $currency }}</span>
                                             @endif
-                                        </span>
-                                        <span title="Average buy prize">Avg price: {{ round($wallet->averageBuyPrice($asset->id), 2) }}<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span></span>
+                                        </p>
+                                    </div>
 
-                                        <span><button class="btn" wire:click="loadPrice('{{ $asset->symbol }}', '{{ $asset->exchange?->symbol }}')">Value:</button> {{ isset($price[$asset->symbol])
-    ? $price[$asset->symbol] * $wallet->transactions->where('asset_id', $asset->id)->sum('quantity')
-    : '-' }}
-                                            
-                                            {{-- {{ round($wallet->transactions()->where('asset_id', $asset->id)->sum('total_value'),2) }} --}}<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span></span>
-                                        <button wire:click="toggleTransactions({{ $asset->id }})"
-                                            class="flex items-center cursor-pointer gap-1">
-                                            {{ $transactionsForAsset->count() }} transactions
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                @if (isset($visibleTransactions[$asset->id]))
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M5 15l7-7 7 7" />
+                                    <div>
+                                        <button
+                                            wire:click="toggleTransactions({{ $wallet->id }}, {{ $asset['id'] }})"
+                                            aria-expanded="{{ $this->isTransactionsVisible($wallet->id, $asset['id']) ? 'true' : 'false' }}"
+                                            class="flex items-center gap-1 rounded border border-neutral-600 px-2 py-1 text-[11px] font-medium hover:bg-neutral-700"
+                                        >
+                                            {{ $asset['transaction_count'] }} transactions
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                @if ($this->isTransactionsVisible($wallet->id, $asset['id']))
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
                                                 @else
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                                 @endif
                                             </svg>
                                         </button>
                                     </div>
-                                    @php
-                                        $transactions = $wallet->transactions
-                                            ->where('asset_id', $asset->id)
-                                            ->sortByDesc('date');
-                                    @endphp
-                                    @if (isset($visibleTransactions[$asset->id]))
-                                        <div class="transaction-table">
-                                            <table class="w-full border-collapse">
-                                                <thead>
-                                                    <tr class="bg-gray-800 text-white text-sm">
-                                                        <th class="p-2 text-left">Type</th>
-                                                        <th class="p-2 text-left">Quantity</th>
-                                                        <th class="p-2 text-left">Price per unit</th>
-                                                        <th class="p-2 text-left">Total value</th>
-                                                        <th class="p-2 text-left">Date</th>
-                                                    </tr>
-                                                </thead>
-
-                                                <tbody>
-                                                    @foreach ($transactions as $t)
-                                                        <tr
-                                                            class="text-sm border-b border-gray-700 
-                                                            @if ($t->type === 'buy') bg-green-600/30 
-                                                            @elseif($t->type === 'sell') bg-red-600/30 @endif">
-
-                                                            <td class="p-2 capitalize">{{ $t->type }}</td>
-                                                            <td class="p-2">{{ $t->quantity }}</td>
-                                                            <td class="p-2">{{ $t->price_per_unit }}</td>
-                                                            <td class="p-2">{{ $t->total_value }}</td>
-                                                            <td class="p-2">{{ $t->date->format('d.m.Y') }}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    @endif
                                 </div>
-                            @endforeach
-                        </div>
+
+                                @if ($this->isTransactionsVisible($wallet->id, $asset['id']))
+                                    <div class="overflow-x-auto border-t border-neutral-700">
+                                        <table class="min-w-full text-xs">
+                                            <thead class="bg-neutral-700 text-neutral-100">
+                                                <tr>
+                                                    <th class="px-3 py-2 text-left">Type</th>
+                                                    <th class="px-3 py-2 text-left">Quantity</th>
+                                                    <th class="px-3 py-2 text-left">Price per unit</th>
+                                                    <th class="px-3 py-2 text-left">Total value</th>
+                                                    <th class="px-3 py-2 text-left">Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($asset['transactions'] as $transaction)
+                                                    <tr class="border-t border-neutral-700 {{ $transaction->type === 'buy' ? 'bg-emerald-700/20' : ($transaction->type === 'sell' ? 'bg-rose-700/20' : '') }}">
+                                                        <td class="px-3 py-2 capitalize">{{ $transaction->type }}</td>
+                                                        <td class="px-3 py-2">{{ number_format($transaction->quantity, 8, '.', ' ') }}</td>
+                                                        <td class="px-3 py-2">{{ number_format($transaction->price_per_unit, 2, '.', ' ') }}</td>
+                                                        <td class="px-3 py-2">{{ number_format($transaction->total_value, 2, '.', ' ') }}</td>
+                                                        <td class="px-3 py-2">{{ $transaction->date->format('d.m.Y') }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
+                            </article>
+                        @empty
+                            <div class="rounded-lg border border-dashed border-neutral-700 bg-neutral-800 p-6 text-center text-sm text-neutral-400">
+                                No assets in this wallet yet.
+                            </div>
+                        @endforelse
                     </div>
                 </div>
-                <div class="flex-2 mx-12 my-6">
-                    <div class="pt-3 rounded-t-lg border-b-2 border-gray-200 bg-neutral-700">
-                        <span class="text-2xl flex justify-center ">
-                            Pie Chart
-                        </span>
-                    </div>
-                    <div>
-                        <div>
-                            <div wire:ignore>
-                                <canvas id="myChart-{{ $wallet->id }}"
-                                    style="background-color: #262626; padding: 20px; display: inline-block; border-radius: 8px;"></canvas>
-                            </div>
 
-                            <script>
-                                (function() {
-                                    // Pobieramy dane z Blade (PHP)
-                                    const walletsData = {!! json_encode(
-                                        $wallet->assetsCollection()->map(
-                                            fn($a) => [
-                                                'id' => $a->id,
-                                                'name' => $a->name,
-                                                'amount' => $wallet->transactions()->where('asset_id', $a->id)->sum('total_value'),
-                                            ],
-                                        ),
-                                    ) !!};
-
-                                    // Tworzymy tablice do wykresu
-                                    const labels = walletsData.map(w => w.name);
-                                    const values = walletsData.map(w => w.amount);
-
-                                    // Pobieramy canvas
-                                    const ctx = document.getElementById('myChart-{{ $wallet->id }}');
-
-                                    // Jeśli canvas istnieje, rysujemy wykres
-                                    if (ctx) {
-                                        new Chart(ctx, {
-                                            type: 'pie',
-                                            data: {
-                                                labels: labels,
-                                                datasets: [{
-                                                    data: values,
-                                                    backgroundColor: values.map((v, i) => `hsla(${i * 40}, 50%, 75%, 0.7)`),
-                                                    borderWidth: 0.5,
-                                                    hoverOffset: 5
-                                                }]
-                                            },
-                                            options: {
-                                                responsive: true,
-                                                plugins: {
-                                                    legend: {
-                                                        position: 'bottom',
-                                                        labels: {
-                                                            color: '#ffffff',
-                                                            font: {
-                                                                family: 'Inter',
-                                                                size: 14,
-                                                                weight: '600'
-                                                            },
-                                                            boxWidth: 20, // szerokość kwadratu przy labelu
-                                                            padding: 15, // odstęp między labelami
-                                                            generateLabels: (chart) => {
-                                                                const defaultLabels = Chart.overrides.pie.plugins.legend.labels
-                                                                    .generateLabels(chart);
-                                                                const data = chart.data.datasets[0].data;
-                                                                const total = data.reduce((a, b) => a + b, 0);
-
-                                                                return defaultLabels.map((label, i) => {
-                                                                    const value = data[i];
-                                                                    const percentage = ((value / total) * 100).toFixed(1);
-                                                                    return {
-                                                                        ...label,
-                                                                        text: `${label.text} – ${percentage}%`,
-                                                                    };
-                                                                });
-                                                            }
-                                                        }
-                                                    },
-                                                    tooltip: {
-                                                        bodyFont: {
-                                                            family: 'Inter',
-                                                            size: 14
-                                                        },
-                                                        callbacks: {
-                                                            label: function(context) {
-                                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                                                const value = context.parsed;
-                                                                const percentage = ((value / total) * 100).toFixed(1);
-                                                                return `${context.label}: ${value} (${percentage}%)`;
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                        });
-                                    }
-                                })();
-                            </script>
+                <div class="xl:col-span-2">
+                    <div class="rounded-lg border border-neutral-700 bg-neutral-800 p-3">
+                        <h3 class="border-b border-neutral-700 pb-2 text-lg font-semibold text-white">Allocation</h3>
+                        <div wire:ignore class="pt-3">
+                            <canvas id="wallet-chart-{{ $wallet->id }}" class="max-h-[360px]"></canvas>
                         </div>
-
                     </div>
                 </div>
             </div>
-        </div>
+
+            <script>
+                (function () {
+                    const labels = @json($summary['chart_labels'] ?? []);
+                    const values = @json($summary['chart_values'] ?? []);
+                    const canvas = document.getElementById('wallet-chart-{{ $wallet->id }}');
+
+                    if (!canvas || !Array.isArray(values) || values.length === 0) {
+                        return;
+                    }
+
+                    window.walletCharts = window.walletCharts || {};
+                    const chartKey = 'wallet-{{ $wallet->id }}';
+
+                    if (window.walletCharts[chartKey]) {
+                        window.walletCharts[chartKey].destroy();
+                    }
+
+                    window.walletCharts[chartKey] = new Chart(canvas, {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: values,
+                                backgroundColor: values.map((v, i) => `hsla(${i * 45}, 65%, 60%, 0.8)`),
+                                borderWidth: 1,
+                                borderColor: '#262626'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        color: '#ffffff',
+                                        boxWidth: 14,
+                                        padding: 12
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })();
+            </script>
+        </section>
     @endforeach
+</div>
