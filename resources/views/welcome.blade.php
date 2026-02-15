@@ -27,7 +27,7 @@
                     <div class="hidden items-center gap-6 text-sm text-zinc-600 md:flex dark:text-zinc-300">
                         <a href="#how-it-works" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">Jak to działa</a>
                         <a href="#features" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">Funkcje</a>
-                        <a href="#faq" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">FAQ</a>
+                        {{-- <a href="#faq" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">FAQ</a> --}}
                     </div>
 
                     <div class="flex items-center gap-2 sm:gap-3">
@@ -138,8 +138,8 @@
                     <div class="grid gap-4 sm:gap-5 md:grid-cols-3 md:gap-6">
                         <article class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                             <p class="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-700 dark:text-cyan-300">Krok 1</p>
-                            <h3 class="mt-2 text-base font-semibold">Dodaj transakcje (akcje i krypto)</h3>
-                            <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">Wprowadź transakcje z różnych brokerów i giełd kryptowalut w jednym miejscu.</p>
+                            <h3 class="mt-2 text-base font-semibold">Dodaj transakcje</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">Wprowadź transakcje zakupu/sprzedaży akcji, ETF bądź kryptowaluty</p>
                         </article>
                         <article class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                             <p class="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-700 dark:text-cyan-300">Krok 2</p>
@@ -164,7 +164,7 @@
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <article class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                             <h3 class="text-base font-semibold">My Wallets</h3>
-                            <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">Organizuj portfele inwestycyjne i porównuj wyniki między rachunkami.</p>
+                            <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">Organizuj portfele inwestycyjne, porównuj wyniki między rachunkami i śledź ruch cenowy na wykresie.</p>
                         </article>
                         <article class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                             <h3 class="text-base font-semibold">My Transactions</h3>
@@ -185,7 +185,7 @@
                     </div>
                 </section>
 
-                {{-- FAQ --}}
+                {{-- FAQ --}}{{-- 
                 <section id="faq" class="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 md:py-16 lg:px-8 xl:py-20">
                     <div class="mb-8 max-w-2xl space-y-3 md:mb-10">
                         <h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">FAQ</h2>
@@ -211,22 +211,21 @@
                         </article>
                     </div>
                 </section>
-            </main>
+            </main> --}}
 
             {{-- Footer --}}
             <footer class="border-t border-zinc-200 bg-white/80 dark:border-zinc-800 dark:bg-zinc-950/80">
                 <div class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-zinc-600 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8 dark:text-zinc-300">
                     <div class="flex flex-wrap gap-x-5 gap-y-2">
-                        <a href="#" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">Regulamin</a>
-                        <a href="#" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">Polityka prywatności</a>
-                        <a href="#" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">Kontakt</a>
-                        <a href="#" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">GitHub</a>
+{{--                         <a href="#" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">Regulamin</a>
+                        <a href="#" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">Polityka prywatności</a> --}}
+                        <a href="mailto:kontakt@przyklad.pl" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">Kontakt</a>
+                        <a href="https://github.com/RafalBytniewski/invest-tax" target="_blank" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">GitHub</a>
                     </div>
                     <p class="text-xs sm:text-sm">Copyright © 2026 InvestTax</p>
                 </div>
             </footer>
         </div>
-
         <script>
             (() => {
                 const buttons = document.querySelectorAll('[data-theme-toggle]');
