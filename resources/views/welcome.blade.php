@@ -93,7 +93,7 @@
                     <div class="space-y-4">
                         <h1
                             class="text-balance text-3xl font-semibold leading-tight sm:text-4xl md:text-5xl xl:text-6xl">
-                            Oblicz podatek od giełdy i kryptowalut w jednym miejscu
+                            Oblicz podatek od zrealizowanego zysku inwestycyjnego w jednym miejscu.
                         </h1>
                         <p
                             class="max-w-2xl text-sm leading-relaxed text-zinc-600 sm:text-base md:text-lg dark:text-zinc-300">
