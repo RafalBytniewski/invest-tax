@@ -9,18 +9,17 @@
     @endphp
 
     @php
-        $baseClasses = 'h-12 px-4 rounded-xl 
-    font-semibold flex items-center justify-between
-    hover:bg-gray-100 dark:hover:bg-zinc-700
-    transition';
+        $baseClasses = 'h-12 px-4 rounded-xl font-semibold
+        flex items-center justify-between transition';
 
-        $inactiveClasses = 'border
-    border-gray-300 dark:border-zinc-700
-    bg-gray-50 dark:bg-zinc-800
-    text-gray-900 dark:text-zinc-100';
+        $inactiveClasses = 'border border-gray-300 
+        dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800
+        text-gray-900 dark:text-zinc-100
+        hover:bg-gray-300 dark:hover:bg-zinc-700';
 
-        $activeClasses = 'bg-blue-600 text-white border-blue-600
-    dark:bg-blue-500 dark:border-blue-500';
+        $activeClasses = 'bg-blue-600 text-white 
+        border-blue-600 dark:bg-blue-500 dark:border-blue-500
+        hover:bg-blue-300 dark:hover:bg-blue-700';
     @endphp
 
 
@@ -47,14 +46,15 @@
 
             <!-- CRYPTO -->
             <button wire:click="$set('type', 'crypto')"
-                class="{{ $baseClasses}} {{ $type === 'crypto' ? $activeClasses : $inactiveClasses }}">
+                class="{{ $baseClasses }} {{ $type === 'crypto' ? $activeClasses : $inactiveClasses }}">
                 <span>Crypto</span>
-                <span class="text-xs text-purple-600 dark:text-purple-400">{{ $type === 'crypto' ? $crypto : '' }}</span>
+                <span
+                    class="text-xs text-purple-600 dark:text-purple-400">{{ $type === 'crypto' ? $crypto : '' }}</span>
             </button>
 
             <!-- ALL -->
             <button wire:click="$set('type', null)"
-                class="{{ $baseClasses }} col-span-2 sm:col-span-3 {{ is_null($type) ? $activeClasses : $inactiveClasses }}">
+                class="{{ $baseClasses }} col-span-2 sm:col-span-3 {{ $type === null ? $activeClasses : $inactiveClasses }}">
                 <span>All</span>
                 <span class="text-xs text-white/70">{{ $type === null ? $assets->count() : '' }}</span>
             </button>
@@ -62,22 +62,23 @@
     </div>
 
     <!-- LETTER NAV -->
-    <div class="bg-white dark:bg-zinc-900 border-b dark:border-zinc-800 px-4 py-2 flex flex-wrap gap-2">
-        @foreach ($groupedAssets as $letter => $items)
-            <a href="#letter-{{ $letter }}"
-                class="transition px-2 py-1 text-sm font-semibold rounded-md
-                      text-gray-600 dark:text-zinc-300
-                      hover:bg-gray-100 dark:hover:bg-zinc-800
-                      hover:text-gray-900 dark:hover:text-white">
-                {{ $letter }}
-            </a>
-        @endforeach
-    </div>
+    <nav
+        class="max-w-7xl mx-auto sticky top-0 z-10 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur px-3 py-2">
+        <div class="flex flex-wrap gap-1.5">
+            @foreach ($groupedAssets as $letter => $items)
+                <a href="#letter-{{ $letter }}"
+                    class="rounded-md px-2 py-1 text-s font-semibold text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white">
+                    {{ $letter }}
+                </a>
+            @endforeach
+        </div>
+    </nav>
 
     <!-- LIST -->
     <div class="space-y-10 max-w-7xl mx-auto px-4">
         @foreach ($groupedAssets as $letter => $items)
-            <div id="letter-{{ $letter }}">
+            <div id="letter-{{ $letter }}" class="scroll-mt-20">
+
                 <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-3">
                     {{ $letter }}
                 </h2>
