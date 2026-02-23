@@ -85,7 +85,7 @@
 
                     <button
                         type="button"
-                        wire:click="$dispatch('openNewTransactionModal')"
+                        wire:click="$dispatchTo('new-transaction', 'openModal')"
                         class="h-11 rounded-lg border border-red-700 bg-red-700 px-3 text-sm font-semibold text-white transition hover:bg-red-600"
                     >
                         New Transaction
@@ -220,6 +220,6 @@
     </div>
 
     <div>
-        <livewire:new-transaction />
+        <livewire:new-transaction wire:key="new-transaction-modal" />
     </div>
 </div>
