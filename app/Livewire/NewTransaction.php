@@ -40,7 +40,10 @@ class NewTransaction extends Component
 
     // new transaction modal 
     public $showModal = false;
-    protected $listeners = ['openNewTransactionModal' => 'openModal'];
+    protected $listeners = [
+        'openModal' => 'openModal',
+        'openNewTransactionModal' => 'openModal',
+    ];
 
     public function openModal()
     {
