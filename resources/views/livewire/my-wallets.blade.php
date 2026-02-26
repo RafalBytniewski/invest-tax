@@ -158,7 +158,7 @@
                                     // Jeśli canvas istnieje, rysujemy wykres
                                     if (ctx) {
                                         new Chart(ctx, {
-                                            type: 'pie',
+                                            type: 'doughnut',
                                             data: {
                                                 labels: labels,
                                                 datasets: [{

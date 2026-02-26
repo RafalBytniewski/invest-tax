@@ -47,9 +47,11 @@
                         <div x-show="open" @click.away="open = false"
                             class="absolute right-0 mt-2 w-36 bg-white dark:bg-gray-600 dark:border-gray-700 border rounded z-50">
                             @foreach ($columns as $column)
-                                <label class="flex items-center space-x-2 px-2 py-1 bg-white dark:bg-gray-700 dark:hover:bg-gray-600">
-                                    <input type="checkbox" x-model="selected.{{  $column   }}" class="text-blue-600 focus:ring-blue-500">
-                                    <span class="text-gray-900 dark:text-white">{{  $column   }}</span>
+                                <label
+                                    class="flex items-center space-x-2 px-2 py-1 bg-white dark:bg-gray-700 dark:hover:bg-gray-600">
+                                    <input type="checkbox" x-model="selected.{{ $column }}"
+                                        class="text-blue-600 focus:ring-blue-500">
+                                    <span class="text-gray-900 dark:text-white">{{ $column }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -67,7 +69,8 @@
             <div class="overflow-x-auto">
                 <x-table>
                     <x-slot name="head">
-                        <x-table.header><input type="checkbox"wire:model="selectAll"></x-table.header>
+                        <x-table.header class="!text-center"><input
+                                type="checkbox"wire:model="selectAll"></x-table.header>
                         <x-table.header sortable wire:click="sortBy('asset')" :direction="$sortField === 'asset' ? $sortDirection : null"
                             class="px-4 py-2">Asset</x-table.header>
                         <x-table.header sortable wire:click="sortBy('brokers')" :direction="$sortField === 'brokers' ? $sortDirection : null"
@@ -89,27 +92,54 @@
 
                     @forelse ($transactions as $transaction)
                         <x-table.row wire.loading.class.delay="opacity-50">
-                            <x-table.cell class="px-4 py-2">
+                            <x-table.cell class="px-4 py-2 text-center">
                                 <input type="checkbox" value="{{ $transaction->id }}" wire:model="selected">
                             </x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ $transaction->asset?->name }}</x-table.cell>
-                            <x-table.cell class="px-4 py-2">{{ $transaction->wallet->broker->name}}</x-table.cell>
+                            <x-table.cell class="px-4 py-2">{{ $transaction->wallet->broker->name }}</x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ $transaction->wallet?->name }}</x-table.cell>
                             <x-table.cell
                                 class="px-4 py-2  {{ $transaction->type === 'sell' ? 'text-red-500' : 'text-green-500' }}">{{ ucfirst($transaction->type) }}</x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ abs($transaction->quantity) }}</x-table.cell>
                             <x-table.cell
                                 class="px-4 py-2">{{ number_format($transaction->price_per_unit, 2, ',', ' ') }}<span>
-                                    {{ $transaction->asset->exchange->currency ?? $transaction->currency}}</span></x-table.cell>
+                                    {{ $transaction->asset->exchange->currency ?? $transaction->currency }}</span></x-table.cell>
                             <x-table.cell
                                 class="px-4 py-2">{{ number_format(abs($transaction->total_value), 2, ',', ' ') }}<span>
                                     {{ $transaction->currency }}</span></x-table.cell>
                             <x-table.cell class="px-4 py-2">{{ $transaction->date->format('M, d Y') }}</x-table.cell>
                             <x-table.cell>
-                                <button class="bg-blue-800 cursor-pointer m-1">V</button>
-                                <button class="bg-green-800 cursor-pointer m-1">E</button>
-                                <button class="bg-red-800 cursor-pointer m-1">D</button>
-                            </x-table.cell>
+                                <div class="flex space-x-1 justify-center">
+                                    <!-- V: Verify / Check -->
+                                    <button
+                                        class="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- E: Edit / Pencil -->
+                                    <button
+                                        class="p-1 rounded hover:bg-green-100 dark:hover:bg-green-800 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5h2m2 2l4 4M4 20h16" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- D: Delete / Trash -->
+                                    <button
+                                        class="p-1 rounded hover:bg-red-100 dark:hover:bg-red-800 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
                         </x-table.row>
                     @empty
                         <x-table.row>
