@@ -2,33 +2,20 @@
 
 namespace App\Livewire;
 
-use App\Models\Asset;
-use App\Models\Broker;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Transaction;
-use App\Models\Wallet;
 use Illuminate\Database\Eloquent\Builder;
 
 class MyTransactions extends Component
 {
     use WithPagination;
+
+    protected const ALLOWED_SORT_FIELDS = ['asset', 'broker', 'wallet', 'type', 'quantity', 'price', 'total_value', 'date'];
+
     // paginate
     public $perPage = '10';
-    
-    //columns
-    public $columns = [
-        'asset' => true,
-        'broker' => true,
-        'wallet' => true,
-        'type' => true,
-        'quantity' => true,
-        'price' => true,
-        'total_value' => true,
-        'date' => true,
-    ];
-    protected array $requiredColumns = ['asset', 'wallet', 'type', 'total_value', 'date'];
 
     // searching feature
     public $search = '';
@@ -44,10 +31,20 @@ class MyTransactions extends Component
     public array $selected = [];
     public bool $selectAll = false;
 
+    public function mount(): void
+    {
+        if (! in_array($this->sortField, self::ALLOWED_SORT_FIELDS, true)) {
+            $this->sortField = 'date';
+        }
+
+        if (! in_array($this->sortDirection, ['asc', 'desc'], true)) {
+            $this->sortDirection = 'asc';
+        }
+    }
+
     public function sortBy($field)
     {
-        $allowedSortFields = ['asset', 'broker', 'wallet', 'type', 'quantity', 'price', 'total_value', 'date'];
-        if (! in_array($field, $allowedSortFields, true)) {
+        if (! in_array($field, self::ALLOWED_SORT_FIELDS, true)) {
             return;
         }
 
@@ -56,13 +53,6 @@ class MyTransactions extends Component
         } else {
             $this->sortField = $field;
             $this->sortDirection = 'asc';
-        }
-    }
-
-    public function updatedColumns(): void
-    {
-        foreach ($this->requiredColumns as $column) {
-            $this->columns[$column] = true;
         }
     }
 
@@ -102,6 +92,26 @@ class MyTransactions extends Component
         $this->resetPage();
 
         session()->flash('success', "Deleted {$deletedCount} selected transaction(s).");
+    }
+
+    public function deleteTransaction(int $id): void
+    {
+        $deleted = Transaction::query()
+            ->where('id', $id)
+            ->whereHas('wallet', function (Builder $query) {
+                $query->where('user_id', Auth::id());
+            })
+            ->delete();
+
+        if ($deleted === 0) {
+            session()->flash('error', 'Transaction could not be deleted.');
+            return;
+        }
+
+        unset($this->selected[(string) $id], $this->selected[$id]);
+        $this->updatedSelected();
+
+        session()->flash('success', 'Transaction deleted.');
     }
 
     public function updatingSearch(): void
@@ -145,25 +155,19 @@ class MyTransactions extends Component
         $direction = $this->sortDirection === 'asc' ? 'asc' : 'desc';
 
         return match ($this->sortField) {
-            'asset' => $query->orderBy(
-                Asset::select('name')
-                    ->whereColumn('assets.id', 'transactions.asset_id')
-                    ->limit(1),
-                $direction
-            ),
-            'wallet' => $query->orderBy(
-                Wallet::select('name')
-                    ->whereColumn('wallets.id', 'transactions.wallet_id')
-                    ->limit(1),
-                $direction
-            ),
-            'broker' => $query->orderBy(
-                Broker::select('name')
-                    ->join('wallets', 'wallets.broker_id', '=', 'brokers.id')
-                    ->whereColumn('wallets.id', 'transactions.wallet_id')
-                    ->limit(1),
-                $direction
-            ),
+            'asset' => $query
+                ->leftJoin('assets as sort_assets', 'sort_assets.id', '=', 'transactions.asset_id')
+                ->orderBy('sort_assets.name', $direction)
+                ->select('transactions.*'),
+            'wallet' => $query
+                ->leftJoin('wallets as sort_wallets', 'sort_wallets.id', '=', 'transactions.wallet_id')
+                ->orderBy('sort_wallets.name', $direction)
+                ->select('transactions.*'),
+            'broker' => $query
+                ->leftJoin('wallets as sort_wallets', 'sort_wallets.id', '=', 'transactions.wallet_id')
+                ->leftJoin('brokers as sort_brokers', 'sort_brokers.id', '=', 'sort_wallets.broker_id')
+                ->orderBy('sort_brokers.name', $direction)
+                ->select('transactions.*'),
             'price' => $query->orderBy('price_per_unit', $direction),
             default => $query->orderBy($this->sortField, $direction),
         };
@@ -182,7 +186,7 @@ class MyTransactions extends Component
             ->paginate((int) $this->perPage, ['*'], 'page', $this->getPage())
             ->getCollection()
             ->pluck('id')
-            ->map(fn ($id) => (string) $id)
+            ->map(fn($id) => (string) $id)
             ->all();
     }
 
@@ -194,9 +198,9 @@ class MyTransactions extends Component
     protected function getSelectedIds(): array
     {
         return collect($this->selected)
-            ->filter(fn ($checked) => (bool) $checked)
+            ->filter(fn($checked) => (bool) $checked)
             ->keys()
-            ->map(fn ($id) => (string) $id)
+            ->map(fn($id) => (string) $id)
             ->values()
             ->all();
     }
