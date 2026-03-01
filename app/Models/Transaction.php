@@ -33,36 +33,36 @@ class Transaction extends Model
         'date' => 'datetime',
     ];
 
-    public function wallet():BelongsTo{
+    public function wallet(): BelongsTo
+    {
         return $this->belongsTo(Wallet::class);
     }
 
-    public function asset():BelongsTo{
+    public function asset(): BelongsTo
+    {
         return $this->belongsTo(Asset::class);
     }
 
-    public function fees():HasMany{
+    public function fees(): HasMany
+    {
         return $this->hasMany(Fee::class);
     }
-    
-public function scopeSearch($query, $value)
-{
-    $query->where(function ($q) use ($value) {
-        // Szukaj po nazwie assetu
-        $q->whereHas('asset', function ($q2) use ($value) {
-            $q2->where('name', 'like', "%{$value}%");
-        })
-        // Szukaj po nazwie walletu
-        ->orWhereHas('wallet', function ($q2) use ($value) {
-            $q2->where('name', 'like', "%{$value}%")
-                // Szukaj także po nazwie brokera przez wallet
-                ->orWhereHas('broker', function ($q3) use ($value) {
-                    $q3->where('name', 'like', "%{$value}%");
+
+    public function scopeSearch($query, $value)
+    {
+        $query->where(function ($q) use ($value) {
+            // Szukaj po nazwie assetu
+            $q->whereHas('asset', function ($q2) use ($value) {
+                $q2->where('name', 'like', "%{$value}%");
+            })
+                // Szukaj po nazwie walletu
+                ->orWhereHas('wallet', function ($q2) use ($value) {
+                    $q2->where('name', 'like', "%{$value}%")
+                        // Szukaj także po nazwie brokera przez wallet
+                        ->orWhereHas('broker', function ($q3) use ($value) {
+                            $q3->where('name', 'like', "%{$value}%");
+                        });
                 });
         });
-    });
-}
-
-
-
+    }
 }

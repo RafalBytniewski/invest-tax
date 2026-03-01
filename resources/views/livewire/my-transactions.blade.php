@@ -71,10 +71,14 @@
                     <x-slot name="head">
                         <x-table.header class="!text-center"><input
                                 type="checkbox"wire:model="selectAll"></x-table.header>
+{{--                         @foreach ($columns as $column)
+                            <x-table.header sortable wire:click="sortBy('{{$column}}')" :direction="$sortField === $column ? $sortDirection : null"
+                                class="px-4 py-2">{{$column}}</x-table.header>
+                        @endforeach --}}
                         <x-table.header sortable wire:click="sortBy('asset')" :direction="$sortField === 'asset' ? $sortDirection : null"
                             class="px-4 py-2">Asset</x-table.header>
                         <x-table.header sortable wire:click="sortBy('brokers')" :direction="$sortField === 'brokers' ? $sortDirection : null"
-                            class="px-4 py-2">Broker</x-table.header>
+                            class="px-4 py-2">Broker</x-table.header> 
                         <x-table.header sortable wire:click="sortBy('wallet')" :direction="$sortField === 'wallet' ? $sortDirection : null"
                             class="px-4 py-2">Wallet</x-table.header>
                         <x-table.header sortable wire:click="sortBy('type')" :direction="$sortField === 'type' ? $sortDirection : null"
@@ -83,7 +87,7 @@
                             class="px-4 py-2">Quantity</x-table.header>
                         <x-table.header class="px-4 py-2">Price</x-table.header>
                         <x-table.header sortable wire:click="sortBy('total_value')" :direction="$sortField === 'total_value' ? $sortDirection : null"
-                            class="px-4 py-2">Total Value</x-table.header>
+                            class="px-4 py-2">Total Value</x-table.header> 
                         <x-table.header sortable wire:click="sortBy('date')" :direction="$sortField === 'date' ? $sortDirection : null"
                             class="px-4 py-2">Date</x-table.header>
                         <x-table.header>Actions</x-table>
@@ -140,6 +144,7 @@
                                         </svg>
                                     </button>
                                 </div>
+                            </x-table.cell>
                         </x-table.row>
                     @empty
                         <x-table.row>

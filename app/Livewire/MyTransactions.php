@@ -19,12 +19,9 @@ class MyTransactions extends Component
     //columns
     public $columns = ['asset', 'broker', 'wallet', 'type', 'quantity', 'price', 'total_value', 'date'];
     // searching feature
-    public $search = '';
-    public function updatedSearch()
-    {
-        $this->resetPage();
-    }
+    
 
+    
     // sorting feature
     public $sortField = 'date';
     public $sortDirection = 'asc';
@@ -42,7 +39,7 @@ class MyTransactions extends Component
 
 
     // bulk actions                                 ********** DOESNT WORKING 
-    public $selected = [];   // zaznaczone ID
+/*     public $selected = [];   // zaznaczone ID
     public $selectAll = false;
 
     public function updatedSelectAll($value)
@@ -52,7 +49,7 @@ class MyTransactions extends Component
         } else {
             $this->selected = [];
         }
-    }
+    } */
 
     
 
