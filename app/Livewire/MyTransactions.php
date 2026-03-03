@@ -2,71 +2,47 @@
 
 namespace App\Livewire;
 
-use App\Models\Asset;
-use App\Models\Broker;
-use App\Models\Transaction;
-use App\Models\Wallet;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Transaction;
+use Illuminate\Database\Eloquent\Builder;
 
 class MyTransactions extends Component
 {
     use WithPagination;
 
-    protected array $columnConfig = [
-        'asset' => ['label' => 'Asset', 'required' => true, 'sortable' => true],
-        'broker' => ['label' => 'Broker', 'required' => false, 'sortable' => true],
-        'wallet' => ['label' => 'Wallet', 'required' => true, 'sortable' => true],
-        'type' => ['label' => 'Type', 'required' => true, 'sortable' => true],
-        'quantity' => ['label' => 'Quantity', 'required' => false, 'sortable' => true],
-        'price' => ['label' => 'Price', 'required' => false, 'sortable' => true],
-        'total_value' => ['label' => 'Total Value', 'required' => true, 'sortable' => true],
-        'date' => ['label' => 'Date', 'required' => true, 'sortable' => true],
-    ];
+    protected const ALLOWED_SORT_FIELDS = ['asset', 'broker', 'wallet', 'type', 'quantity', 'price', 'total_value', 'date'];
 
+    // paginate
     public $perPage = '10';
-    public array $columns = [];
+
+    // searching feature
     public $search = '';
+
+    // filter by date
     public $dateFrom = '';
     public $dateTo = '';
 
+    // sorting feature
     public $sortField = 'date';
     public $sortDirection = 'asc';
     protected $queryString = ['sortField', 'sortDirection'];
 
-    public array $selected = [];
-    public array $displayedIds = [];
-    public bool $selectAll = false;
-
     public function mount(): void
     {
-        $this->columns = collect($this->columnConfig)
-            ->mapWithKeys(fn (array $config, string $key) => [$key => true])
-            ->all();
+        if (! in_array($this->sortField, self::ALLOWED_SORT_FIELDS, true)) {
+            $this->sortField = 'date';
+        }
 
-        foreach ($this->lockedColumns as $key) {
-            $this->columns[$key] = true;
+        if (! in_array($this->sortDirection, ['asc', 'desc'], true)) {
+            $this->sortDirection = 'asc';
         }
     }
 
-    public function getColumnOptionsProperty(): array
+    public function sortBy($field)
     {
-        return $this->columnConfig;
-    }
-
-    public function getLockedColumnsProperty(): array
-    {
-        return collect($this->columnConfig)
-            ->filter(fn (array $config) => $config['required'])
-            ->keys()
-            ->all();
-    }
-
-    public function sortBy(string $field): void
-    {
-        if (! isset($this->columnConfig[$field]) || ! $this->columnConfig[$field]['sortable']) {
+        if (! in_array($field, self::ALLOWED_SORT_FIELDS, true)) {
             return;
         }
 
@@ -76,90 +52,43 @@ class MyTransactions extends Component
             $this->sortField = $field;
             $this->sortDirection = 'asc';
         }
-
-        $this->resetPageAndSelection();
-    }
-
-    public function updatedColumns(): void
-    {
-        foreach ($this->lockedColumns as $column) {
-            $this->columns[$column] = true;
-        }
-    }
-
-    public function updatedSelectAll($value): void
-    {
-        $checked = (bool) $value;
-
-        foreach ($this->displayedIds as $id) {
-            $this->selected[$id] = $checked;
-        }
-    }
-
-    public function updatedSelected(): void
-    {
-        $selectedIds = $this->getSelectedIds();
-        $this->selectAll = ! empty($this->displayedIds) && empty(array_diff($this->displayedIds, $selectedIds));
-    }
-
-    public function deleteSelected(): void
-    {
-        $ids = array_map('intval', $this->getSelectedIds());
-        if ($ids === []) {
-            return;
-        }
-
-        $deletedCount = Transaction::query()
-            ->whereIn('id', $ids)
-            ->whereHas('wallet', function (Builder $query) {
-                $query->where('user_id', Auth::id());
-            })
-            ->delete();
-
-        $this->selected = [];
-        $this->selectAll = false;
-        $this->resetPage();
-
-        session()->flash('success', "Deleted {$deletedCount} selected transaction(s).");
     }
 
     public function deleteTransaction(int $id): void
     {
-        Transaction::query()
+        $deleted = Transaction::query()
             ->where('id', $id)
             ->whereHas('wallet', function (Builder $query) {
                 $query->where('user_id', Auth::id());
             })
             ->delete();
 
-        $this->selected[(string) $id] = false;
-        $this->selectAll = false;
+        if ($deleted === 0) {
+            session()->flash('error', 'Transaction could not be deleted.');
+            return;
+        }
+
         session()->flash('success', 'Transaction deleted.');
     }
 
     public function updatingSearch(): void
     {
-        $this->resetPageAndSelection();
+        $this->resetPage();
     }
 
     public function updatingDateFrom(): void
     {
-        $this->resetPageAndSelection();
+        $this->resetPage();
     }
 
     public function updatingDateTo(): void
     {
-        $this->resetPageAndSelection();
+        $this->resetPage();
     }
 
     public function updatingPerPage(): void
     {
-        $this->resetPageAndSelection();
-    }
-
-    public function getSelectedCountProperty(): int
-    {
-        return count($this->getSelectedIds());
+        $this->resetPage();
     }
 
     protected function baseQuery(): Builder
@@ -169,9 +98,7 @@ class MyTransactions extends Component
             ->whereHas('wallet', function (Builder $query) {
                 $query->where('user_id', Auth::id());
             })
-            ->when(trim((string) $this->search) !== '', function (Builder $query) {
-                $query->search($this->search);
-            })
+            ->search($this->search)
             ->when($this->dateFrom !== '', function (Builder $query) {
                 $query->whereDate('date', '>=', $this->dateFrom);
             })
@@ -185,89 +112,31 @@ class MyTransactions extends Component
         $direction = $this->sortDirection === 'asc' ? 'asc' : 'desc';
 
         return match ($this->sortField) {
-            'asset' => $query->orderBy(
-                Asset::select('name')
-                    ->whereColumn('assets.id', 'transactions.asset_id')
-                    ->limit(1),
-                $direction
-            ),
-            'wallet' => $query->orderBy(
-                Wallet::select('name')
-                    ->whereColumn('wallets.id', 'transactions.wallet_id')
-                    ->limit(1),
-                $direction
-            ),
-            'broker' => $query->orderBy(
-                Broker::select('name')
-                    ->join('wallets', 'wallets.broker_id', '=', 'brokers.id')
-                    ->whereColumn('wallets.id', 'transactions.wallet_id')
-                    ->limit(1),
-                $direction
-            ),
+            'asset' => $query
+                ->leftJoin('assets as sort_assets', 'sort_assets.id', '=', 'transactions.asset_id')
+                ->orderBy('sort_assets.name', $direction)
+                ->select('transactions.*'),
+            'wallet' => $query
+                ->leftJoin('wallets as sort_wallets', 'sort_wallets.id', '=', 'transactions.wallet_id')
+                ->orderBy('sort_wallets.name', $direction)
+                ->select('transactions.*'),
+            'broker' => $query
+                ->leftJoin('wallets as sort_wallets', 'sort_wallets.id', '=', 'transactions.wallet_id')
+                ->leftJoin('brokers as sort_brokers', 'sort_brokers.id', '=', 'sort_wallets.broker_id')
+                ->orderBy('sort_brokers.name', $direction)
+                ->select('transactions.*'),
             'price' => $query->orderBy('price_per_unit', $direction),
             default => $query->orderBy($this->sortField, $direction),
         };
     }
 
-    protected function resetPageAndSelection(): void
-    {
-        $this->selected = [];
-        $this->selectAll = false;
-        $this->resetPage();
-    }
-
-    protected function getSelectedIds(): array
-    {
-        return collect($this->selected)
-            ->filter(fn ($checked) => (bool) $checked)
-            ->keys()
-            ->map(fn ($id) => (string) $id)
-            ->values()
-            ->all();
-    }
-
-    protected function validateDateRange(): bool
-    {
-        if ($this->dateFrom !== '' && $this->dateTo !== '' && $this->dateFrom > $this->dateTo) {
-            $this->addError('dateFrom', 'Date from cannot be later than date to.');
-            $this->addError('dateTo', 'Date to cannot be earlier than date from.');
-
-            return false;
-        }
-
-        $this->resetErrorBag(['dateFrom', 'dateTo']);
-
-        return true;
-    }
-
     public function render()
     {
-        if (! $this->validateDateRange()) {
-            $transactions = Transaction::query()->whereRaw('1 = 0')->paginate((int) $this->perPage);
-            $this->displayedIds = [];
-            $this->selectAll = false;
-
-            return view('livewire.my-transactions', [
-                'transactions' => $transactions,
-                'columnOptions' => $this->columnOptions,
-            ]);
-        }
-
         $transactions = $this->applySorting($this->baseQuery())
-            ->paginate((int) $this->perPage);
-
-        $this->displayedIds = $transactions->getCollection()
-            ->pluck('id')
-            ->map(fn ($id) => (string) $id)
-            ->values()
-            ->all();
-
-        $selectedIds = $this->getSelectedIds();
-        $this->selectAll = ! empty($this->displayedIds) && empty(array_diff($this->displayedIds, $selectedIds));
+            ->paginate($this->perPage);
 
         return view('livewire.my-transactions', [
             'transactions' => $transactions,
-            'columnOptions' => $this->columnOptions,
         ]);
     }
 }
