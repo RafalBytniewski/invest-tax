@@ -28,8 +28,6 @@ class MyTransactions extends Component
     public $sortField = 'date';
     public $sortDirection = 'asc';
     protected $queryString = ['sortField', 'sortDirection'];
-    public array $selected = [];
-    public bool $selectAll = false;
 
     public function mount(): void
     {
@@ -56,44 +54,6 @@ class MyTransactions extends Component
         }
     }
 
-    public function updatedSelectAll($value): void
-    {
-        $displayed = $this->getDisplayedTransactionIds();
-        $checked = (bool) $value;
-
-        foreach ($displayed as $id) {
-            $this->selected[$id] = $checked;
-        }
-    }
-
-    public function updatedSelected(): void
-    {
-        $displayed = $this->getDisplayedTransactionIds();
-        $selectedIds = $this->getSelectedIds();
-        $this->selectAll = ! empty($displayed) && empty(array_diff($displayed, $selectedIds));
-    }
-
-    public function deleteSelected(): void
-    {
-        $ids = array_map('intval', $this->getSelectedIds());
-        if ($ids === []) {
-            return;
-        }
-
-        $deletedCount = Transaction::query()
-            ->whereIn('id', $ids)
-            ->whereHas('wallet', function (Builder $query) {
-                $query->where('user_id', Auth::id());
-            })
-            ->delete();
-
-        $this->selected = [];
-        $this->selectAll = false;
-        $this->resetPage();
-
-        session()->flash('success', "Deleted {$deletedCount} selected transaction(s).");
-    }
-
     public function deleteTransaction(int $id): void
     {
         $deleted = Transaction::query()
@@ -108,30 +68,27 @@ class MyTransactions extends Component
             return;
         }
 
-        unset($this->selected[(string) $id], $this->selected[$id]);
-        $this->updatedSelected();
-
         session()->flash('success', 'Transaction deleted.');
     }
 
     public function updatingSearch(): void
     {
-        $this->resetPageAndSelection();
+        $this->resetPage();
     }
 
     public function updatingDateFrom(): void
     {
-        $this->resetPageAndSelection();
+        $this->resetPage();
     }
 
     public function updatingDateTo(): void
     {
-        $this->resetPageAndSelection();
+        $this->resetPage();
     }
 
     public function updatingPerPage(): void
     {
-        $this->resetPageAndSelection();
+        $this->resetPage();
     }
 
     protected function baseQuery(): Builder
@@ -171,38 +128,6 @@ class MyTransactions extends Component
             'price' => $query->orderBy('price_per_unit', $direction),
             default => $query->orderBy($this->sortField, $direction),
         };
-    }
-
-    protected function resetPageAndSelection(): void
-    {
-        $this->selected = [];
-        $this->selectAll = false;
-        $this->resetPage();
-    }
-
-    protected function getDisplayedTransactionIds(): array
-    {
-        return $this->applySorting($this->baseQuery())
-            ->paginate((int) $this->perPage, ['*'], 'page', $this->getPage())
-            ->getCollection()
-            ->pluck('id')
-            ->map(fn($id) => (string) $id)
-            ->all();
-    }
-
-    public function getSelectedCountProperty(): int
-    {
-        return count($this->getSelectedIds());
-    }
-
-    protected function getSelectedIds(): array
-    {
-        return collect($this->selected)
-            ->filter(fn($checked) => (bool) $checked)
-            ->keys()
-            ->map(fn($id) => (string) $id)
-            ->values()
-            ->all();
     }
 
     public function render()

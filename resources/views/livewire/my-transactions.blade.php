@@ -41,12 +41,6 @@
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
-                    <!-- Delete Selected -->
-                    <button wire:click="deleteSelected" wire:confirm="Delete selected transactions?"
-                        @disabled($this->selectedCount === 0)
-                        class="px-4 py-2 border rounded h-11 w-full sm:w-44 transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-600 hover:text-white">
-                        Delete Selected
-                    </button>
                     <!-- New Transaction -->
                     <button wire:click="$dispatch('openNewTransactionModal')"
                         class="px-4 py-2 border bg-red-800 rounded h-11 w-full sm:w-44 hover:bg-red-400 transition">
@@ -59,9 +53,6 @@
             <div class="overflow-x-auto">
                 <x-table>
                     <x-slot name="head">
-                        <x-table.header class="!text-center"><input type="checkbox"
-                                wire:model.live="selectAll"></x-table.header>
-
                         <x-table.header sortable wire:click="sortBy('asset')" :direction="$sortField === 'asset' ? $sortDirection : null"
                             class="px-4 py-2">Asset</x-table.header>
 
@@ -92,12 +83,7 @@
 
                         @forelse ($transactions as $transaction)
                             <x-table.row wire.loading.class.delay="opacity-50">
-                                <x-table.cell class="px-4 py-2 text-center">
-                                    <input type="checkbox" wire:model.live="selected.{{ $transaction->id }}">
-                                </x-table.cell>
-
                                 <x-table.cell class="px-4 py-2">{{ $transaction->asset?->name }}</x-table.cell>
-
 
                                 <x-table.cell class="px-4 py-2">{{ $transaction->wallet->broker->name }}</x-table.cell>
 
@@ -156,7 +142,7 @@
                             </x-table.row>
                         @empty
                             <x-table.row>
-                                <x-table.cell colspan="10">
+                                <x-table.cell colspan="9">
                                     <div class="flex justify-center items-center">
                                         <span class="font-medium py-8 text-gray-500 text-2xl">
                                             No transactions found...

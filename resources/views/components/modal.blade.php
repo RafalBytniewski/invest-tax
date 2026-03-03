@@ -4,7 +4,7 @@
         @click="open = false"></div>
 
     <div x-show="open" x-transition.scale.origin.center.duration.200ms @click.stop
-        class="relative w-full max-w-5xl max-h-[92vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800">
+        class="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800">
         <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur dark:border-slate-700 dark:bg-slate-800/95">
             <div>
                 <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">New Transaction</h1>
