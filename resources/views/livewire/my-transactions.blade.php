@@ -27,16 +27,18 @@
 
             <div class="flex flex-col lg:flex-row lg:justify-between lg:items-end mb-4 gap-3">
                 <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:items-end w-full lg:w-auto">
+                     <!-- Search -->
                     <input type="text" wire:model.live.debounce.500ms="search" placeholder="Find ..."
                         class="px-4 py-2 border rounded h-11 w-full sm:w-72 lg:w-96" />
+                     <!-- Date filter -->
                     <div class="flex flex-col">
                         <label class="text-xs mb-1 text-gray-600 dark:text-gray-300">Date from</label>
-                        <input type="date" wire:model.live="dateFrom"
+                        <input type="date" wire:model.live="dateFrom" max="{{ now()->toDateString() }}"
                             class="px-3 py-2 border rounded h-11 w-full sm:w-44">
                     </div>
                     <div class="flex flex-col">
                         <label class="text-xs mb-1 text-gray-600 dark:text-gray-300">Date to</label>
-                        <input type="date" wire:model.live="dateTo"
+                        <input type="date" wire:model.live="dateTo" max="{{ now()->toDateString() }}"
                             class="px-3 py-2 border rounded h-11 w-full sm:w-44">
                     </div>
                 </div>
@@ -107,17 +109,8 @@
 
                                 <x-table.cell class="w-32 text-center">
                                     <div class="flex space-x-1 justify-center">
-                                        <!-- V: Verify / Check -->
-                                        <button
-                                            class="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M5 13l4 4L19 7" />
-                                            </svg>
-                                        </button>
 
-                                        <!-- E: Edit / Pencil -->
+                                        <!-- Edit -->
                                         <button
                                             class="p-1 rounded hover:bg-green-100 dark:hover:bg-green-800 transition-colors">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600"
@@ -127,7 +120,7 @@
                                             </svg>
                                         </button>
 
-                                        <!-- D: Delete / Trash -->
+                                        <!-- Delete -->
                                         <button wire:click="deleteTransaction({{ $transaction->id }})"
                                             wire:confirm="Delete this transaction?"
                                             class="p-1 rounded hover:bg-red-100 dark:hover:bg-red-800 transition-colors">
