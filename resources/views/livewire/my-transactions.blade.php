@@ -27,10 +27,10 @@
 
             <div class="flex flex-col lg:flex-row lg:justify-between lg:items-end mb-4 gap-3">
                 <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:items-end w-full lg:w-auto">
-                     <!-- Search -->
+                    <!-- Search -->
                     <input type="text" wire:model.live.debounce.500ms="search" placeholder="Find ..."
                         class="px-4 py-2 border rounded h-11 w-full sm:w-72 lg:w-96" />
-                     <!-- Date filter -->
+                    <!-- Date filter -->
                     <div class="flex flex-col">
                         <label class="text-xs mb-1 text-gray-600 dark:text-gray-300">Date from</label>
                         <input type="date" wire:model.live="dateFrom" max="{{ now()->toDateString() }}"
@@ -113,21 +113,21 @@
                                         <!-- Edit -->
                                         <button
                                             class="p-1 rounded hover:bg-green-100 dark:hover:bg-green-800 transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M11 5h2m2 2l4 4M4 20h16" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="20px"
+                                                viewBox="0 -960 960 960" width="20px" fill="#75FB4C">
+                                                <path
+                                                    d="M216-144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-30.11 21-51.56Q186-817 216-816h346l-72 72H216v528h528v-274l72-72v346q0 29.7-21.15 50.85Q773.7-144 744-144H216Zm264-336Zm-96 96v-153l354-354q11-11 24-16t26.5-5q14.4 0 27.45 5 13.05 5 23.99 15.78L891-840q11 11 16 24t5 27q0 14-5.02 27.09Q901.96-748.83 891-738L537-384H384Zm456-405-51-51 51 51ZM456-456h51l231-231-25-26-26-25-231 231v51Zm257-257-26-25 26 25 25 26-25-26Z" />
                                             </svg>
                                         </button>
 
                                         <!-- Delete -->
                                         <button wire:click="deleteTransaction({{ $transaction->id }})"
                                             wire:confirm="Delete this transaction?"
-                                            class="p-1 rounded hover:bg-red-100 dark:hover:bg-red-800 transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M6 18L18 6M6 6l12 12" />
+                                            class=" rounded hover:bg-red-100 dark:hover:bg-red-800 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="30px"
+                                                viewBox="0 -960 960 960" width="30px" fill="#8B1A10">
+                                                <path
+                                                    d="m338-288-50-50 141-142-141-141 50-50 142 141 141-141 50 50-141 141 141 142-50 50-141-141-142 141Z" />
                                             </svg>
                                         </button>
                                     </div>

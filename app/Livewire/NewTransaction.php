@@ -38,7 +38,7 @@ class NewTransaction extends Component
     }
 
 
-    // new transaction modal 
+    // transaction form modal
     public $showModal = false;
     protected $listeners = ['openNewTransactionModal' => 'openModal'];
 
@@ -105,7 +105,6 @@ class NewTransaction extends Component
             'notes' => $this->notes,
         ]);
 
-        // Tutaj flash i redirect
         session()->flash('success', 'Transaction saved!');
         return redirect()->route('my-transactions');
     }
