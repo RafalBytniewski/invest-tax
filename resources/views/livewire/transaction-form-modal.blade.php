@@ -8,13 +8,17 @@
     class="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-2 sm:items-center sm:p-4"
     role="dialog"
     aria-modal="true"
-    aria-labelledby="new-transaction-title"
+    aria-labelledby="transaction-form-title"
 >
     <div class="w-full max-w-5xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900">
         <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 sm:px-6 dark:border-zinc-700">
             <div>
-                <h2 id="new-transaction-title" class="text-base font-semibold text-gray-900 sm:text-lg dark:text-zinc-100">Add New Transaction</h2>
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Record a buy or sell operation for your portfolio.</p>
+                <h2 id="transaction-form-title" class="text-base font-semibold text-gray-900 sm:text-lg dark:text-zinc-100">
+                    {{ $editingTransactionId ? 'Edit Transaction' : 'Add New Transaction' }}
+                </h2>
+                <p class="text-xs text-gray-500 dark:text-zinc-400">
+                    {{ $editingTransactionId ? 'Update transaction details.' : 'Record a buy or sell operation for your portfolio.' }}
+                </p>
             </div>
             <button
                 type="button"
@@ -113,7 +117,7 @@
                                 id="quantity"
                                 type="number"
                                 step="0.00000001"
-                                min="0"
+                                min="0.00000001"
                                 required
                                 wire:model.live="quantity"
                                 class="h-11 w-full rounded-lg border border-gray-300 bg-gray-50 px-3 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
@@ -136,20 +140,6 @@
                         </div>
 
                         <div class="space-y-1">
-                            <label for="total_fees" class="text-xs font-medium text-gray-600 dark:text-zinc-300">Total fees</label>
-                            <input
-                                id="total_fees"
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                required
-                                wire:model.live="total_fees"
-                                class="h-11 w-full rounded-lg border border-gray-300 bg-gray-50 px-3 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
-                            />
-                            @error('total_fees') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
-                        </div>
-
-                        <div class="space-y-1">
                             <label for="total_value" class="text-xs font-medium text-gray-600 dark:text-zinc-300">Total value</label>
                             <input
                                 id="total_value"
@@ -159,7 +149,6 @@
                                 readonly
                                 class="h-11 w-full rounded-lg border border-gray-200 bg-gray-100 px-3 text-sm text-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-200"
                             />
-                            @error('total_value') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
                         </div>
 
                         <div class="space-y-1">
@@ -205,7 +194,7 @@
                     type="submit"
                     class="h-10 rounded-lg border border-red-700 bg-red-700 px-4 text-sm font-semibold text-white transition hover:bg-red-600"
                 >
-                    Save Transaction
+                    {{ $editingTransactionId ? 'Update Transaction' : 'Save Transaction' }}
                 </button>
             </div>
         </form>

@@ -85,7 +85,7 @@
 
                     <button
                         type="button"
-                        wire:click="$dispatchTo('new-transaction', 'openModal')"
+                        wire:click="$dispatchTo('transaction-form-modal', 'openTransactionFormModal')"
                         class="h-11 rounded-lg border border-red-700 bg-red-700 px-3 text-sm font-semibold text-white transition hover:bg-red-600"
                     >
                         New Transaction
@@ -190,8 +190,15 @@
 
                             <x-table.cell class="px-4 py-2">
                                 <div class="flex flex-wrap gap-1">
-                                    <button type="button" class="rounded border border-blue-700 bg-blue-700 px-2 py-1 text-xs font-semibold text-white hover:bg-blue-600" aria-label="View transaction {{ $transaction->id }}" title="View">View</button>
-                                    <button type="button" class="rounded border border-emerald-700 bg-emerald-700 px-2 py-1 text-xs font-semibold text-white hover:bg-emerald-600" aria-label="Edit transaction {{ $transaction->id }}" title="Edit">Edit</button>
+                                    <button
+                                        type="button"
+                                        wire:click="$dispatchTo('transaction-form-modal', 'openTransactionFormModal', { transactionId: {{ $transaction->id }} })"
+                                        class="rounded border border-emerald-700 bg-emerald-700 px-2 py-1 text-xs font-semibold text-white hover:bg-emerald-600"
+                                        aria-label="Edit transaction {{ $transaction->id }}"
+                                        title="Edit"
+                                    >
+                                        Edit
+                                    </button>
                                     <button type="button" class="rounded border border-rose-700 bg-rose-700 px-2 py-1 text-xs font-semibold text-white hover:bg-rose-600" aria-label="Delete transaction {{ $transaction->id }}" title="Delete">Delete</button>
                                 </div>
                             </x-table.cell>
@@ -220,6 +227,6 @@
     </div>
 
     <div>
-        <livewire:new-transaction wire:key="new-transaction-modal" />
+        <livewire:transaction-form-modal wire:key="transaction-form-modal" />
     </div>
 </div>

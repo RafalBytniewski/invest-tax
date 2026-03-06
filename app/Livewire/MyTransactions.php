@@ -22,6 +22,9 @@ class MyTransactions extends Component
     public $selectAll = false;
     public $sortField = 'date';
     public $sortDirection = 'desc';
+    protected $listeners = [
+        'transactionSaved' => 'handleTransactionSaved',
+    ];
 
     public $columnVisibility = [
         'asset' => true,
@@ -108,6 +111,12 @@ class MyTransactions extends Component
     {
         $this->selected = [];
         $this->selectAll = false;
+    }
+
+    public function handleTransactionSaved(): void
+    {
+        $this->resetPage();
+        $this->clearSelection();
     }
 
     public function visibleColumnCount(): int
