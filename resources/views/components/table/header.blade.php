@@ -3,7 +3,7 @@
     'direction' => null
 ])
 
-<th {{ $attributes->merge(['class' => 'text-left px-6 py-3 bg-gray-50 dark:bg-gray-800']) }}>
+<th {{ $attributes->except(['wire:click'])->merge(['class' => 'text-left px-6 py-3 bg-gray-50 dark:bg-gray-800']) }}>
     @unless($sortable)
         <span class=" text-sm leading-4 font-medium text-gray-900 dark:text-gray-100 tracking-wider">
             {{ $slot }}
