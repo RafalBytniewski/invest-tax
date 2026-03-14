@@ -2,115 +2,179 @@
 
 namespace App\Livewire;
 
-use Illuminate\Support\Facades\Auth;
 use App\Models\Asset;
 use App\Models\Transaction;
 use App\Models\Wallet;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
-use Illuminate\Support\Facades\Request;
 
 class NewTransaction extends Component
 {
-    /* TRANSACTION DATA */
-    public $wallet;
-    public $asset;
-    public $type;
-    public $currency;
-    public $quantity;
-    public $price_per_unit;
-    public $total_value;
-    public $total_fees = 0;
-    public $date;
-    public $notes;
+    public ?int $editingTransactionId = null;
+    public bool $showModal = false;
 
+    public $wallet = null;
+    public $asset = null;
+    public $type = null;
+    public $currency = null;
+    public $quantity = null;
+    public $price_per_unit = null;
+    public $total_value = 0;
+    public $date = null;
+    public $notes = null;
 
-    // total_value price update function
+    public array $wallets = [];
+    public array $assets = [];
+    public array $types = [
+        'buy' => 'Buy',
+        'sell' => 'Sell',
+    ];
 
-    public function updated($field)
+    protected $listeners = [
+        'openTransactionFormModal' => 'openTransactionFormModal',
+        'openNewTransactionModal' => 'openCreateModal',
+    ];
+
+    public function mount(): void
     {
-        if (in_array($field, ['quantity', 'price_per_unit', 'total_fees'])) {
-            if ($this->quantity && $this->price_per_unit) {
-                $this->total_value = $this->quantity * $this->price_per_unit - $this->total_fees;
-            } else {
-                $this->total_value = 0;
-            }
-        }
-    }
-
-
-    // transaction form modal
-    public $showModal = false;
-    protected $listeners = ['openNewTransactionModal' => 'openModal'];
-
-    public function openModal()
-    {
-        $this->showModal = true;
-    }
-
-    public function closeModal()
-    {
-        $this->showModal = false;
-    }
-
-    // select data
-
-    public $wallets = [];
-    public $assets = [];
-
-    public function mount()
-    {
-
         $this->wallets = Wallet::where('user_id', Auth::id())
             ->pluck('name', 'id')
             ->toArray();
 
         $this->assets = Asset::pluck('name', 'id')->toArray();
     }
-    public $types = [
-        'buy' => 'Buy',
-        'sell' => 'Sell',
-    ];
 
+    public function updated($field): void
+    {
+        if (in_array($field, ['quantity', 'price_per_unit'], true)) {
+            $this->recalculateTotalValue();
+        }
+    }
 
-    public function save()
+    public function openTransactionFormModal(?int $transactionId = null): void
+    {
+        if ($transactionId === null) {
+            $this->openCreateModal();
+            return;
+        }
 
+        $this->openEditModal($transactionId);
+    }
+
+    public function openCreateModal(): void
+    {
+        $this->resetForm();
+        $this->showModal = true;
+    }
+
+    public function openEditModal(int $transactionId): void
+    {
+        $transaction = $this->ownedTransactionsQuery()->findOrFail($transactionId);
+
+        $this->editingTransactionId = $transaction->id;
+        $this->wallet = $transaction->wallet_id;
+        $this->asset = $transaction->asset_id;
+        $this->type = $transaction->type;
+        $this->currency = strtoupper((string) $transaction->currency);
+        $this->quantity = abs((float) $transaction->quantity);
+        $this->price_per_unit = (float) $transaction->price_per_unit;
+        $this->date = optional($transaction->date)->format('Y-m-d');
+        $this->notes = $transaction->notes;
+        $this->recalculateTotalValue();
+        $this->resetValidation();
+        $this->showModal = true;
+    }
+
+    public function closeModal(): void
+    {
+        $this->showModal = false;
+        $this->resetValidation();
+    }
+
+    public function save(): void
     {
         $validated = $this->validate([
-            'wallet' => 'required|exists:wallets,id',
+            'wallet' => [
+                'required',
+                Rule::exists('wallets', 'id')->where(fn ($query) => $query->where('user_id', Auth::id())),
+            ],
             'asset' => 'required|exists:assets,id',
-            'type' => 'required|string',
-            'currency' =>
-            'required|string|max:3',
-            'quantity' => 'required|numeric',
-            'price_per_unit' => 'required|numeric',
-            'total_fees' => 'required|numeric',
-            'total_value' => 'required|numeric',
+            'type' => 'required|in:buy,sell',
+            'currency' => 'required|string|size:3',
+            'quantity' => 'required|numeric|gt:0',
+            'price_per_unit' => 'required|numeric|gte:0',
             'date' => 'required|date',
-            'notes' => 'nullable|string|max:500'
-        ]);
-        if ($this->type === 'sell') {
-            $validated['quantity'] = -abs($validated['quantity']);
-            $validated['total_value'] = -abs($validated['total_value']);
-        }
-        Transaction::create([
-            'wallet_id' => $this->wallet,
-            'asset_id'  => $this->asset,
-            'type' => $this->type,
-            'currency' => $this->currency,
-            'quantity' => $validated['quantity'],
-            'price_per_unit' => $this->price_per_unit,
-            'total_fees' => $this->total_fees,
-            'total_value' => $validated['total_value'],
-            'date' => $this->date,
-            'notes' => $this->notes,
+            'notes' => 'nullable|string|max:500',
         ]);
 
-        session()->flash('success', 'Transaction saved!');
-        return redirect()->route('my-transactions');
+        $baseTotalValue = (float) $validated['quantity'] * (float) $validated['price_per_unit'];
+
+        if ($validated['type'] === 'sell') {
+            $validated['quantity'] = -abs((float) $validated['quantity']);
+            $validated['total_value'] = -abs($baseTotalValue);
+        } else {
+            $validated['quantity'] = abs((float) $validated['quantity']);
+            $validated['total_value'] = abs($baseTotalValue);
+        }
+
+        $payload = [
+            'wallet_id' => (int) $validated['wallet'],
+            'asset_id' => (int) $validated['asset'],
+            'type' => $validated['type'],
+            'currency' => strtoupper($validated['currency']),
+            'quantity' => $validated['quantity'],
+            'price_per_unit' => (float) $validated['price_per_unit'],
+            'total_value' => $validated['total_value'],
+            'date' => $validated['date'],
+            'notes' => $validated['notes'] ?? null,
+        ];
+
+        if ($this->editingTransactionId !== null) {
+            $transaction = $this->ownedTransactionsQuery()->findOrFail($this->editingTransactionId);
+            $transaction->update($payload);
+            session()->flash('success', 'Transaction updated.');
+        } else {
+            Transaction::create($payload);
+            session()->flash('success', 'Transaction created.');
+        }
+
+        $this->closeModal();
+        $this->dispatch('transactionSaved');
     }
+
+    protected function resetForm(): void
+    {
+        $this->editingTransactionId = null;
+        $this->wallet = null;
+        $this->asset = null;
+        $this->type = null;
+        $this->currency = null;
+        $this->quantity = null;
+        $this->price_per_unit = null;
+        $this->total_value = 0;
+        $this->date = now()->format('Y-m-d');
+        $this->notes = null;
+        $this->resetValidation();
+    }
+
+    protected function recalculateTotalValue(): void
+    {
+        $quantity = (float) ($this->quantity ?? 0);
+        $price = (float) ($this->price_per_unit ?? 0);
+        $this->total_value = $quantity * $price;
+    }
+
+    protected function ownedTransactionsQuery()
+    {
+        return Transaction::query()->whereHas('wallet', function ($query) {
+            $query->where('user_id', Auth::id());
+        });
+    }
+
     public function render()
     {
-        return view('livewire.new-transaction', [
+        return view('livewire.transaction-form-modal', [
             'wallets' => $this->wallets,
             'assets' => $this->assets,
         ]);
