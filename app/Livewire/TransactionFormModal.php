@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
-class NewTransaction extends Component
+class TransactionFormModal extends Component
 {
     public ?int $editingTransactionId = null;
     public bool $showModal = false;

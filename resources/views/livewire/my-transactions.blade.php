@@ -166,6 +166,6 @@
         </div>
     </div>
     <div>
-        <livewire:new-transaction />
+        <livewire:transaction-form-modal />
     </div>
 </div>
