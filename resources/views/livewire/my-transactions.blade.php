@@ -111,7 +111,7 @@
                                     <div class="flex space-x-1 justify-center">
 
                                         <!-- Edit -->
-                                        <button wire:click="$dispatch('openNewTransactionModal')"
+                                        <button wire:click="$dispatchTo('transaction-form-modal', 'openTransactionFormModal', { transactionId: {{ $transaction->id }} })"
                                             class="p-1 rounded hover:bg-green-100 dark:hover:bg-green-800 transition-colors">
                                             <svg xmlns="http://www.w3.org/2000/svg" height="20px"
                                                 viewBox="0 -960 960 960" width="20px" fill="#75FB4C">

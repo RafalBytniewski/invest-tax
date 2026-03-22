@@ -13,6 +13,7 @@ class TransactionFormModal extends Component
 {
     public ?int $editingTransactionId = null;
     public bool $showModal = false;
+    public string $mode = '';
 
     public $wallet = null;
     public $asset = null;
@@ -64,12 +65,14 @@ class TransactionFormModal extends Component
 
     public function openCreateModal(): void
     {
+        $this->mode = 'new';
         $this->resetForm();
         $this->showModal = true;
     }
 
     public function openEditModal(int $transactionId): void
     {
+        $this->mode = 'edit';
         $transaction = $this->ownedTransactionsQuery()->findOrFail($transactionId);
 
         $this->editingTransactionId = $transaction->id;

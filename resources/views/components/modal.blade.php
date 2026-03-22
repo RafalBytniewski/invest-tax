@@ -7,8 +7,7 @@
         class="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800">
         <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur dark:border-slate-700 dark:bg-slate-800/95">
             <div>
-                <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">New Transaction</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-300">Add buy or sell operation to your portfolio.</p>
+                <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ $mode === 'new' ? 'New Transaction' : 'Edit Transaction'}}</h1>
             </div>
             <button type="button" wire:click="closeModal"
                 class="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
@@ -41,9 +40,11 @@
                 </x-form.section>
             </div>
 
-            <x-form.section label="Notes" columns="grid-cols-1" class="mt-4">
-                <div class="col-span-1">
+            <x-form.section label="Optional" columns="grid-cols-1" class="mt-4">
+                <div class="col-span-2">
                     <x-form.textarea model="notes" label="Notes" placeholder="Write your notes..." maxlength="500" />
+       {{--              <x-form.input  type="file" model="attachments" label="Attachments"/>
+                    <p class="text-sm text-gray-500 dark:text-gray-300" id="file_input_help">SVG, PNG, JPG or GIF (MAX. 800x400px).</p> --}}
                 </div>
             </x-form.section>
 
@@ -59,4 +60,5 @@
             </div>
         </x-form>
     </div>
+    
 </div>
