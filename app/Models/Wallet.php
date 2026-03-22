@@ -39,15 +39,17 @@ class Wallet extends Model
         return $this->belongsTo(Broker::class);
     }
 
-public function assetsCollection()
-{
-    return $this->transactions()
-        ->with('asset')
-        ->get()
-        ->pluck('asset')
-        ->unique('id')
-        ->values();
-}
+    public function activeAssetsCollection()
+    {
+        return $this->transactions()
+            ->selectRaw('asset_id, SUM(quantity) as total_quantity')
+            ->groupBy('asset_id')
+            ->having('total_quantity', '>', 0)
+            ->with('asset')
+            ->get()
+            ->pluck('asset')
+            ->values();
+    }
 
 
     public function averageBuyPrice($assetId)

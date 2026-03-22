@@ -1,11 +1,10 @@
 <div>
-
-{{-- 
+    {{-- 
 
 <div>
     <div>
         NVIDIA - cena otwarcia: 
-        @if($cdProjectOpenPrice)
+        @if ($cdProjectOpenPrice)
             {{ number_format($cdProjectOpenPrice, 2) }} PLN
         @else
             Brak danych
@@ -16,7 +15,7 @@
 </div> --}}
 
     @foreach ($wallets as $wallet)
-    {{--     @php
+        {{--     @php
             $assets = $wallet->transactions->pluck('asset')->unique('id')->values();
         @endphp --}}
         <div
@@ -38,34 +37,44 @@
                     </div>
                     <div class="mx-12 mb-6">
                         <div class="p-2 flex justify-around bg-gray-800">
-                            <span>Assets: {{ $wallet->assetsCollection()->count() }}</span>
+                            <span>Assets: {{ $wallet->activeAssetsCollection()->count() }}</span>
                             <span>Transactions: {{ $wallet->transactions->count() }}</span>
-                            <span>Cost: {{ $wallet->transactions->sum('total_value') }}<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span></span>
+                            <span>Cost: {{ $wallet->transactions->sum('total_value') }}<span
+                                    class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency }}</span></span>
                             <span>Current value:</span>
-                            <span>Profit: {{ round($wallet->realizedPL(),2) }}@if($wallet->realizedPL() !== 0)<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span>@endif</span>
+                            <span>Profit: {{ round($wallet->realizedPL(), 2) }}@if ($wallet->realizedPL() !== 0)
+                                    <span
+                                        class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency }}</span>
+                                @endif
+                            </span>
 
                         </div>
                     </div>
                     <div class="mx-12">
                         <div>
-                            @foreach ($wallet->assetsCollection() as $asset)
+                            @foreach ($wallet->activeAssetsCollection() as $asset)
                                 @php
                                     $transactionsForAsset = $wallet->transactions->where('asset_id', $asset->id);
                                 @endphp
                                 <div class="asset-section text-xs bg-neutral-800 border-b-1 border-gray-200">
                                     <div class="grid grid-cols-4 items-center p-1 gap-2 ">
-                                        <span title="{{ $asset->name }}">{{ $asset->symbol}}
+                                        <span title="{{ $asset->name }}">{{ $asset->symbol }}
                                             @if ($asset->exchange)
                                                 .{{ $asset->exchange->symbol }}
                                             @endif
                                         </span>
-                                        <span title="Average buy prize">Avg price: {{ round($wallet->averageBuyPrice($asset->id), 2) }}<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span></span>
+                                        <span title="Average buy prize">Avg price:
+                                            {{ round($wallet->averageBuyPrice($asset->id), 2) }}<span
+                                                class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency }}</span></span>
 
-                                        <span><button class="btn" wire:click="loadPrice('{{ $asset->symbol }}', '{{ $asset->exchange?->symbol }}')">Value:</button> {{ isset($price[$asset->symbol])
-    ? $price[$asset->symbol] * $wallet->transactions->where('asset_id', $asset->id)->sum('quantity')
-    : '-' }}
-                                            
-                                            {{-- {{ round($wallet->transactions()->where('asset_id', $asset->id)->sum('total_value'),2) }} --}}<span class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency}}</span></span>
+                                        <span><button class="btn"
+                                                wire:click="loadPrice('{{ $asset->symbol }}', '{{ $asset->exchange?->symbol }}')">Value:</button>
+                                            {{ isset($price[$asset->symbol])
+                                                ? $price[$asset->symbol] * $wallet->transactions->where('asset_id', $asset->id)->sum('quantity')
+                                                : '-' }}
+
+                                            {{-- {{ round($wallet->transactions()->where('asset_id', $asset->id)->sum('total_value'),2) }} --}}<span
+                                                class="pl-1 text-[0.6rem] font-italic font-black font-rametto">{{ $wallet->currency }}</span></span>
                                         <button wire:click="toggleTransactions({{ $asset->id }})"
                                             class="flex items-center cursor-pointer gap-1">
                                             {{ $transactionsForAsset->count() }} transactions
@@ -139,11 +148,11 @@
                                 (function() {
                                     // Pobieramy dane z Blade (PHP)
                                     const walletsData = {!! json_encode(
-                                        $wallet->assetsCollection()->map(
+                                        $wallet->activeAssetsCollection()->map(
                                             fn($a) => [
                                                 'id' => $a->id,
                                                 'name' => $a->name,
-                                                'amount' => $wallet->transactions()->where('asset_id', $a->id)->sum('total_value'),
+                                                'amount' => $wallet->transactions()->where('asset_id', $a->id)->sum('total_value'), // ***ERROR*** - zmienic na sum('quantity')* avg('price_per_unit') a docelowo last_price dla assetu
                                             ],
                                         ),
                                     ) !!};
