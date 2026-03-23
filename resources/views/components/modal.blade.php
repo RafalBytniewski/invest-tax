@@ -40,11 +40,12 @@
                 </x-form.section>
             </div>
 
-            <x-form.section label="Optional" columns="grid-cols-1" class="mt-4">
+            <x-form.section label="Additional" columns="grid-cols-1" class="mt-4">
                 <div class="col-span-2">
                     <x-form.textarea model="notes" label="Notes" placeholder="Write your notes..." maxlength="500" />
-       {{--              <x-form.input  type="file" model="attachments" label="Attachments"/>
-                    <p class="text-sm text-gray-500 dark:text-gray-300" id="file_input_help">SVG, PNG, JPG or GIF (MAX. 800x400px).</p> --}}
+                    <x-form.input  type="file" model="attachments" label="Attachments"/>
+                    <p class="text-sm text-gray-500 dark:text-gray-300" id="file_input_help">SVG, PNG, JPG, DOC or PDF (2MB).</p> 
+                    <p class="text-sm text-gray-500 dark:text-gray-300" id="file_input_help">Upload screenshots, fee confirmations, or PDF statements for future tax verification.</p>
                 </div>
             </x-form.section>
 

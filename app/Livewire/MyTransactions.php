@@ -13,6 +13,7 @@ class MyTransactions extends Component
     use WithPagination;
 
     protected const ALLOWED_SORT_FIELDS = ['asset', 'broker', 'wallet', 'type', 'quantity', 'price', 'total_value', 'date'];
+    protected $listeners = ['transactionSaved' => '$refresh'];
 
     // paginate
     public $perPage = '10';
