@@ -99,23 +99,32 @@
 
                         <ul class="divide-y divide-gray-100 dark:divide-zinc-700 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
                             @foreach ($items as $asset)
-                                <li class="flex items-center justify-between gap-3 px-3 py-3 sm:px-4 hover:bg-gray-50 dark:hover:bg-zinc-800/70 transition">
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-semibold text-gray-900 dark:text-zinc-100 truncate" title="{{ $asset->name }}">
-                                            {{ $asset->name }}
-                                        </p>
-                                        <p class="mt-0.5 text-xs text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
-                                            @if ($asset->asset_type === 'crypto')
-                                                {{ $asset->symbol }}
-                                            @else
-                                                {{ $asset->symbol }}{{ $asset->exchange?->symbol ? '.' . $asset->exchange->symbol : '' }}
-                                            @endif
-                                        </p>
-                                    </div>
+                                <li>
+                                    <a
+                                        href="{{ route('assets.show', $asset) }}"
+                                        wire:navigate
+                                        class="flex items-center justify-between gap-3 px-3 py-3 sm:px-4 hover:bg-gray-50 dark:hover:bg-zinc-800/70 transition"
+                                    >
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-semibold text-gray-900 dark:text-zinc-100 truncate" title="{{ $asset->name }}">
+                                                {{ $asset->name }}
+                                            </p>
+                                            <p class="mt-0.5 text-xs text-gray-500 dark:text-zinc-400 uppercase tracking-wide">
+                                                @if ($asset->asset_type === 'crypto')
+                                                    {{ $asset->symbol }}
+                                                @else
+                                                    {{ $asset->symbol }}{{ $asset->exchange?->symbol ? '.' . $asset->exchange->symbol : '' }}
+                                                @endif
+                                            </p>
+                                        </div>
 
-                                    <span class="shrink-0 rounded-full border border-gray-300 dark:border-zinc-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:text-zinc-300">
-                                        {{ $asset->asset_type }}
-                                    </span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="shrink-0 rounded-full border border-gray-300 dark:border-zinc-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:text-zinc-300">
+                                                {{ $asset->asset_type }}
+                                            </span>
+                                            <span class="text-xs text-blue-600 dark:text-blue-400">Open</span>
+                                        </div>
+                                    </a>
                                 </li>
                             @endforeach
                         </ul>
