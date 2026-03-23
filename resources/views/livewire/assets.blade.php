@@ -85,23 +85,28 @@
 
                 <ul class="divide-y divide-gray-100 dark:divide-zinc-700">
                     @foreach ($items as $asset)
-                        <li class="py-2 flex justify-between items-center">
-                            <div>
-                                <span class=" font-semibold uppercase text-gray-400 dark:text-zinc-400">
-                                    @if ($asset->asset_type == 'crypto')
-                                        {{ $asset->symbol }}
-                                    @elseif($asset->exchange_id)
-                                        {{ $asset->symbol }}.{{ $asset->exchange->symbol }}
-                                    @endif
-                                </span>
-                                {{ $asset->name }}
+                        <li>
+                            <a href="{{ route('assets.show', $asset->id) }}"
+                                class="block py-2 flex justify-between items-center hover:bg-white/95 hover:dark:bg-zinc-900/95">
 
-                            </div>
-                            <div>
-                                <span class="text-xs font-semibold uppercase text-gray-400 dark:text-zinc-400">
-                                    {{ $asset->asset_type }}
-                                </span>
-                            </div>
+                                <div>
+                                    <span class="font-semibold uppercase text-gray-400 dark:text-zinc-400">
+                                        @if ($asset->asset_type == 'crypto')
+                                            {{ $asset->symbol }}
+                                        @elseif($asset->exchange_id)
+                                            {{ $asset->symbol }}.{{ $asset->exchange->symbol }}
+                                        @endif
+                                    </span>
+                                    {{ $asset->name }}
+                                </div>
+
+                                <div>
+                                    <span class="text-xs font-semibold uppercase text-gray-400 dark:text-zinc-400">
+                                        {{ $asset->asset_type }}
+                                    </span>
+                                </div>
+
+                            </a>
                         </li>
                     @endforeach
                 </ul>

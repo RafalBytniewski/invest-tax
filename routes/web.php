@@ -7,6 +7,8 @@ use App\Livewire\Settings\Profile;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\MyTransactions;
 use App\Livewire\MyWallets;
+use App\Livewire\Asset\Show;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -23,6 +25,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
     Route::get('/my-transactions', MyTransactions::class)->name('my-transactions');
     Route::get('/assets', Assets::class)->name('assets');
+    Route::get('/assets/{asset}', Show::class)->name('assets.show');
     Route::get('/my-walletss', MyWallets::class)->name('my-wallets');
 
 });
