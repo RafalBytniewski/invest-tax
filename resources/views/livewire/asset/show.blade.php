@@ -1,64 +1,150 @@
 <div class="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+    {{-- ASSET DETAIL --}}
     <section
         class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
         <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">Asset name{{-- {{ $asset->name }} --}}</h1>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">{{ $asset->name }}</h1>
                 <p class="mt-1 text-sm uppercase tracking-wide text-gray-500 dark:text-zinc-400">
-                    {{-- {{ $asset->symbol }}@if ($asset->exchange?->symbol).{{ $asset->exchange->symbol }}@endif --}}
+                    {{ $asset->symbol }}@if ($asset->exchange?->symbol)
+                        .{{ $asset->exchange->symbol }}
+                    @endif
                 </p>
             </div>
 
             <div class="flex flex-wrap gap-2">
-                {{--             <span class="rounded-full border border-gray-300 px-2.5 py-1 text-xs font-semibold uppercase text-gray-600 dark:border-zinc-600 dark:text-zinc-300">
+                <span
+                    class="rounded-full border border-gray-300 px-2.5 py-1 text-xs font-semibold uppercase text-gray-600 dark:border-zinc-600 dark:text-zinc-300">
                     {{ $asset->asset_type }}
                 </span>
                 @if ($asset->exchange)
-                    <span class="rounded-full border border-gray-300 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:border-zinc-600 dark:text-zinc-300">
+                    <span
+                        class="rounded-full border border-gray-300 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:border-zinc-600 dark:text-zinc-300">
                         {{ $asset->exchange->name }}
                     </span>
-                @endif --}}
+                @endif
             </div>
         </div>
 
+        {{-- <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
+                <p class="text-xs text-gray-500 dark:text-zinc-400">Latest close price</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">
+                    @if ($latestPrice)
+                    {{ $latestPrice['close_price'] }}{{ $asset->exchange->currency }}
+                         @else
+                        -
+                    @endif
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
+                <p class="text-xs text-gray-500 dark:text-zinc-400">Asset currency</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">
+                    {{ $asset->exchange->currency }}
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
+                <p class="text-xs text-gray-500 dark:text-zinc-400"></p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">
+                    
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
+                <p class="text-xs text-gray-500 dark:text-zinc-400">Current Value ({{ $latestPrice['date'] ?? '-' }})
+                </p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">
+                    {{ $quantity * $latestPrice['close_price'] }}</p>
+            </div>
+        </div> --}}
         <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Latest close</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">
-                    {{--                     @if ($latestPrice)
-                        {{ number_format($latestPrice['value'], 6, '.', ' ') }}
-                    @else
-                        -
-                    @endif --}}
+                <p class="text-xs text-gray-500 dark:text-zinc-400">Holdings</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">{{ $quantity }}
+
                 </p>
             </div>
 
             <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Latest price date</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">
-                    {{-- {{ $latestPrice['date'] ?? '-' }} --}}
+                <p class="text-xs text-gray-500 dark:text-zinc-400">Average buy prize</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">{{ $average }}
+                    {{ $transactionCurrency }}{{-- dodac currency of wallet --}}
                 </p>
             </div>
 
             <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Price source</p>
+                <p class="text-xs text-gray-500 dark:text-zinc-400">Current Profit/Loss</p>
                 <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">
-                    {{-- {{ $latestPrice['source'] ?? '-' }} --}}
                 </p>
             </div>
 
             <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Price points</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">{{-- {{ $pricePoints }} --}}</p>
+                <p class="text-xs text-gray-500 dark:text-zinc-400">Relizaed Profit/Loss</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">-</p>
             </div>
         </div>
     </section>
+    {{-- CHARTS --}}
     <section
         class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">Charts</h1>
         </div>
+        <div id="tv-chart"></div>
+
+{{--         <script src="https://s3.tradingview.com/tv.js"></script>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                new TradingView.widget({
+                    container_id: "tv-chart",
+                    symbol: "{{ $asset->symbol }}",
+                    interval: "D",
+                    theme: "dark",
+                    style: "1",
+                    locale: "en",
+                    width: "100%",
+                    height: 400
+                });
+            });
+        </script> --}}
+
+
+        <div>
+            <canvas id="myChart"></canvas>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+            const ctx = document.getElementById('myChart');
+
+            const labels = @json($prices->pluck('date'));
+            const data = @json($prices->pluck('close_price'));
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        pointRadius: 0,
+                        label: 'Price',
+                        data: data,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
     </section>
+    {{-- TRANSACTIONS --}}
     <section
         class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-zinc-100">Your recent transactions</h2>
@@ -86,9 +172,9 @@
                                 </span>
                             </td>
                             <td class="px-2 py-2 text-right text-gray-700 dark:text-zinc-200">
-                                {{ number_format(abs($transaction->quantity), 8, '.', ' ') }}</td>
+                                {{ abs($transaction->quantity) }}</td>
                             <td class="px-2 py-2 text-right text-gray-700 dark:text-zinc-200">
-                                {{ number_format((float) $transaction->price_per_unit, 6, '.', ' ') }}
+                                {{ $transaction->price_per_unit }}
                                 <span
                                     class="text-xs text-gray-500 dark:text-zinc-400">{{ $transaction->currency }}</span>
                             </td>
