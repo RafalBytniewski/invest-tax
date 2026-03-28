@@ -73,7 +73,34 @@
             @endforeach
         </div>
     </nav>
-
+    {{-- COUNTRY, EXCHANGE FILTERS --}}
+    {{--     <div
+        class="flex justify-end max-w-7xl mx-auto sticky top-0 z-10 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur px-3 py-2">
+        <div class="mx-5">
+            <label for="eu"></label>
+            <input type="checkbox" name="" id="eu">EU
+        </div>
+        <div class="mx-5">
+            <label for="usa"></label>
+            <input type="checkbox" name="" id="usa">USA
+        </div>
+        <div class="mx-5">
+            <label for="pl"></label>
+            <input type="checkbox" name="" id="pl">PL
+        </div>
+        <div class="mx-5">
+            <label for="gpw"></label>
+            <input type="checkbox" name="" id="gpw">GPW
+        </div>
+        <div class="mx-5">
+            <label for="nyse"></label>
+            <input type="checkbox" name="" id="nyse">NYSE
+        </div>
+        <div class="mx-5">
+            <label for="nasdaq"></label>
+            <input type="checkbox" name="" id="nasdaq">NASDAQ
+        </div>
+    </div> --}}
     <!-- LIST -->
     <div class="space-y-10 max-w-7xl mx-auto px-4">
         @foreach ($groupedAssets as $letter => $items)

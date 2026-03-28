@@ -87,63 +87,48 @@
         </div>
     </section>
     {{-- CHARTS --}}
-    <section
-        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">Charts</h1>
+<section
+    class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
+
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">Charts</h1>
+    </div>
+
+    <div wire:ignore>
+        <div id="tv-container" class="tradingview-widget-container">
+            <div class="tradingview-widget-container__widget"></div>
         </div>
-        <div id="tv-chart"></div>
+    </div>
 
-{{--         <script src="https://s3.tradingview.com/tv.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
 
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                new TradingView.widget({
-                    container_id: "tv-chart",
-                    symbol: "{{ $asset->symbol }}",
-                    interval: "D",
-                    theme: "dark",
-                    style: "1",
-                    locale: "en",
-                    width: "100%",
-                    height: 400
-                });
-            });
-        </script> --}}
+            const symbol = "{{$assetSymbol}}"; // 👈 z Blade
 
+            const config = {
+                "symbols": [
+                    ["Asset", symbol + "|1D"]
+                ],
+                "chartType": "area",
+                "colorTheme": "dark",
+                "locale": "en",
+                "autosize": true,
+                "width": "100%",
+                "height": 400
+            };
 
-        <div>
-            <canvas id="myChart"></canvas>
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            const script = document.createElement("script");
+            script.src = "https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js";
+            script.async = true;
+            script.innerHTML = JSON.stringify(config);
 
-        <script>
-            const ctx = document.getElementById('myChart');
+            document
+                .querySelector("#tv-container")
+                .appendChild(script);
+        });
+    </script>
 
-            const labels = @json($prices->pluck('date'));
-            const data = @json($prices->pluck('close_price'));
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        pointRadius: 0,
-                        label: 'Price',
-                        data: data,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        </script>
-    </section>
+</section>
     {{-- TRANSACTIONS --}}
     <section
         class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">

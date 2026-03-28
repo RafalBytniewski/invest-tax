@@ -11,13 +11,21 @@ class Show extends Component
 {
     public Asset $asset;
 
-    public $quantity; 
-    public $average; 
-    public $latestPrice; 
+    public $quantity;
+    public $average;
+    public $latestPrice;
     public $transactionCurrency;
     public $transactionQuery;
-    public $prices;
+    public $assetSymbol;
 
+    public function GetTVAssetSymbol(Asset $asset)
+    {
+        if ($asset->asset_type === 'crypto') {
+            $this->assetSymbol = 'BINANCE:' . $asset->symbol . 'USD';
+        }else{
+            $this->assetSymbol = $asset->exchange->symbol . ':' . $asset->symbol;
+        }
+        }
     protected function query()
     {
         return Transaction::query()
@@ -27,11 +35,16 @@ class Show extends Component
             });
     }
 
-    public function countAverage(){
-        $totalValue = $this->query()->where('type','buy')->sum('total_value');
-        $quantity = $this->query()->where('type','buy')->sum('quantity');
-        return $totalValue / $quantity;
-    }
+    public function countAverage()
+    {
+        $totalValue = $this->query()->where('type', 'buy')->sum('total_value');
+        $quantity = $this->query()->where('type', 'buy')->sum('quantity');
+        if($quantity != 0){
+            return $totalValue / $quantity;
+        }else{
+            return;
+        }
+        }
 
     public function mount(Asset $asset)
     {
@@ -39,7 +52,7 @@ class Show extends Component
         $this->average = $this->countAverage();
         $this->transactionCurrency = $this->query()->value('currency');
         $this->latestPrice = $asset->assetPrices()->latest('date')->first();
-        $this->prices = $asset->assetPrices()->get();
+        $this->GetTVAssetSymbol($asset);
     }
     public function render()
     {
