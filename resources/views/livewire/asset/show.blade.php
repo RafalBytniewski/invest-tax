@@ -59,39 +59,69 @@
                     {{ $quantity * $latestPrice['close_price'] }}</p>
             </div>
         </div> --}}
-        <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Holdings</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">{{ $quantity }}
+   <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
 
-                </p>
-            </div>
+    {{-- Position Value --}}
+    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
+        <p class="text-xs text-gray-500 dark:text-zinc-400">Position Value</p>
 
-            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Average buy prize</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">{{ $average }}
-                    {{ $transactionCurrency }}{{-- dodac currency of wallet --}}
-                </p>
-            </div>
+        <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
+            {{$latestPrice ? $latestPrice->close_price : '-'}}
+        </p>
 
-            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Current Profit/Loss</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">
-                </p>
-            </div>
+        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
+            {{ $quantity }} {{$asset->symbol}}
+        </p>
+    </div>
 
-            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Relizaed Profit/Loss</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">-</p>
-            </div>
-        </div>
+    {{-- Unrealized P/L --}}
+    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
+        <p class="text-xs text-gray-500 dark:text-zinc-400">Unrealized P/L</p>
+            {{$latestPrice ? $latestPrice->close_price*$quantity : '-'}}
+        <p class="text-xl font-semibold text-green-500">
+            {{ $transactionCurrency }}
+        </p>
+
+        <p class="text-xs text-green-400 mt-1">
+            
+        </p>
+    </div>
+
+    {{-- Average Buy Price --}}
+    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
+        <p class="text-xs text-gray-500 dark:text-zinc-400">Average Buy Price</p>
+
+        <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
+            {{ $average ? $average : '23,500' }}
+            {{ $transactionCurrency }}
+        </p>
+
+        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
+            based on 8 buys
+        </p>
+    </div>
+
+    {{-- Realized P/L --}}
+    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
+        <p class="text-xs text-gray-500 dark:text-zinc-400">Realized P/L</p>
+
+        <p class="text-xl font-semibold text-green-500">
+            {{ $realizedPL }}
+        </p>
+
+        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
+            from 5 sells
+        </p>
+    </div>
+
+</div>
     </section>
     {{-- CHARTS --}}
 <section
     class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
 
     <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">Charts</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">Chart</h1>
     </div>
 
     <div wire:ignore>

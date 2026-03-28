@@ -15,10 +15,12 @@ class Show extends Component
     public $average;
     public $latestPrice;
     public $transactionCurrency;
-    public $transactionQuery;
     public $assetSymbol;
 
-    public function GetTVAssetSymbol(Asset $asset)
+    public $realizedPL;
+    public $totalValue;
+    
+    protected function GetTVAssetSymbol(Asset $asset)
     {
         if ($asset->asset_type === 'crypto') {
             $this->assetSymbol = 'BINANCE:' . $asset->symbol . 'USD';
@@ -42,17 +44,30 @@ class Show extends Component
         if($quantity != 0){
             return $totalValue / $quantity;
         }else{
-            return;
+            return '-';
         }
+    }
+
+    public function countRealizedPL(){
+        $totalValue = $this->query()->where('type', 'sell')->sum('total_value');
+        $quantity = $this->query()->where('type', 'sell')->sum('quantity');
+        if($quantity != 0){
+        $averageSell = $totalValue/$quantity;
+            return (abs($averageSell)-$this->countAverage())*abs($quantity);
+         }else{
+            return '-';
         }
+    }
 
     public function mount(Asset $asset)
     {
         $this->quantity = $this->query()->sum('quantity');
         $this->average = $this->countAverage();
-        $this->transactionCurrency = $this->query()->value('currency');
+        $this->transactionCurrency = $this->query()->value('currency'); // check wallet->currency
         $this->latestPrice = $asset->assetPrices()->latest('date')->first();
         $this->GetTVAssetSymbol($asset);
+        
+        $this->realizedPL = $this->countRealizedPL();
     }
     public function render()
     {
