@@ -6,64 +6,75 @@ use Illuminate\Support\Facades\Http;
 
 class StockPriceService
 {
-    protected $apiKeyAlpha;
-    protected $urlAlpha;
+    protected string $apiKeyAlpha;
 
-    protected $apiKeyTwelve;
-    protected $urlTwelve;
+    protected string $urlAlpha;
 
-    protected $apiKeyEodhd;
-    protected $urlEodhd;
+    protected string $apiKeyEodhd;
+
+    protected string $urlEodhd;
 
     public function __construct()
     {
-        $this->apiKeyAlpha = config('services.alphavantage.key');
-        $this->urlAlpha = 'https://www.alphavantage.co/query/?symbol="NVDA"/?date="2025-12-11"/?apikey="3266195fd4914158966d9be199e4294e"';
-        $this->apiKeyEodhd = config('services.eodhd.key');
+        $this->apiKeyAlpha = (string) config('services.alphavantage.key');
+        $this->urlAlpha = 'https://www.alphavantage.co/query';
+        $this->apiKeyEodhd = (string) config('services.eodhd.key');
         $this->urlEodhd = 'https://eodhd.com/api/eod/';
     }
 
-    public function getTodayOpenPrice(string $symbol, string $exchange): ?float
+    public function getTodayOpenPrice(string $symbol, ?string $exchange): ?float
     {
-        if ($exchange == 'GPW') {
-            $ticker = $symbol . '.WAR';
-            $response = Http::get(
-            $this->urlEodhd . $ticker,[
-                
-                'filter' => 'last_close',
-                'api_token' => $this->apiKeyEodhd,
-                'fmt' =>'json'
-            ]);
-            $price = $response->json();
-        } else {
+        return $exchange === 'GPW'
+            ? $this->getGpwClosePrice($symbol)
+            : $this->getLatestOpenPriceFromAlphaVantage($symbol);
+    }
 
-
-            $response = Http::get($this->urlAlpha, [
-                'function' => 'TIME_SERIES_DAILY',
-                'symbol' => $symbol,
-                'apikey' => $this->apiKeyAlpha,
-            ]);
-
-            if (!$response->ok()) {
-                return null;
-            }
-
-            $data = $response->json();
-
-            if (!isset($data['Time Series (Daily)'])) {
-                return null;
-            }
-
-            $today = date('Y-m-d');
-
-            // Jeśli dzisiejsze dane nie są jeszcze dostępne (np. przed otwarciem giełdy), weź ostatni dzień
-            if (!isset($data['Time Series (Daily)'][$today])) {
-                $dates = array_keys($data['Time Series (Daily)']);
-                $today = $dates[0];
-            }
-
-            $price = floatval($data['Time Series (Daily)'][$today]['1. open']);
+    protected function getGpwClosePrice(string $symbol): ?float
+    {
+        if ($this->apiKeyEodhd === '') {
+            return null;
         }
-        return $price;
+
+        $response = Http::get($this->urlEodhd.$symbol.'.WAR', [
+            'filter' => 'last_close',
+            'api_token' => $this->apiKeyEodhd,
+            'fmt' => 'json',
+        ]);
+
+        if (! $response->ok()) {
+            return null;
+        }
+
+        $price = $response->json();
+
+        return is_numeric($price) ? (float) $price : null;
+    }
+
+    protected function getLatestOpenPriceFromAlphaVantage(string $symbol): ?float
+    {
+        if ($this->apiKeyAlpha === '') {
+            return null;
+        }
+
+        $response = Http::get($this->urlAlpha, [
+            'function' => 'TIME_SERIES_DAILY',
+            'symbol' => $symbol,
+            'apikey' => $this->apiKeyAlpha,
+        ]);
+
+        if (! $response->ok()) {
+            return null;
+        }
+
+        $series = data_get($response->json(), 'Time Series (Daily)');
+
+        if (! is_array($series) || $series === []) {
+            return null;
+        }
+
+        $latestDate = array_key_first($series);
+        $price = data_get($series, $latestDate.'.1. open');
+
+        return is_numeric($price) ? (float) $price : null;
     }
 }

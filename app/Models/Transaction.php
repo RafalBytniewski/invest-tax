@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,7 +27,7 @@ class Transaction extends Model
         'date',
         'notes',
         'wallet_id',
-        'asset_id'
+        'asset_id',
     ];
 
     protected $casts = [
@@ -48,21 +49,21 @@ class Transaction extends Model
         return $this->hasMany(Fee::class);
     }
 
-    public function scopeSearch($query, $value)
+    public function scopeSearch(Builder $query, ?string $value): Builder
     {
-        $query->where(function ($q) use ($value) {
-            // Szukaj po nazwie assetu
-            $q->whereHas('asset', function ($q2) use ($value) {
-                $q2->where('name', 'like', "%{$value}%");
-            })
-                // Szukaj po nazwie walletu
-                ->orWhereHas('wallet', function ($q2) use ($value) {
-                    $q2->where('name', 'like', "%{$value}%")
-                        // Szukaj także po nazwie brokera przez wallet
-                        ->orWhereHas('broker', function ($q3) use ($value) {
-                            $q3->where('name', 'like', "%{$value}%");
-                        });
-                });
+        if (blank($value)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $query) use ($value) {
+            $query->whereHas('asset', function (Builder $assetQuery) use ($value) {
+                $assetQuery->where('name', 'like', "%{$value}%");
+            })->orWhereHas('wallet', function (Builder $walletQuery) use ($value) {
+                $walletQuery->where('name', 'like', "%{$value}%")
+                    ->orWhereHas('broker', function (Builder $brokerQuery) use ($value) {
+                        $brokerQuery->where('name', 'like', "%{$value}%");
+                    });
+            });
         });
     }
 }

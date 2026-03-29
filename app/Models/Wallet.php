@@ -21,7 +21,7 @@ class Wallet extends Model
         'description',
         'user_id',
         'currency',
-        'broker_id'
+        'broker_id',
     ];
 
     public function transactions(): HasMany
@@ -51,14 +51,14 @@ class Wallet extends Model
             ->values();
     }
 
-
-    public function averageBuyPrice($assetId)
+    public function averageBuyPrice(int $assetId): float
     {
         $buy = $this->transactions()
             ->where('asset_id', $assetId)
             ->where('type', 'buy');
 
         $quantity = $buy->sum('quantity');
+
         if ($quantity == 0) {
             return 0;
         }
@@ -66,21 +66,17 @@ class Wallet extends Model
         return $buy->sum('total_value') / $quantity;
     }
 
-
-    public function realizedPL()
+    public function realizedPL(): float
     {
         $realized = 0;
 
-        foreach ($this->transactions->where('type', 'sell') as $t) {
-            $avg = $this->averageBuyPrice($t->asset_id);
-
-            // bierzemy ABS, żeby ignorować minus w bazie
-            $sellQuantity = abs($t->quantity);
-            $sellTotal = abs($t->total_value);
-
+        foreach ($this->transactions->where('type', 'sell') as $transaction) {
+            $averageBuyPrice = $this->averageBuyPrice($transaction->asset_id);
+            $sellQuantity = abs($transaction->quantity);
+            $sellTotal = abs($transaction->total_value);
             $sellPrice = $sellTotal / $sellQuantity;
 
-            $realized += ($sellPrice - $avg) * $sellQuantity;
+            $realized += ($sellPrice - $averageBuyPrice) * $sellQuantity;
         }
 
         return $realized;

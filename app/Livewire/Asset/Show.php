@@ -4,6 +4,8 @@ namespace App\Livewire\Asset;
 
 use App\Models\Asset;
 use App\Models\Transaction;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -11,65 +13,74 @@ class Show extends Component
 {
     public Asset $asset;
 
-    public $quantity;
-    public $average;
-    public $latestPrice;
-    public $transactionCurrency;
-    public $assetSymbol;
+    public float|int $quantity = 0;
 
-    public $realizedPL;
-    public $totalValue;
-    
-    protected function GetTVAssetSymbol(Asset $asset)
+    public float|string $average = '-';
+
+    public $latestPrice = null;
+
+    public ?string $transactionCurrency = null;
+
+    public string $assetSymbol = '';
+
+    public float|string $realizedPL = '-';
+
+    protected function tradingViewSymbol(Asset $asset): string
     {
         if ($asset->asset_type === 'crypto') {
-            $this->assetSymbol = 'BINANCE:' . $asset->symbol . 'USD';
-        }else{
-            $this->assetSymbol = $asset->exchange->symbol . ':' . $asset->symbol;
+            return 'BINANCE:'.$asset->symbol.'USD';
         }
-        }
-    protected function query()
+
+        return ($asset->exchange?->symbol ?? '').':'.$asset->symbol;
+    }
+
+    protected function query(): Builder
     {
         return Transaction::query()
             ->where('asset_id', $this->asset->id)
-            ->whereHas('wallet', function ($query) {
+            ->whereHas('wallet', function (Builder $query) {
                 $query->where('user_id', Auth::id());
             });
     }
 
-    public function countAverage()
+    public function countAverage(): float|string
     {
         $totalValue = $this->query()->where('type', 'buy')->sum('total_value');
         $quantity = $this->query()->where('type', 'buy')->sum('quantity');
-        if($quantity != 0){
-            return $totalValue / $quantity;
-        }else{
+
+        if ($quantity == 0) {
             return '-';
         }
+
+        return $totalValue / $quantity;
     }
 
-    public function countRealizedPL(){
+    public function countRealizedPL(): float|string
+    {
         $totalValue = $this->query()->where('type', 'sell')->sum('total_value');
         $quantity = $this->query()->where('type', 'sell')->sum('quantity');
-        if($quantity != 0){
-        $averageSell = $totalValue/$quantity;
-            return (abs($averageSell)-$this->countAverage())*abs($quantity);
-         }else{
+
+        if ($quantity == 0 || ! is_numeric($this->average)) {
             return '-';
         }
+
+        $averageSell = $totalValue / $quantity;
+
+        return (abs($averageSell) - $this->average) * abs($quantity);
     }
 
-    public function mount(Asset $asset)
+    public function mount(Asset $asset): void
     {
+        $this->asset = $asset;
         $this->quantity = $this->query()->sum('quantity');
         $this->average = $this->countAverage();
-        $this->transactionCurrency = $this->query()->value('currency'); // check wallet->currency
+        $this->transactionCurrency = $this->query()->value('currency');
         $this->latestPrice = $asset->assetPrices()->latest('date')->first();
-        $this->GetTVAssetSymbol($asset);
-        
+        $this->assetSymbol = $this->tradingViewSymbol($asset);
         $this->realizedPL = $this->countRealizedPL();
     }
-    public function render()
+
+    public function render(): View
     {
         $transactions = $this->query()
             ->latest('date')

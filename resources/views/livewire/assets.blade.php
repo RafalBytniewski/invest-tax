@@ -1,144 +1,111 @@
-<div class="space-y-6">
-
+<x-page-shell>
     @php
-        $groupedAssets = $assets->groupBy(fn($asset) => strtoupper(mb_substr($asset->name, 0, 1)));
+        $groupedAssets = $assets->groupBy(fn ($asset) => strtoupper(mb_substr($asset->name, 0, 1)));
+        $counts = [
+            'stock' => $assets->where('asset_type', 'stock')->count(),
+            'etf' => $assets->where('asset_type', 'etf')->count(),
+            'crypto' => $assets->where('asset_type', 'crypto')->count(),
+            'all' => $assets->count(),
+        ];
 
-        $crypto = $assets->where('asset_type', 'crypto')->count();
-        $stock = $assets->where('asset_type', 'stock')->count();
-        $etf = $assets->where('asset_type', 'etf')->count();
+        $filters = [
+            ['key' => 'stock', 'label' => 'Stock'],
+            ['key' => 'etf', 'label' => 'ETF'],
+            ['key' => 'crypto', 'label' => 'Crypto'],
+            ['key' => null, 'label' => 'All'],
+        ];
     @endphp
 
-    @php
-        $baseClasses = 'h-12 px-4 rounded-xl font-semibold
-        flex items-center justify-between transition';
-
-        $inactiveClasses = 'border border-gray-300 
-        dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800
-        text-gray-900 dark:text-zinc-100
-        hover:bg-gray-300 dark:hover:bg-zinc-700';
-
-        $activeClasses = 'bg-blue-600 text-white 
-        border-blue-600 dark:bg-blue-500 dark:border-blue-500
-        hover:bg-blue-300 dark:hover:bg-blue-700';
-    @endphp
-
-
-
-    <!-- FILTER PANEL -->
-    <div class="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl px-4 py-4 space-y-5 max-w-7xl mx-auto">
-
-        <!-- MAIN FILTER GRID -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-
-            <!-- STOCK -->
-            <button wire:click="$set('type', 'stock')"
-                class="{{ $baseClasses }} {{ $type === 'stock' ? $activeClasses : $inactiveClasses }}">
-                <span>Stock</span>
-                <span class="text-xs text-gray-500 dark:text-zinc-400">{{ $type === 'stock' ? $stock : '' }}</span>
-            </button>
-
-            <!-- ETF -->
-            <button wire:click="$set('type', 'etf')"
-                class="{{ $baseClasses }} {{ $type === 'etf' ? $activeClasses : $inactiveClasses }}">
-                <span>ETF</span>
-                <span class="text-xs text-gray-500 dark:text-zinc-400">{{ $type === 'etf' ? $etf : '' }}</span>
-            </button>
-
-            <!-- CRYPTO -->
-            <button wire:click="$set('type', 'crypto')"
-                class="{{ $baseClasses }} {{ $type === 'crypto' ? $activeClasses : $inactiveClasses }}">
-                <span>Crypto</span>
+    <x-page-section class="overflow-hidden">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
                 <span
-                    class="text-xs text-purple-600 dark:text-purple-400">{{ $type === 'crypto' ? $crypto : '' }}</span>
-            </button>
+                    class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
+                    Asset Directory
+                </span>
+                <h1 class="mt-4 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                    Browse all tracked assets
+                </h1>
+                <p class="mt-2 max-w-3xl text-sm text-gray-500 dark:text-zinc-400">
+                    One consistent list with type filters, alphabet navigation and direct access to each asset page.
+                </p>
+            </div>
 
-            <!-- ALL -->
-            <button wire:click="$set('type', null)"
-                class="{{ $baseClasses }} col-span-2 sm:col-span-3 {{ $type === null ? $activeClasses : $inactiveClasses }}">
-                <span>All</span>
-                <span class="text-xs text-white/70">{{ $type === null ? $assets->count() : '' }}</span>
-            </button>
+            <div class="grid w-full gap-3 sm:grid-cols-2 xl:w-[560px] xl:grid-cols-4">
+                @foreach ($filters as $filter)
+                    @php
+                        $isActive = $type === $filter['key'];
+                        $countKey = $filter['key'] ?? 'all';
+                    @endphp
+                    <button
+                        wire:click="$set('type', @js($filter['key']))"
+                        class="{{ $isActive ? 'border-blue-600 bg-blue-600 text-white dark:border-blue-500 dark:bg-blue-500' : 'border-gray-200 bg-gray-50 text-gray-900 hover:bg-gray-100 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-100 dark:hover:bg-zinc-800' }} flex h-14 items-center justify-between rounded-2xl border px-4 text-left text-sm font-semibold transition">
+                        <span>{{ $filter['label'] }}</span>
+                        <span class="text-xs {{ $isActive ? 'text-white/80' : 'text-gray-500 dark:text-zinc-400' }}">
+                            {{ $counts[$countKey] }}
+                        </span>
+                    </button>
+                @endforeach
+            </div>
         </div>
+    </x-page-section>
+
+    <div class="sticky top-0 z-10">
+        <x-page-section padding="p-3">
+            <div class="flex flex-wrap gap-1.5">
+                @foreach ($groupedAssets as $letter => $items)
+                    <a href="#letter-{{ $letter }}"
+                        class="rounded-xl px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">
+                        {{ $letter }}
+                    </a>
+                @endforeach
+            </div>
+        </x-page-section>
     </div>
 
-    <!-- LETTER NAV -->
-    <nav
-        class="max-w-7xl mx-auto sticky top-0 z-10 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur px-3 py-2">
-        <div class="flex flex-wrap gap-1.5">
-            @foreach ($groupedAssets as $letter => $items)
-                <a href="#letter-{{ $letter }}"
-                    class="rounded-md px-2 py-1 text-s font-semibold text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white">
-                    {{ $letter }}
-                </a>
-            @endforeach
-        </div>
-    </nav>
-    {{-- COUNTRY, EXCHANGE FILTERS --}}
-    {{--     <div
-        class="flex justify-end max-w-7xl mx-auto sticky top-0 z-10 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur px-3 py-2">
-        <div class="mx-5">
-            <label for="eu"></label>
-            <input type="checkbox" name="" id="eu">EU
-        </div>
-        <div class="mx-5">
-            <label for="usa"></label>
-            <input type="checkbox" name="" id="usa">USA
-        </div>
-        <div class="mx-5">
-            <label for="pl"></label>
-            <input type="checkbox" name="" id="pl">PL
-        </div>
-        <div class="mx-5">
-            <label for="gpw"></label>
-            <input type="checkbox" name="" id="gpw">GPW
-        </div>
-        <div class="mx-5">
-            <label for="nyse"></label>
-            <input type="checkbox" name="" id="nyse">NYSE
-        </div>
-        <div class="mx-5">
-            <label for="nasdaq"></label>
-            <input type="checkbox" name="" id="nasdaq">NASDAQ
-        </div>
-    </div> --}}
-    <!-- LIST -->
-    <div class="space-y-10 max-w-7xl mx-auto px-4">
+    <div class="space-y-6">
         @foreach ($groupedAssets as $letter => $items)
-            <div id="letter-{{ $letter }}" class="scroll-mt-20">
+            <x-page-section id="letter-{{ $letter }}" class="scroll-mt-24">
+                <div class="mb-5 flex items-center justify-between gap-3 border-b border-gray-100 pb-4 dark:border-zinc-800">
+                    <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $letter }}</h2>
+                    <span class="text-sm text-gray-500 dark:text-zinc-400">{{ $items->count() }} items</span>
+                </div>
 
-                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-3">
-                    {{ $letter }}
-                </h2>
-
-                <ul class="divide-y divide-gray-100 dark:divide-zinc-700">
+                <ul class="divide-y divide-gray-100 dark:divide-zinc-800">
                     @foreach ($items as $asset)
                         <li>
                             <a href="{{ route('assets.show', $asset->id) }}"
-                                class="block py-2 flex justify-between items-center hover:bg-white/95 hover:dark:bg-zinc-900/95">
-
-                                <div>
-                                    <span class="font-semibold uppercase text-gray-400 dark:text-zinc-400">
-                                        @if ($asset->asset_type == 'crypto')
+                                class="flex flex-col gap-3 rounded-xl px-2 py-4 transition hover:bg-gray-50 sm:flex-row sm:items-center sm:justify-between dark:hover:bg-zinc-950/50">
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-zinc-500">
+                                        @if ($asset->asset_type === 'crypto')
                                             {{ $asset->symbol }}
-                                        @elseif($asset->exchange_id)
+                                        @elseif ($asset->exchange_id)
                                             {{ $asset->symbol }}.{{ $asset->exchange->symbol }}
+                                        @else
+                                            {{ $asset->symbol }}
                                         @endif
-                                    </span>
-                                    {{ $asset->name }}
+                                    </div>
+                                    <div class="mt-1 text-base font-medium text-gray-900 dark:text-white">{{ $asset->name }}</div>
                                 </div>
 
-                                <div>
-                                    <span class="text-xs font-semibold uppercase text-gray-400 dark:text-zinc-400">
+                                <div class="flex items-center gap-3">
+                                    @if ($asset->exchange)
+                                        <span
+                                            class="rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
+                                            {{ $asset->exchange->symbol }}
+                                        </span>
+                                    @endif
+                                    <span
+                                        class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase text-gray-700 dark:bg-zinc-800 dark:text-zinc-300">
                                         {{ $asset->asset_type }}
                                     </span>
                                 </div>
-
                             </a>
                         </li>
                     @endforeach
                 </ul>
-            </div>
+            </x-page-section>
         @endforeach
     </div>
-
-</div>
+</x-page-shell>

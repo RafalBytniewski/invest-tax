@@ -12,21 +12,33 @@ use Livewire\Component;
 class TransactionFormModal extends Component
 {
     public ?int $editingTransactionId = null;
+
     public bool $showModal = false;
+
     public string $mode = '';
 
     public $wallet = null;
+
     public $asset = null;
+
     public $type = null;
+
     public $currency = null;
+
     public $quantity = null;
+
     public $price_per_unit = null;
+
     public $total_value = 0;
+
     public $date = null;
+
     public $notes = null;
 
     public array $wallets = [];
+
     public array $assets = [];
+
     public array $types = [
         'buy' => 'Buy',
         'sell' => 'Sell',
@@ -57,6 +69,7 @@ class TransactionFormModal extends Component
     {
         if ($transactionId === null) {
             $this->openCreateModal();
+
             return;
         }
 

@@ -3,25 +3,19 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\WalletResource\Pages;
-use App\Filament\Resources\WalletResource\RelationManagers;
 use App\Models\Wallet;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\ActionGroup as ActionsActionGroup;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Auth;
 
 class WalletResource extends Resource
 {
@@ -61,7 +55,7 @@ class WalletResource extends Resource
                 TextColumn::make('user.name'),
                 TextColumn::make('broker.name'),
                 TextColumn::make('currency'),
-                TextColumn::make('description')
+                TextColumn::make('description'),
             ])
             ->filters([
                 //
@@ -70,8 +64,8 @@ class WalletResource extends Resource
                 ActionGroup::make([
                     ViewAction::make(),
                     EditAction::make(),
-                    DeleteAction::make()
-                ])
+                    DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -95,6 +89,4 @@ class WalletResource extends Resource
             'edit' => Pages\EditWallet::route('/{record}/edit'),
         ];
     }
-
-
 }

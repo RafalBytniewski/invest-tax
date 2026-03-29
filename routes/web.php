@@ -1,14 +1,13 @@
 <?php
 
+use App\Livewire\Asset\Show;
 use App\Livewire\Assets;
+use App\Livewire\MyTransactions;
+use App\Livewire\MyWallets;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use Illuminate\Support\Facades\Route;
-use App\Livewire\MyTransactions;
-use App\Livewire\MyWallets;
-use App\Livewire\Asset\Show;
-
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,6 +28,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/my-walletss', MyWallets::class)->name('my-wallets');
 
 });
-
 
 require __DIR__.'/auth.php';

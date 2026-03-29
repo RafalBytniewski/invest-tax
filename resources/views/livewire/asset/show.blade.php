@@ -1,207 +1,206 @@
-<div class="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
-    {{-- ASSET DETAIL --}}
-    <section
-        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
-        <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
+<x-page-shell>
+    @php
+        $latestClose = $latestPrice?->close_price;
+        $positionValue = is_numeric($latestClose) ? $latestClose * $quantity : null;
+        $averageValue = is_numeric($average) ? $average : null;
+        $unrealizedPl = $positionValue !== null && $averageValue !== null ? $positionValue - ($averageValue * $quantity) : null;
+        $priceDate = $latestPrice?->date?->format('Y-m-d') ?? ($latestPrice?->date ?? '-');
+    @endphp
+
+    <x-page-section>
+        <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span
+                            class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
+                            Asset Detail
+                        </span>
+                        <span
+                            class="rounded-full border border-gray-200 px-3 py-1 text-xs font-medium uppercase text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
+                            {{ $asset->asset_type }}
+                        </span>
+                        @if ($asset->exchange)
+                            <span
+                                class="rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
+                                {{ $asset->exchange->name }}
+                            </span>
+                        @endif
+                    </div>
+
+                    <div>
+                        <h1 class="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                            {{ $asset->name }}
+                        </h1>
+                        <p class="mt-2 text-sm uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
+                            {{ $asset->symbol }}@if ($asset->exchange?->symbol)
+                                .{{ $asset->exchange->symbol }}
+                            @endif
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+                    <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/50">
+                        <p class="text-xs font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-zinc-400">Latest Close</p>
+                        <p class="mt-3 text-2xl font-semibold text-gray-900 dark:text-white">
+                            {{ $latestClose !== null ? number_format($latestClose, 2, ',', ' ') : '-' }}
+                        </p>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-zinc-400">
+                            {{ $transactionCurrency ?? $asset->exchange?->currency ?? '-' }} · {{ $priceDate }}
+                        </p>
+                    </div>
+
+                    <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/50">
+                        <p class="text-xs font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-zinc-400">Position Size</p>
+                        <p class="mt-3 text-2xl font-semibold text-gray-900 dark:text-white">
+                            {{ number_format($quantity, 4, ',', ' ') }}
+                        </p>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-zinc-400">
+                            {{ $asset->symbol }}
+                        </p>
+                    </div>
+
+                    <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/50">
+                        <p class="text-xs font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-zinc-400">Average Buy Price</p>
+                        <p class="mt-3 text-2xl font-semibold text-gray-900 dark:text-white">
+                            {{ $averageValue !== null ? number_format($averageValue, 2, ',', ' ') : '-' }}
+                        </p>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-zinc-400">
+                            {{ $transactionCurrency ?? $asset->exchange?->currency ?? '-' }}
+                        </p>
+                    </div>
+
+                    <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/50">
+                        <p class="text-xs font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-zinc-400">Position Value</p>
+                        <p class="mt-3 text-2xl font-semibold text-gray-900 dark:text-white">
+                            {{ $positionValue !== null ? number_format($positionValue, 2, ',', ' ') : '-' }}
+                        </p>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-zinc-400">
+                            {{ $transactionCurrency ?? $asset->exchange?->currency ?? '-' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/30">
+                    <p class="text-xs font-medium uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">Unrealized P/L</p>
+                    <p class="mt-3 text-2xl font-semibold text-emerald-700 dark:text-emerald-300">
+                        {{ $unrealizedPl !== null ? number_format($unrealizedPl, 2, ',', ' ') : '-' }}
+                    </p>
+                    <p class="mt-2 text-sm text-emerald-700/80 dark:text-emerald-300/80">
+                        {{ $transactionCurrency ?? $asset->exchange?->currency ?? '-' }}
+                    </p>
+                </div>
+
+                <div class="rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/60 dark:bg-blue-950/30">
+                    <p class="text-xs font-medium uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">Realized P/L</p>
+                    <p class="mt-3 text-2xl font-semibold text-blue-700 dark:text-blue-300">
+                        {{ is_numeric($realizedPL) ? number_format($realizedPL, 2, ',', ' ') : '-' }}
+                    </p>
+                    <p class="mt-2 text-sm text-blue-700/80 dark:text-blue-300/80">
+                        {{ $transactionCurrency ?? $asset->exchange?->currency ?? '-' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </x-page-section>
+
+    <x-page-section>
+        <div class="mb-5 flex items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">{{ $asset->name }}</h1>
-                <p class="mt-1 text-sm uppercase tracking-wide text-gray-500 dark:text-zinc-400">
-                    {{ $asset->symbol }}@if ($asset->exchange?->symbol)
-                        .{{ $asset->exchange->symbol }}
-                    @endif
-                </p>
-            </div>
-
-            <div class="flex flex-wrap gap-2">
-                <span
-                    class="rounded-full border border-gray-300 px-2.5 py-1 text-xs font-semibold uppercase text-gray-600 dark:border-zinc-600 dark:text-zinc-300">
-                    {{ $asset->asset_type }}
-                </span>
-                @if ($asset->exchange)
-                    <span
-                        class="rounded-full border border-gray-300 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:border-zinc-600 dark:text-zinc-300">
-                        {{ $asset->exchange->name }}
-                    </span>
-                @endif
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Price Chart</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">TradingView overview for {{ $asset->symbol }}</p>
             </div>
         </div>
 
-        {{-- <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Latest close price</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">
-                    @if ($latestPrice)
-                    {{ $latestPrice['close_price'] }}{{ $asset->exchange->currency }}
-                         @else
-                        -
-                    @endif
-                </p>
+        <div wire:ignore class="overflow-hidden rounded-2xl border border-gray-200 bg-zinc-950 dark:border-zinc-800">
+            <div id="tv-container" class="tradingview-widget-container min-h-[420px]">
+                <div class="tradingview-widget-container__widget"></div>
             </div>
-
-            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Asset currency</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">
-                    {{ $asset->exchange->currency }}
-                </p>
-            </div>
-
-            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400"></p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">
-                    
-                </p>
-            </div>
-
-            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Current Value ({{ $latestPrice['date'] ?? '-' }})
-                </p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-zinc-100">
-                    {{ $quantity * $latestPrice['close_price'] }}</p>
-            </div>
-        </div> --}}
-   <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-
-    {{-- Position Value --}}
-    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
-        <p class="text-xs text-gray-500 dark:text-zinc-400">Position Value</p>
-
-        <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
-            {{$latestPrice ? $latestPrice->close_price : '-'}}
-        </p>
-
-        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
-            {{ $quantity }} {{$asset->symbol}}
-        </p>
-    </div>
-
-    {{-- Unrealized P/L --}}
-    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
-        <p class="text-xs text-gray-500 dark:text-zinc-400">Unrealized P/L</p>
-            {{$latestPrice ? $latestPrice->close_price*$quantity : '-'}}
-        <p class="text-xl font-semibold text-green-500">
-            {{ $transactionCurrency }}
-        </p>
-
-        <p class="text-xs text-green-400 mt-1">
-            
-        </p>
-    </div>
-
-    {{-- Average Buy Price --}}
-    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
-        <p class="text-xs text-gray-500 dark:text-zinc-400">Average Buy Price</p>
-
-        <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
-            {{ $average ? $average : '23,500' }}
-            {{ $transactionCurrency }}
-        </p>
-
-        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
-            based on 8 buys
-        </p>
-    </div>
-
-    {{-- Realized P/L --}}
-    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
-        <p class="text-xs text-gray-500 dark:text-zinc-400">Realized P/L</p>
-
-        <p class="text-xl font-semibold text-green-500">
-            {{ $realizedPL }}
-        </p>
-
-        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
-            from 5 sells
-        </p>
-    </div>
-
-</div>
-    </section>
-    {{-- CHARTS --}}
-<section
-    class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
-
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">Chart</h1>
-    </div>
-
-    <div wire:ignore>
-        <div id="tv-container" class="tradingview-widget-container">
-            <div class="tradingview-widget-container__widget"></div>
         </div>
-    </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const symbol = @js($assetSymbol);
+                const container = document.querySelector('#tv-container');
 
-            const symbol = "{{$assetSymbol}}"; // 👈 z Blade
+                if (!container || container.dataset.loaded === 'true') {
+                    return;
+                }
 
-            const config = {
-                "symbols": [
-                    ["Asset", symbol + "|1D"]
-                ],
-                "chartType": "area",
-                "colorTheme": "dark",
-                "locale": "en",
-                "autosize": true,
-                "width": "100%",
-                "height": 400
-            };
+                container.dataset.loaded = 'true';
 
-            const script = document.createElement("script");
-            script.src = "https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js";
-            script.async = true;
-            script.innerHTML = JSON.stringify(config);
+                const config = {
+                    symbols: [
+                        ['Asset', symbol + '|1D']
+                    ],
+                    chartType: 'area',
+                    colorTheme: 'dark',
+                    locale: 'en',
+                    autosize: true,
+                    width: '100%',
+                    height: 420,
+                };
 
-            document
-                .querySelector("#tv-container")
-                .appendChild(script);
-        });
-    </script>
+                const script = document.createElement('script');
+                script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js';
+                script.async = true;
+                script.innerHTML = JSON.stringify(config);
 
-</section>
-    {{-- TRANSACTIONS --}}
-    <section
-        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-zinc-100">Your recent transactions</h2>
-        <div class="mt-3 overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead
-                    class="border-b border-gray-200 text-left text-xs uppercase text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
-                    <tr>
-                        <th class="px-2 py-2">Date</th>
-                        <th class="px-2 py-2">Type</th>
-                        <th class="px-2 py-2 text-right">Quantity</th>
-                        <th class="px-2 py-2 text-right">Price</th>
-                        <th class="px-2 py-2">Wallet</th>
+                container.appendChild(script);
+            });
+        </script>
+    </x-page-section>
+
+    <x-page-section>
+        <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Recent Transactions</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">Last 10 operations for this asset across your wallets.</p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-zinc-800">
+                <thead>
+                    <tr class="text-left text-xs font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-zinc-400">
+                        <th class="px-4 py-3">Date</th>
+                        <th class="px-4 py-3">Type</th>
+                        <th class="px-4 py-3 text-right">Quantity</th>
+                        <th class="px-4 py-3 text-right">Price</th>
+                        <th class="px-4 py-3 text-right">Total</th>
+                        <th class="px-4 py-3">Wallet</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100 dark:divide-zinc-900">
                     @forelse ($transactions as $transaction)
-                        <tr class="border-b border-gray-100 dark:border-zinc-800">
-                            <td class="px-2 py-2 text-gray-700 dark:text-zinc-200">
-                                {{ $transaction->date->format('Y-m-d') }}</td>
-                            <td class="px-2 py-2">
+                        <tr class="text-gray-700 dark:text-zinc-200">
+                            <td class="px-4 py-4">{{ $transaction->date->format('Y-m-d') }}</td>
+                            <td class="px-4 py-4">
                                 <span
-                                    class="rounded px-2 py-0.5 text-xs font-semibold {{ $transaction->type === 'sell' ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' }}">
+                                    class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $transaction->type === 'sell' ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' }}">
                                     {{ strtoupper($transaction->type) }}
                                 </span>
                             </td>
-                            <td class="px-2 py-2 text-right text-gray-700 dark:text-zinc-200">
-                                {{ abs($transaction->quantity) }}</td>
-                            <td class="px-2 py-2 text-right text-gray-700 dark:text-zinc-200">
-                                {{ $transaction->price_per_unit }}
-                                <span
-                                    class="text-xs text-gray-500 dark:text-zinc-400">{{ $transaction->currency }}</span>
+                            <td class="px-4 py-4 text-right">{{ number_format(abs($transaction->quantity), 4, ',', ' ') }}</td>
+                            <td class="px-4 py-4 text-right">
+                                {{ number_format($transaction->price_per_unit, 2, ',', ' ') }}
+                                <span class="text-xs text-gray-500 dark:text-zinc-400">{{ $transaction->currency }}</span>
                             </td>
-                            <td class="px-2 py-2 text-gray-700 dark:text-zinc-200">
-                                {{ $transaction->wallet?->name ?? '-' }}
-                                <span
-                                    class="text-xs text-gray-500 dark:text-zinc-400">{{ $transaction->wallet?->broker?->name ? '(' . $transaction->wallet->broker->name . ')' : '' }}</span>
+                            <td class="px-4 py-4 text-right">
+                                {{ number_format(abs($transaction->total_value), 2, ',', ' ') }}
+                                <span class="text-xs text-gray-500 dark:text-zinc-400">{{ $transaction->currency }}</span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="font-medium text-gray-900 dark:text-white">{{ $transaction->wallet?->name ?? '-' }}</div>
+                                <div class="text-xs text-gray-500 dark:text-zinc-400">{{ $transaction->wallet?->broker?->name ?? '' }}</div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-2 py-4 text-sm text-gray-500 dark:text-zinc-400">
+                            <td colspan="6" class="px-4 py-10 text-center text-sm text-gray-500 dark:text-zinc-400">
                                 No transactions for this asset in your wallets yet.
                             </td>
                         </tr>
@@ -209,5 +208,5 @@
                 </tbody>
             </table>
         </div>
-    </section>
-</div>
+    </x-page-section>
+</x-page-shell>

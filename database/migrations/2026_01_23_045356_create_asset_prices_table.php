@@ -25,6 +25,7 @@ return new class extends Migration
             $table->index(['asset_id', 'date']);
         });
     }
+
     /**
      * Reverse the migrations.
      */

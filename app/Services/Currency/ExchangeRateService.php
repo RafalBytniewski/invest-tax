@@ -2,25 +2,45 @@
 
 namespace App\Services\Currency;
 
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Http;
 
 class ExchangeRateService
 {
-public function getLastCurrencyPrice($symbol)
+    public function getLastCurrencyPrice(string $symbol): ?float
     {
-        $url = "https://api.nbp.pl/api/exchangerates/rates/a/{$symbol}/last/1/?format=json";
+        $response = Http::get(
+            sprintf(
+                'https://api.nbp.pl/api/exchangerates/rates/a/%s/last/1/',
+                strtoupper($symbol)
+            ),
+            ['format' => 'json']
+        );
 
-        $response = Http::get($url);
-
-        if (!$response->ok()) {
+        if (! $response->ok()) {
             return null;
         }
-        $data = $response->json();
-        $price =  $data['rates'][0]['mid'];
-        dd($price);
-        
-    }
-    public function getCurrencyPrice($symbol, $date){
 
+        return data_get($response->json(), 'rates.0.mid');
+    }
+
+    public function getCurrencyPrice(string $symbol, string|CarbonInterface $date): ?float
+    {
+        $formattedDate = $date instanceof CarbonInterface ? $date->toDateString() : $date;
+
+        $response = Http::get(
+            sprintf(
+                'https://api.nbp.pl/api/exchangerates/rates/a/%s/%s/',
+                strtoupper($symbol),
+                $formattedDate
+            ),
+            ['format' => 'json']
+        );
+
+        if (! $response->ok()) {
+            return null;
+        }
+
+        return data_get($response->json(), 'rates.0.mid');
     }
 }

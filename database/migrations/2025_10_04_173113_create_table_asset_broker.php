@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('asset_id')->constrained()->onDelete('cascade');
             $table->foreignId('broker_id')->constrained()->onDelete('cascade');
             $table->timestamps();
-            
+
             // Opcjonalnie unikalne ograniczenie, żeby nie powtarzać tego samego powiązania
             $table->unique(['asset_id', 'broker_id']);
         });

@@ -3,12 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TransactionResource\Pages;
-use App\Filament\Resources\TransactionResource\RelationManagers;
 use App\Models\Asset;
 use App\Models\Transaction;
-use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -23,9 +20,6 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Tables\Columns\NumericColumn;
 
 class TransactionResource extends Resource
 {
@@ -43,38 +37,36 @@ class TransactionResource extends Resource
                         ->label('Wallet')
                         ->relationship('wallet', 'name'),
                     Select::make('asset_id')
-    ->label('Asset')
-    ->required()
-    ->searchable()
-    ->preload(false)
-    ->extraAttributes([
-        'class' => 'font-mono text-sm',
-    ])
-    ->getSearchResultsUsing(function (string $search) {
-        return Asset::query()
-            ->with('exchange')
-            ->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('symbol', 'like', "%{$search}%")
-                  ->orWhereHas('exchange', function ($q) use ($search) {
-                      $q->where('symbol', 'like', "%{$search}%");
-                  });
-            })
-            ->limit(50)
-            ->get()
-            ->mapWithKeys(fn (Asset $asset) => [
-                $asset->id => sprintf(
-                    "%-12s %-32s %-8s",
-                    $asset->symbol . '.' . ($asset->exchange?->symbol ?? '') . ' — ',
-                    $asset->name,
-                    strtoupper($asset->asset_type),
-                ),
-            ]);
-    })
-    ->getOptionLabelUsing(fn ($value): ?string =>
-        Asset::with('exchange')->find($value)?->symbol
-    )
-
+                        ->label('Asset')
+                        ->required()
+                        ->searchable()
+                        ->preload(false)
+                        ->extraAttributes([
+                            'class' => 'font-mono text-sm',
+                        ])
+                        ->getSearchResultsUsing(function (string $search) {
+                            return Asset::query()
+                                ->with('exchange')
+                                ->where(function ($q) use ($search) {
+                                    $q->where('name', 'like', "%{$search}%")
+                                        ->orWhere('symbol', 'like', "%{$search}%")
+                                        ->orWhereHas('exchange', function ($q) use ($search) {
+                                            $q->where('symbol', 'like', "%{$search}%");
+                                        });
+                                })
+                                ->limit(50)
+                                ->get()
+                                ->mapWithKeys(fn (Asset $asset) => [
+                                    $asset->id => sprintf(
+                                        '%-12s %-32s %-8s',
+                                        $asset->symbol.'.'.($asset->exchange?->symbol ?? '').' — ',
+                                        $asset->name,
+                                        strtoupper($asset->asset_type),
+                                    ),
+                                ]);
+                        })
+                        ->getOptionLabelUsing(fn ($value): ?string => Asset::with('exchange')->find($value)?->symbol
+                        ),
 
                 ])->columns(2),
                 Section::make('Transaction Type')->schema([
@@ -85,16 +77,16 @@ class TransactionResource extends Resource
                             'buy' => 'Buy',
                             'sell' => 'Sell',
                             'dividend' => 'Dividend',
-                            'crypto_reward' => 'Crypto reward'
+                            'crypto_reward' => 'Crypto reward',
                         ]),
                     Select::make('reward_type')
                         ->options([
                             'airdrop' => 'Airdrop',
                             'staking' => 'Staking',
                             'lauchpad' => 'Launchpad',
-                            'launchpool' => 'Launchpool'
+                            'launchpool' => 'Launchpool',
                         ])
-                        ->visible(fn(callable $get) => $get('type') === 'crypto_reward'),
+                        ->visible(fn (callable $get) => $get('type') === 'crypto_reward'),
                     Select::make('currency_type')
                         ->label('Currency Type')
                         ->options([
@@ -102,7 +94,7 @@ class TransactionResource extends Resource
                             'crypto' => 'Crypto',
                         ])
                         ->reactive()
-                        ->visible(fn($get) => optional(Asset::find($get('asset_id')))->asset_type === 'crypto')
+                        ->visible(fn ($get) => optional(Asset::find($get('asset_id')))->asset_type === 'crypto')
                         ->dehydrated(false),
                     Select::make('currency')
                         ->label('Currency')
@@ -120,6 +112,7 @@ class TransactionResource extends Resource
                             if ($currencyType === 'crypto') {
                                 return Asset::where('asset_type', 'crypto')->pluck('symbol', 'symbol');
                             }
+
                             return [];
                         })
                         ->visible(function ($get) {
@@ -128,6 +121,7 @@ class TransactionResource extends Resource
                             if ($assetType !== 'crypto') {
                                 return true;
                             }
+
                             return filled($get('currency_type'));
                         }),
                 ])->columns(2),
@@ -153,7 +147,7 @@ class TransactionResource extends Resource
                         ->numeric()
                         ->lazy()
 
-                        ->prefix(fn(callable $get) => strtoupper($get('currency')) ?: '')
+                        ->prefix(fn (callable $get) => strtoupper($get('currency')) ?: '')
                         ->afterStateUpdated(function (callable $set, callable $get) {
                             $quantity = (float) $get('quantity');
                             $pricePerUnit = (float) $get('price_per_unit');
@@ -169,7 +163,7 @@ class TransactionResource extends Resource
                         ->default(0)
                         ->numeric()
                         ->lazy()
-                        
+
                         ->prefix(fn (callable $get) => strtoupper($get('currency')) ?: '')
                         ->afterStateUpdated(function (callable $set, callable $get) {
                             $quantity = (float) $get('quantity');
@@ -185,11 +179,11 @@ class TransactionResource extends Resource
                         ->label('Total Value')
                         ->numeric()
                         ->reactive()
-                        ->prefix(fn(callable $get) => strtoupper($get('currency')) ?: ''),
+                        ->prefix(fn (callable $get) => strtoupper($get('currency')) ?: ''),
 
                     DatePicker::make('date')
                         ->required(),
-                    Textarea::make('notes')->columnSpan(2)
+                    Textarea::make('notes')->columnSpan(2),
                 ])->columns(2),
                 Section::make('Transaction Fees')
                     ->schema([
@@ -226,17 +220,18 @@ class TransactionResource extends Resource
                                             return \App\Models\Asset::where('asset_type', 'crypto')
                                                 ->pluck('symbol', 'symbol');
                                         }
+
                                         return [];
                                     })
-                                    ->visible(fn($get) => filled($get('currency_type'))),
+                                    ->visible(fn ($get) => filled($get('currency_type'))),
                                 TextInput::make('value')
                                     ->numeric()
                                     ->required()
-                                    ->prefix(fn(callable $get) => strtoupper($get('currency')) ?: '')
+                                    ->prefix(fn (callable $get) => strtoupper($get('currency')) ?: ''),
                             ])
                             ->columns(2)
                             ->defaultItems(0)
-                            ->createItemButtonLabel('Add Fee')
+                            ->createItemButtonLabel('Add Fee'),
                     ])
                     ->collapsible(),
             ]);
@@ -261,13 +256,13 @@ class TransactionResource extends Resource
                 TextColumn::make('type')
                     ->sortable()
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'buy' => 'success',
                         'sell' => 'danger',
                         'dividend' => 'primary',
                         'crypto_reward' => 'primary'
                     })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
                         'buy' => 'Buy',
                         'sell' => 'Sell',
                         'dividend' => 'Dividend',
@@ -275,11 +270,12 @@ class TransactionResource extends Resource
                     }),
                 TextColumn::make('reward_type')
                     ->label('Reward Type')
-                    ->hidden(fn($record) => empty($record) || is_null($record->reward_type)),
+                    ->hidden(fn ($record) => empty($record) || is_null($record->reward_type)),
                 TextColumn::make('quantity')
                     ->sortable()
                     ->formatStateUsing(function ($state) {
                         $formatted = number_format($state, 8, '.', ' ');
+
                         return rtrim(rtrim($formatted, '0'), '.');
                     }),
                 TextColumn::make('price_per_unit')
@@ -287,14 +283,15 @@ class TransactionResource extends Resource
                     ->sortable()
                     ->formatStateUsing(function ($state) {
                         $formatted = number_format($state, 8, '.', ' ');
+
                         return rtrim(rtrim($formatted, '0'), '.');
                     })
-                    ->suffix(fn($record) => ' ' . ($record->currency ?? '')),
+                    ->suffix(fn ($record) => ' '.($record->currency ?? '')),
                 TextColumn::make('total_fees')
                     ->label('Total Fees')
                     ->getStateUsing(function ($record) {
                         return $record->fees
-                            ->map(fn($fee) => number_format($fee->value, 2, '.', '') . ' ' . strtoupper($fee->currency)) // edytowacv !!!!
+                            ->map(fn ($fee) => number_format($fee->value, 2, '.', '').' '.strtoupper($fee->currency)) // edytowacv !!!!
                             ->join(', ');
                     })
                     ->sortable(false)
@@ -303,8 +300,8 @@ class TransactionResource extends Resource
                 TextColumn::make('total_value')
                     ->label('Total Value')
                     ->sortable()
-                    ->suffix(fn($record) => ' ' . strtoupper($record->currency ?? ''))
-                    ->formatStateUsing(fn($state) => number_format($state, 2, '.', ' ')),
+                    ->suffix(fn ($record) => ' '.strtoupper($record->currency ?? ''))
+                    ->formatStateUsing(fn ($state) => number_format($state, 2, '.', ' ')),
 
             ])
             ->filters([
@@ -314,8 +311,8 @@ class TransactionResource extends Resource
                 ActionGroup::make([
                     ViewAction::make(),
                     EditAction::make(),
-                    DeleteAction::make()
-                ])
+                    DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

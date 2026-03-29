@@ -20,10 +20,11 @@ class TaxReport extends Model
         'total_income',
         'total_cost',
         'tax_due',
-        'user_id'
+        'user_id',
     ];
 
-    public function user():BelongsTo{
+    public function user(): BelongsTo
+    {
         return $this->belongsTo(User::class);
     }
 }

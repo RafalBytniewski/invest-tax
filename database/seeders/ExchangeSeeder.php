@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Exchange;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ExchangeSeeder extends Seeder
@@ -18,24 +17,24 @@ class ExchangeSeeder extends Seeder
             'type' => 'crypto_exchange',
             'image' => '',
             'url' => 'https://bitcoin.com',
-            'country' => NULL,
-            'currency' => NULL,
+            'country' => null,
+            'currency' => null,
         ]);
         Exchange::create([
             'name' => 'Coinbase',
             'type' => 'crypto_exchange',
             'image' => '',
             'url' => 'https://coinbase.com',
-            'country' => NULL,
-            'currency' => NULL,
+            'country' => null,
+            'currency' => null,
         ]);
         Exchange::create([
             'name' => 'XTB',
             'type' => 'broker',
             'image' => '',
             'url' => 'https://xtb.com',
-            'country' => NULL,
-            'currency' => NULL,
+            'country' => null,
+            'currency' => null,
         ]);
     }
 }

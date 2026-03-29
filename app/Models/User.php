@@ -60,11 +60,13 @@ class User extends Authenticatable
             ->implode('');
     }
 
-    public function taxReports():HasMany{
+    public function taxReports(): HasMany
+    {
         return $this->hasMany(TaxReport::class);
     }
 
-    public function wallets():HasMany{
+    public function wallets(): HasMany
+    {
         return $this->hasMany(Wallet::class);
     }
 }

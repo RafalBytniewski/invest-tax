@@ -20,10 +20,11 @@ class Fee extends Model
         'currency_type',
         'currency',
         'value',
-        'transaction_id'
+        'transaction_id',
     ];
 
-    public function transaction():BelongsTo{
+    public function transaction(): BelongsTo
+    {
         return $this->belongsTo(Transaction::class);
     }
 }

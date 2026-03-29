@@ -3,9 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AssetResource\Pages;
-use App\Filament\Resources\AssetResource\RelationManagers;
 use App\Models\Asset;
-use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -18,11 +16,8 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AssetResource extends Resource
 {
@@ -56,14 +51,14 @@ class AssetResource extends Resource
                                 'forex' => 'Forex',
                             ]),
                         Select::make('exchange_id')
-                           
+
                             ->label('Exchange')
                             ->relationship('exchange', 'symbol'),
                         FileUpload::make('image')
                             ->image()
                             ->directory('assets')
                             ->columnSpanFull(),
-                    ])->columns(2)
+                    ])->columns(2),
             ]);
     }
 
@@ -76,7 +71,7 @@ class AssetResource extends Resource
                 TextColumn::make('symbol'),
                 TextColumn::make('asset_type')
                     ->label('Asset Type')
-                    ->formatStateUsing(fn($state) => match ($state) {
+                    ->formatStateUsing(fn ($state) => match ($state) {
                         'stock' => 'Stock',
                         'etf' => 'ETF',
                         'cfd' => 'CFD',
@@ -94,7 +89,7 @@ class AssetResource extends Resource
                     ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
-                ])
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

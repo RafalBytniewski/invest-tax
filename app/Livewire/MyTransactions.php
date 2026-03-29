@@ -2,17 +2,18 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Livewire\WithPagination;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class MyTransactions extends Component
 {
     use WithPagination;
 
     protected const ALLOWED_SORT_FIELDS = ['asset', 'broker', 'wallet', 'type', 'quantity', 'price', 'total_value', 'date'];
+
     protected $listeners = ['transactionSaved' => '$refresh'];
 
     // paginate
@@ -23,11 +24,14 @@ class MyTransactions extends Component
 
     // filter by date
     public $dateFrom = '';
+
     public $dateTo = '';
 
     // sorting feature
     public $sortField = 'date';
+
     public $sortDirection = 'asc';
+
     protected $queryString = ['sortField', 'sortDirection'];
 
     public function mount(): void
@@ -66,6 +70,7 @@ class MyTransactions extends Component
 
         if ($deleted === 0) {
             session()->flash('error', 'Transaction could not be deleted.');
+
             return;
         }
 

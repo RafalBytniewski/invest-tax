@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->year('year');
-            $table->decimal('total_income',20, 2);
-            $table->decimal('total_cost',20, 2);
-            $table->decimal('tax_due',20, 2);
+            $table->decimal('total_income', 20, 2);
+            $table->decimal('total_cost', 20, 2);
+            $table->decimal('tax_due', 20, 2);
             $table->timestamps();
         });
     }

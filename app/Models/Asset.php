@@ -22,22 +22,26 @@ class Asset extends Model
         'image',
         'symbol',
         'asset_type',
-        'exchange_id'
+        'exchange_id',
     ];
 
-    public function exchange(): BelongsTo{
+    public function exchange(): BelongsTo
+    {
         return $this->belongsTo(Exchange::class);
     }
 
-    public function transactions(): HasMany{
+    public function transactions(): HasMany
+    {
         return $this->hasMany(Transaction::class);
     }
 
-    public function brokers(): BelongsToMany{
+    public function brokers(): BelongsToMany
+    {
         return $this->belongsToMany(Broker::class);
     }
 
-    public function assetPrices(): HasMany{
+    public function assetPrices(): HasMany
+    {
         return $this->hasMany(AssetPrice::class);
     }
 }

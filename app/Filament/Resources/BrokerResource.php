@@ -3,15 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\BrokerResource\Pages;
-use App\Filament\Resources\BrokerResource\RelationManagers;
 use App\Models\Broker;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Actions\SelectAction;
-use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -19,13 +12,13 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\SelectAction as ActionsSelectAction;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class BrokerResource extends Resource
 {
@@ -47,7 +40,7 @@ class BrokerResource extends Resource
                                 Select::make('type')
                                     ->options([
                                         'broker' => 'Broker',
-                                        'crypto_broker' => 'Crypto broker'
+                                        'crypto_broker' => 'Crypto broker',
                                     ])
                                     ->required(),
                                 TextInput::make('url')
@@ -66,7 +59,7 @@ class BrokerResource extends Resource
                     ->columnSpan(2),
                 Section::make('Optional')
                     ->schema([
-                        TextInput::make('country')
+                        TextInput::make('country'),
                     ])
                     ->columnSpan(1),
             ])
@@ -80,7 +73,7 @@ class BrokerResource extends Resource
                 TextColumn::make('name'),
                 ImageColumn::make('image'),
                 TextColumn::make('type')
-                    ->formatStateUsing(fn($state) => match ($state) {
+                    ->formatStateUsing(fn ($state) => match ($state) {
                         'broker' => 'Broker',
                         'crypto_broker' => 'Crypto exchange',
                         default => $state,
@@ -97,7 +90,7 @@ class BrokerResource extends Resource
                     ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
-                ])
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

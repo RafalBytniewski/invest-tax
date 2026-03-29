@@ -16,7 +16,7 @@ class EditAsset extends EditRecord
         return [
             Actions\DeleteAction::make(),
             Action::make('create')
-                ->label('New ' . static::$resource::getLabel())
+                ->label('New '.static::$resource::getLabel())
                 ->url(fn () => static::$resource::getUrl('create'))
                 ->color('primary'),
         ];

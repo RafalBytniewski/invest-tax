@@ -27,8 +27,8 @@ class Exchange extends Model
         'image',
     ];
 
-    public function assets(): HasMany{
+    public function assets(): HasMany
+    {
         return $this->hasMany(Asset::class);
     }
-
 }

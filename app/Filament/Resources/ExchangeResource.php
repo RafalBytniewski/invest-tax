@@ -3,29 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ExchangeResource\Pages;
-use App\Filament\Resources\ExchangeResource\RelationManagers;
 use App\Models\Exchange;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Notifications\Actions\ActionGroup as ActionsActionGroup;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\ViewAction as ActionsViewAction;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-
-use function PHPSTORM_META\map;
 
 class ExchangeResource extends Resource
 {
@@ -47,7 +39,7 @@ class ExchangeResource extends Resource
                                             ->required()
                                             ->maxLength(255),
                                         TextInput::make('symbol')
-                                            ->required()                                        
+                                            ->required()
                                             ->maxLength(25),
                                     ])->columns(2),
                                 Group::make()
@@ -58,16 +50,16 @@ class ExchangeResource extends Resource
                                                 'usa' => 'USA',
                                                 'germany' => 'Germany',
                                                 'great_britain' => 'Great Britain',
-                                                'france' => 'France'
+                                                'france' => 'France',
                                             ])
                                             ->required(),
                                         Select::make('currency')
-                                               ->options([
-                                                    'PLN' => 'PLN',
-                                                    'USD' => 'USD',
-                                                    'EUR' => 'EUR',
-                                                    'GBP' => 'GBP',
-                                                ])
+                                            ->options([
+                                                'PLN' => 'PLN',
+                                                'USD' => 'USD',
+                                                'EUR' => 'EUR',
+                                                'GBP' => 'GBP',
+                                            ])
                                             ->required(),
                                     ])->columns(2),
                                 Group::make()
@@ -84,7 +76,7 @@ class ExchangeResource extends Resource
                                     ->image()
                                     ->columnSpanFull(),
                             ]),
-                    ])
+                    ]),
             ])->columns(1);
     }
 
@@ -99,8 +91,6 @@ class ExchangeResource extends Resource
                 TextColumn::make('timezone'),
                 TextColumn::make('trading_hours'),
 
-
-
             ])
             ->filters([
                 //
@@ -110,7 +100,7 @@ class ExchangeResource extends Resource
                     ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
-                ])
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
