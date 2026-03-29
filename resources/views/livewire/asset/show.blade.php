@@ -4,7 +4,7 @@
         $positionValue = is_numeric($latestClose) ? $latestClose * $quantity : null;
         $averageValue = is_numeric($average) ? $average : null;
         $unrealizedPl = $positionValue !== null && $averageValue !== null ? $positionValue - ($averageValue * $quantity) : null;
-        $priceDate = $latestPrice?->date?->format('Y-m-d') ?? ($latestPrice?->date ?? '-');
+        $priceDate = $latestPrice?->date ?? ($latestPrice?->date ?? '-');
     @endphp
 
     <section class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
