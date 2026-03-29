@@ -47,7 +47,7 @@ class ExchangeResource extends Resource
                                             ->required()
                                             ->maxLength(255),
                                         TextInput::make('symbol')
-                                            ->required()                                        
+                                            ->required()
                                             ->maxLength(25),
                                     ])->columns(2),
                                 Group::make()
@@ -61,13 +61,23 @@ class ExchangeResource extends Resource
                                                 'france' => 'France'
                                             ])
                                             ->required(),
+                                        Select::make('region')
+                                            ->options([
+                                                'NA' => 'NA',
+                                                'SA' => 'SA',
+                                                'EU' => 'EU',
+                                                'AF' => 'AF',
+                                                'AS' => 'AS',
+                                                'OC' => 'OC'
+                                            ])
+                                            ->required(),
                                         Select::make('currency')
-                                               ->options([
-                                                    'PLN' => 'PLN',
-                                                    'USD' => 'USD',
-                                                    'EUR' => 'EUR',
-                                                    'GBP' => 'GBP',
-                                                ])
+                                            ->options([
+                                                'PLN' => 'PLN',
+                                                'USD' => 'USD',
+                                                'EUR' => 'EUR',
+                                                'GBP' => 'GBP',
+                                            ])
                                             ->required(),
                                     ])->columns(2),
                                 Group::make()
@@ -95,6 +105,7 @@ class ExchangeResource extends Resource
                 TextColumn::make('name'),
                 TextColumn::make('symbol'),
                 TextColumn::make('country'),
+                TextColumn::make('region'),
                 TextColumn::make('currency'),
                 TextColumn::make('timezone'),
                 TextColumn::make('trading_hours'),

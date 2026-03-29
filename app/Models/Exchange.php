@@ -20,6 +20,7 @@ class Exchange extends Model
         'name',
         'symbol',
         'country',
+        'region',
         'currency',
         'timezone',
         'url',
