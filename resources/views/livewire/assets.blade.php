@@ -81,13 +81,10 @@
                     </p>
 
                     <div class="flex flex-wrap gap-2">
-                        @foreach (['NA', 'EU'] as $region)
-                            <button wire:click="$set('region', '{{ $region }}')"
-                                class="px-3 h-9 rounded-lg text-sm font-medium border transition
-                            {{ in_array(strtolower($region), $regions ?? [])
-                                ? 'bg-blue-600 text-white border-blue-600'
-                                : 'bg-gray-100 dark:bg-zinc-800 border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700' }}">
-                                {{ $region }}
+                        @foreach (['NA', 'EU'] as $reg)
+                            <button wire:click="$set('region', '{{ $reg }}')"
+                                class="px-3 h-9 {{ $baseClasses }} {{ $reg === $region ? $activeClasses : $inactiveClasses }}">
+                                {{ $reg }}
                             </button>
                         @endforeach
                     </div>
@@ -102,9 +99,6 @@
                         @foreach (['GPW', 'NYSE', 'NASDAQ'] as $ex)
                             <button wire:click="$set('exchange', '{{ $ex }}')"
                                 class="px-3 h-9 {{ $baseClasses }} {{ $ex === $exchange ? $activeClasses : $inactiveClasses }}">
-                        {{--     {{ in_array(strtolower($exchange), $exchanges ?? [])
-                                ? 'bg-purple-600 text-white border-purple-600'
-                                : 'bg-gray-100 dark:bg-zinc-800 border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700' }}"> --}}
                                 {{ $ex }}
                             </button>
                         @endforeach
