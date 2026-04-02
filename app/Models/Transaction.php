@@ -65,4 +65,12 @@ class Transaction extends Model
                 });
         });
     }
+
+    public function scopeForUserAssets($query, $userId , $assetId){
+        return $query
+            ->where('asset_id', $assetId)
+            ->whereHas('wallet', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+    }
 }

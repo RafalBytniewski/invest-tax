@@ -4,74 +4,98 @@ namespace App\Livewire\Asset;
 
 use App\Models\Asset;
 use App\Models\Transaction;
+use App\Services\Asset\AssetCalculator;
+use App\Services\Currency\ExchangeRateService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Show extends Component
 {
     public Asset $asset;
+    public $assetSymbol;
 
     public $quantity;
     public $average;
-    public $latestPrice;
-    public $transactionCurrency;
-    public $assetSymbol;
-
-    public $realizedPL;
     public $totalValue;
-    
-    protected function GetTVAssetSymbol(Asset $asset)
+    public $latestPrice;
+
+    public $walletCurrency = 'USD';
+    public $assetCurrency;
+
+    public $realizedPL = 0;
+    public $currentPL = 0;
+    public $positionValue;
+
+    public $sellTransaction;
+    public $buyTransaction;
+
+    /*     public function countRealizedPL()
+    {
+        $totalValue = Transaction::forUserAssets(Auth::id(), $this->asset->id)->where('type', 'sell')->sum('total_value');
+        $quantity = $this->query()->where('type', 'sell')->sum('quantity');
+        if ($quantity != 0) {
+            $averageSell = $totalValue / $quantity;
+            return (abs($averageSell) - $this->countAverage()) * abs($quantity);
+        } else {
+            return '-';
+        }
+    } */
+
+    protected function getTVAssetSymbol(Asset $asset)
     {
         if ($asset->asset_type === 'crypto') {
             $this->assetSymbol = 'BINANCE:' . $asset->symbol . 'USD';
-        }else{
+        } else {
             $this->assetSymbol = $asset->exchange->symbol . ':' . $asset->symbol;
         }
-        }
-    protected function query()
-    {
-        return Transaction::query()
-            ->where('asset_id', $this->asset->id)
-            ->whereHas('wallet', function ($query) {
-                $query->where('user_id', Auth::id());
-            });
     }
 
-    public function countAverage()
+    public function mount(Asset $asset, AssetCalculator $calculator, ExchangeRateService $rate)
     {
-        $totalValue = $this->query()->where('type', 'buy')->sum('total_value');
-        $quantity = $this->query()->where('type', 'buy')->sum('quantity');
-        if($quantity != 0){
-            return $totalValue / $quantity;
-        }else{
-            return '-';
-        }
-    }
 
-    public function countRealizedPL(){
-        $totalValue = $this->query()->where('type', 'sell')->sum('total_value');
-        $quantity = $this->query()->where('type', 'sell')->sum('quantity');
-        if($quantity != 0){
-        $averageSell = $totalValue/$quantity;
-            return (abs($averageSell)-$this->countAverage())*abs($quantity);
-         }else{
-            return '-';
+        $data = Transaction::forUserAssets(Auth::id(), $this->asset->id)
+            ->selectRaw('
+                SUM(CASE WHEN type = "buy" THEN total_value ELSE 0 END) as buy_value,
+                SUM(CASE WHEN type = "buy" THEN quantity ELSE 0 END) as buy_qty,
+                SUM(CASE WHEN type = "sell" THEN total_value ELSE 0 END) as sell_value,
+                SUM(CASE WHEN type = "sell" THEN quantity ELSE 0 END) as sell_qty,
+                COUNT(CASE WHEN type = "buy" THEN quantity ELSE 0 END) as buy_transaction,
+                COUNT(CASE WHEN type = "sell" THEN quantity ELSE 0 END) as sell_transaction
+            ')->first();
+        if (($data->buy_qty + $data->sell_qty) == 0) {
+            $this->average = '-';
+            $this->quantity = 0;
+            $this->sellTransaction = 0;
+            $this->buyTransaction = 0;
+            $this->positionValue = null;
+            $this->latestPrice = $asset->assetPrices()->latest('date')->first();
+            return;
         }
-    }
+        $this->sellTransaction = $data->sell_transaction;
+        $this->buyTransaction = $data->buy_transaction;
 
-    public function mount(Asset $asset)
-    {
-        $this->quantity = $this->query()->sum('quantity');
-        $this->average = $this->countAverage();
-        $this->transactionCurrency = $this->query()->value('currency'); // check wallet->currency
+        $this->average = $calculator->average($data->buy_value, $data->buy_qty);
+        $this->quantity = $data->buy_qty + $data->sell_qty;
+
         $this->latestPrice = $asset->assetPrices()->latest('date')->first();
-        $this->GetTVAssetSymbol($asset);
-        
-        $this->realizedPL = $this->countRealizedPL();
+        $this->walletCurrency = Transaction::forUserAssets(Auth::id(), $this->asset->id)
+            ->join('wallets', 'transactions.wallet_id', '=', 'wallets.id')
+            ->value('wallets.currency');
+        $this->assetCurrency = $asset->exchange->currency;
+
+        if($this->walletCurrency == $this->assetCurrency){
+            $this->positionValue = $calculator->positionValue($this->latestPrice->close_price, $this->quantity);
+        }else{
+            $rate = $rate->getCurrencyPrice($this->assetCurrency, $this->latestPrice->date);
+            $this->positionValue = $rate * ($calculator->positionValue($this->latestPrice->close_price, $this->quantity));
+        }
+        $this->currentPL = abs($this->positionValue - ($data->buy_value * $data->buy_qty));
+
+        $this->getTVAssetSymbol($asset);
     }
     public function render()
     {
-        $transactions = $this->query()
+        $transactions = Transaction::forUserAssets(Auth::id(), $this->asset->id)
             ->latest('date')
             ->limit(10)
             ->get();
