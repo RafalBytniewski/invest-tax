@@ -36,8 +36,10 @@ An application for managing stock and cryptocurrency transactions, allowing tran
 - Dynamic filters and tables using Livewire (no full-page reloads)  
 - Built with Tailwind CSS and Preline UI for a clean and intuitive design  
 
-<img width="1611" height="444" alt="image" src="https://github.com/user-attachments/assets/4db51242-b1b7-4aa2-908e-f67d6e9b8948" />
-<img width="1395" height="662" alt="image" src="https://github.com/user-attachments/assets/aeb741c6-8689-4d3d-aaae-bd00df965425" />
+<img width="1137" height="684" alt="image" src="https://github.com/user-attachments/assets/332da728-bea5-4667-bce9-e98feeeecad6" />
+
+<img width="1073" height="655" alt="image" src="https://github.com/user-attachments/assets/a26de448-3893-4b80-8c17-1fc87b6f70e7" />
+
 
 
 
