@@ -15,14 +15,6 @@ class AssetCalculator
         return is_numeric($price) ? $price * $quantity : null;
     }
 
-
-
-
-
-
-
-
-
     public function realizedPL(float $sellValue, float $sellQty, float|string $average): float|string
     {
         if ($sellQty == 0 || !is_numeric($average)) return '-';

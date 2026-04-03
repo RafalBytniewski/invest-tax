@@ -35,6 +35,7 @@
                 <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
 
                     @if ($positionValue !== null)
+                        
                         {{ number_format($positionValue, 2, '.', ' ') }}<span
                             class="text-sm text-gray-500 dark:text-zinc-400"> {{ $walletCurrency }}</span> —
                         {{ $quantity }} <span
@@ -72,12 +73,12 @@
             {{-- Current P/L --}}
             <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-purple-700 dark:bg-zinc-800">
                 <p class="text-xs text-gray-500 dark:text-zinc-400">Current P/L</p>
-                {{-- {{ $latestPrice ? $latestPrice->close_price * $quantity : '-' }} --}}
-                <p class="text-xl font-semibold text-green-500">
-                    @if ($currentPL !== 0)
+                @if ($currentPL !== 0 && $positionValue !== null)
+                <p class="text-xl font-semibold @if ($currentPL > 0) text-green-500 @else text-red-500 @endif">
+                    
                         {{ number_format($currentPL, 2, '.', ' ') }}
                         <span class="text-sm">{{ $walletCurrency }}</span> -
-                        {{ number_format($currentPL / $positionValue, 2, '.', ' ') * 100 }} %
+                        {{ abs(number_format($currentPL / $positionValue, 2, '.', ' ') * 100) }} %
                 </p>
 
                 <p class="text-s text-gray-500 dark:text-zinc-400 mt-1">
@@ -92,9 +93,11 @@
             <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-blue-700 dark:bg-zinc-800">
                 <p class="text-xs text-gray-500 dark:text-zinc-400">Realized P/L</p>
                 @if ($realizedPL !== 0)
-                    {{ $realizedPL }}
-                    <p class="text-xl font-semibold text-green-500">
-
+                    
+               <p class="text-xl font-semibold @if ($realizedPL > 0) text-green-500 @else text-red-500 @endif">
+                    
+                        {{ number_format($realizedPL, 2, '.', ' ') }}
+                        <span class="text-sm">{{ $walletCurrency }}</span>
                     </p>
 
                     <p class="text-s text-gray-500 dark:text-zinc-400 mt-1">

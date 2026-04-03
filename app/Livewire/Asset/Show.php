@@ -19,7 +19,7 @@ class Show extends Component
     public $totalValue;
     public $latestPrice;
 
-    public $walletCurrency = 'USD';
+    public $walletCurrency;
     public $assetCurrency;
 
     public $realizedPL = 0;
@@ -52,7 +52,7 @@ class Show extends Component
 
     public function mount(Asset $asset, AssetCalculator $calculator, ExchangeRateService $rate)
     {
-
+        $this->getTVAssetSymbol($asset);
         $data = Transaction::forUserAssets(Auth::id(), $this->asset->id)
             ->selectRaw('
                 SUM(CASE WHEN type = "buy" THEN total_value ELSE 0 END) as buy_value,
@@ -68,7 +68,6 @@ class Show extends Component
             $this->sellTransaction = 0;
             $this->buyTransaction = 0;
             $this->positionValue = null;
-            $this->latestPrice = $asset->assetPrices()->latest('date')->first();
             return;
         }
         $this->sellTransaction = $data->sell_transaction;
@@ -78,21 +77,26 @@ class Show extends Component
         $this->quantity = $data->buy_qty + $data->sell_qty;
 
         $this->latestPrice = $asset->assetPrices()->latest('date')->first();
+
         $this->walletCurrency = Transaction::forUserAssets(Auth::id(), $this->asset->id)
             ->join('wallets', 'transactions.wallet_id', '=', 'wallets.id')
             ->value('wallets.currency');
         $this->assetCurrency = $asset->exchange->currency;
 
-        if($this->walletCurrency == $this->assetCurrency){
-            $this->positionValue = $calculator->positionValue($this->latestPrice->close_price, $this->quantity);
-        }else{
-            $rate = $rate->getCurrencyPrice($this->assetCurrency, $this->latestPrice->date);
-            $this->positionValue = $rate * ($calculator->positionValue($this->latestPrice->close_price, $this->quantity));
+        if ($this->latestPrice !== null) {
+            if ($this->walletCurrency == $this->assetCurrency) {
+                $this->positionValue = $calculator->positionValue($this->latestPrice->close_price, $this->quantity);
+            } else {
+                $rate = $rate->getCurrencyPrice($this->assetCurrency, $this->latestPrice->date);
+                $this->positionValue = $rate * ($calculator->positionValue($this->latestPrice->close_price, $this->quantity));
+            }
+        } else {
+            $this->positionValue = null;
         }
-        $this->currentPL = abs($this->positionValue - ($data->buy_value * $data->buy_qty));
-
-        $this->getTVAssetSymbol($asset);
+        $this->currentPL = $this->positionValue - ($data->buy_value * $data->buy_qty);
+        $this->realizedPL = $calculator->realizedPL($data->sell_value, $data->sell_qty, $this->average);
     }
+
     public function render()
     {
         $transactions = Transaction::forUserAssets(Auth::id(), $this->asset->id)
