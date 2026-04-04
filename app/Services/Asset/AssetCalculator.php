@@ -22,9 +22,9 @@ class AssetCalculator
         return (abs($avgSell) - $average) * abs($sellQty);
     }
 
-    public function unrealizedPL(?float $positionValue, float|string $average, float $quantity): ?float
+/*     public function unrealizedPL(?float $positionValue, float|string $average, float $quantity): ?float
     {
         if ($positionValue === null || !is_numeric($average)) return null;
         return $positionValue - ($average * $quantity);
-    }
+    } */
 }

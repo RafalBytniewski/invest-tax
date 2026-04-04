@@ -53,14 +53,15 @@ class Show extends Component
     public function mount(Asset $asset, AssetCalculator $calculator, ExchangeRateService $rate)
     {
         $this->getTVAssetSymbol($asset);
+        
         $data = Transaction::forUserAssets(Auth::id(), $this->asset->id)
             ->selectRaw('
                 SUM(CASE WHEN type = "buy" THEN total_value ELSE 0 END) as buy_value,
                 SUM(CASE WHEN type = "buy" THEN quantity ELSE 0 END) as buy_qty,
                 SUM(CASE WHEN type = "sell" THEN total_value ELSE 0 END) as sell_value,
                 SUM(CASE WHEN type = "sell" THEN quantity ELSE 0 END) as sell_qty,
-                COUNT(CASE WHEN type = "buy" THEN quantity ELSE 0 END) as buy_transaction,
-                COUNT(CASE WHEN type = "sell" THEN quantity ELSE 0 END) as sell_transaction
+                COUNT(CASE WHEN type = "buy" THEN 1 END) as buy_transaction,
+                COUNT(CASE WHEN type = "sell" THEN 1 END) as sell_transaction
             ')->first();
         if (($data->buy_qty + $data->sell_qty) == 0) {
             $this->average = '-';
@@ -87,12 +88,17 @@ class Show extends Component
             if ($this->walletCurrency == $this->assetCurrency) {
                 $this->positionValue = $calculator->positionValue($this->latestPrice->close_price, $this->quantity);
             } else {
-                $rate = $rate->getCurrencyPrice($this->assetCurrency, $this->latestPrice->date);
-                $this->positionValue = $rate * ($calculator->positionValue($this->latestPrice->close_price, $this->quantity));
+                $currencyRate = $rate->getCurrencyPrice($this->assetCurrency, $this->latestPrice->date);
+                if($currencyRate !== null){ 
+                    $this->positionValue = $currencyRate * ($calculator->positionValue($this->latestPrice->close_price, $this->quantity));
+                }else{
+                    $this->positionValue = '-';
+                }
             }
         } else {
             $this->positionValue = null;
         }
+
         $this->currentPL = $this->positionValue - ($data->buy_value * $data->buy_qty);
         $this->realizedPL = $calculator->realizedPL($data->sell_value, $data->sell_qty, $this->average);
     }

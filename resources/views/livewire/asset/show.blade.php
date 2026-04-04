@@ -57,7 +57,7 @@
 
                 <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
                     @if (is_numeric($average))
-                        {{ $average ? $average : '23,500' }}
+                        {{ $average }}
                         <span class="text-sm text-gray-500 dark:text-zinc-400">{{ $walletCurrency }}</span>
 
                 </p>
@@ -74,7 +74,7 @@
             <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-purple-700 dark:bg-zinc-800">
                 <p class="text-xs text-gray-500 dark:text-zinc-400">Current P/L</p>
                 @if ($currentPL !== 0 && $positionValue !== null)
-                <p class="text-xl font-semibold @if ($currentPL > 0) text-green-500 @else text-red-500 @endif">
+                <p class="text-xl font-semibold @if ($currentPL > 0) text-green-500 @elseif($currentPL < 0) text-red-500 @else text-gray-500 @endif">
                     
                         {{ number_format($currentPL, 2, '.', ' ') }}
                         <span class="text-sm">{{ $walletCurrency }}</span> -
@@ -94,7 +94,7 @@
                 <p class="text-xs text-gray-500 dark:text-zinc-400">Realized P/L</p>
                 @if ($realizedPL !== 0)
                     
-               <p class="text-xl font-semibold @if ($realizedPL > 0) text-green-500 @else text-red-500 @endif">
+               <p class="text-xl font-semibold @if ($realizedPL > 0) text-green-500 @elseif($currentPL < 0) text-red-500 @else text-gray-500 @endif">
                     
                         {{ number_format($realizedPL, 2, '.', ' ') }}
                         <span class="text-sm">{{ $walletCurrency }}</span>

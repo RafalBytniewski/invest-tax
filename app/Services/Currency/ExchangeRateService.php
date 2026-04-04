@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Http;
 
 class ExchangeRateService
 {
-public function getLastCurrencyPrice($symbol)
+/*     public function getLastCurrencyPrice($symbol)
     {
         $url = "https://api.nbp.pl/api/exchangerates/rates/a/{$symbol}/last/1/?format=json";
 
@@ -17,11 +17,11 @@ public function getLastCurrencyPrice($symbol)
         }
         $data = $response->json();
         $price =  $data['rates'][0]['mid'];
-        dd($price);
-        
-    }
-    public function getCurrencyPrice($symbol, $date){
-      
+    } */
+
+    public function getCurrencyPrice($symbol, $date)
+    {
+
         $url = "https://api.nbp.pl/api/exchangerates/rates/a/{$symbol}/{$date}/?format=json";
 
         $response = Http::get($url);
