@@ -25,7 +25,7 @@
 
 
 
-    <section class="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl px-6 py-6 mx-auto">
+    <section class="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl p-4 mx-auto">
 
         <div class="grid gap-6 lg:grid-cols-[1fr_auto] items-start">
 

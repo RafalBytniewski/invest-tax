@@ -2,7 +2,7 @@
     {{-- ASSET DETAIL --}}
 
     <section
-        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
+        class="rounded-xl bg-white p-4 shadow-sm dark:bg-zinc-900 sm:p-6">
         <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">{{ $asset->name }}</h1>
@@ -112,7 +112,7 @@
     </section>
     {{-- CHARTS --}}
     <section
-        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
+        class="rounded-xl bg-white p-4 shadow-sm dark:bg-zinc-900 sm:p-6">
 
         <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">Chart</h1>
@@ -155,7 +155,7 @@
     </section>
     {{-- TRANSACTIONS --}}
     <section
-        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:p-6">
+        class="rounded-xl bg-white p-4 shadow-sm dark:bg-zinc-900 sm:p-6">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-zinc-100">Your recent transactions</h2>
         <div class="mt-3 overflow-x-auto">
             <table class="min-w-full text-sm">
