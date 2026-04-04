@@ -17,9 +17,10 @@
         text-gray-900 dark:text-zinc-100
         hover:bg-gray-300 dark:hover:bg-zinc-700';
 
-        $activeClasses = 'bg-blue-600 text-white 
-        border-blue-600 dark:bg-blue-500 dark:border-blue-500
-        hover:bg-blue-300 dark:hover:bg-blue-700';
+        $activeClasses = 'border-slate-900 bg-slate-900 text-white
+        shadow-sm shadow-slate-900/15 hover:bg-slate-800
+        dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900
+        dark:hover:bg-zinc-200';
     @endphp
 
 
@@ -28,53 +29,48 @@
 
         <div class="grid gap-6 lg:grid-cols-[1fr_auto] items-start">
 
-            <!-- LEFT SIDE -->
+            {{-- LEFT SIDE --}}
             <div>
-                <span
-                    class="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
+                <p class="mt-4 text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white sm:text-4xl">
                     Asset Directory
-                </span>
-
-                <h1 class="mt-4 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-                    Browse all tracked assets
-                </h1>
+                </p>
 
                 <p class="mt-2 max-w-xl text-sm text-gray-500 dark:text-zinc-400">
                     One consistent list with type filters, alphabet navigation and direct access to each asset page.
                 </p>
             </div>
 
-            <!-- FILTERS -->
+            {{-- FILTERS --}}
             <div class="w-full max-w-[620px] justify-self-end space-y-5">
 
-                <!-- TYPE FILTER -->
+                {{-- TYPE FILTER --}}
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     <button wire:click="$set('type', 'stock')"
-                        class="h-12 px-4 {{ $baseClasses }} {{ $type === 'stock' ? $activeClasses : $inactiveClasses }}">
+                        class="h-12 px-10 {{ $baseClasses }} {{ $type === 'stock' ? $activeClasses : $inactiveClasses }}">
                         <span>Stock</span>
                         <span class="text-xs mx-2">{{ $type === 'stock' ? $stock : '' }}</span>
                     </button>
 
                     <button wire:click="$set('type', 'etf')"
-                        class="h-12 px-4 {{ $baseClasses }} {{ $type === 'etf' ? $activeClasses : $inactiveClasses }}">
+                        class="h-12 px-10 {{ $baseClasses }} {{ $type === 'etf' ? $activeClasses : $inactiveClasses }}">
                         <span>ETF</span>
                         <span class="text-xs mx-2">{{ $type === 'etf' ? $etf : '' }}</span>
                     </button>
 
                     <button wire:click="$set('type', 'crypto')"
-                        class="h-12 px-4 {{ $baseClasses }} {{ $type === 'crypto' ? $activeClasses : $inactiveClasses }}">
+                        class="h-12 px-10 {{ $baseClasses }} {{ $type === 'crypto' ? $activeClasses : $inactiveClasses }}">
                         <span>Crypto</span>
                         <span class="text-xs mx-2">{{ $type === 'crypto' ? $crypto : '' }}</span>
                     </button>
 
                     <button wire:click="$set('type', null)"
-                        class="col-span-3 h-12 px-4 {{ $baseClasses }} {{ $type === null ? $activeClasses : $inactiveClasses }}">
+                        class="col-span-3 h-12 px-10 {{ $baseClasses }} {{ $type === null ? $activeClasses : $inactiveClasses }}">
                         <span>All</span>
                         <span class="text-xs mx-2">{{ $type === null ? $assets->count() : '' }}</span>
                     </button>
                 </div>
 
-                <!-- REGION -->
+                {{-- REGION --}}
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-zinc-400 mb-2">
                         Region
@@ -83,14 +79,14 @@
                     <div class="flex flex-wrap gap-2">
                         @foreach (['NA', 'EU'] as $reg)
                             <button wire:click="$set('region', '{{ $reg }}')"
-                                class="px-3 h-9 {{ $baseClasses }} {{ $reg === $region ? $activeClasses : $inactiveClasses }}">
+                                class="px-5 h-11 {{ $baseClasses }} {{ $reg === $region ? $activeClasses : $inactiveClasses }}">
                                 {{ $reg }}
                             </button>
                         @endforeach
                     </div>
                 </div>
 
-                <!-- EXCHANGE -->
+                {{-- EXCHANGE  --}}
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-zinc-400 mb-2">
                         Exchange
@@ -98,19 +94,25 @@
                     <div class="flex flex-wrap gap-2">
                         @foreach (['GPW', 'NYSE', 'NASDAQ'] as $ex)
                             <button wire:click="$set('exchange', '{{ $ex }}')"
-                                class="px-3 h-9 {{ $baseClasses }} {{ $ex === $exchange ? $activeClasses : $inactiveClasses }}">
+                                class="px-5 h-11 {{ $baseClasses }} {{ $ex === $exchange ? $activeClasses : $inactiveClasses }}">
                                 {{ $ex }}
                             </button>
                         @endforeach
                     </div>
                 </div>
-                 <div class="justify-self-end">
-                <button wire:click="resetFilters()" class="cursor-pointer underline">RESET FILTERS</button>
-                 </div>
+
+                {{-- RESET FILTERS --}}
+                <div class="justify-self-end">
+                    <button wire:click="resetFilters()"
+                        class="inline-flex h-10 items-center justify-center rounded-xl border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-rose-500/50 dark:hover:bg-rose-500/10 dark:hover:text-rose-300">
+                        Reset filters
+                    </button>
+                </div>
+
             </div>
         </div>
     </section>
-    <!-- LETTER NAV -->
+    {{-- LETTER NAV --}}
     <nav
         class="sticky top-0 z-10 bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl px-4 py-4 space-y-5 mx-auto">
         <div class="flex flex-wrap justify-center gap-1.5">
@@ -122,7 +124,7 @@
             @endforeach
         </div>
     </nav>
-    <!-- LIST -->
+    {{-- LIST --}}
     <div class="space-y-10 mx-auto">
         @foreach ($groupedAssets as $letter => $items)
             <div id="letter-{{ $letter }}"
