@@ -38,31 +38,54 @@
                         Lorem ipsum
                     </p>
                 </div>
-                <div class="flex flex-col">
-                    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:items-end w-full lg:w-auto">
-                        <!-- Search -->
-                        <input type="text" wire:model.live.debounce.500ms="search" placeholder="Find ..."
-                            class="px-4 py-2 border rounded h-11 w-full sm:w-72 lg:w-96" />
-                        <!-- Date filter -->
-                        <div class="flex flex-col">
-                            <label class="text-xs mb-1 text-gray-600 dark:text-gray-300">Date from</label>
-                            <input type="date" wire:model.live="dateFrom" max="{{ now()->toDateString() }}"
-                                class="px-3 py-2 border rounded h-11 w-full sm:w-44">
-                        </div>
-                        <div class="flex flex-col">
-                            <label class="text-xs mb-1 text-gray-600 dark:text-gray-300">Date to</label>
-                            <input type="date" wire:model.live="dateTo" max="{{ now()->toDateString() }}"
-                                class="px-3 py-2 border rounded h-11 w-full sm:w-44">
-                        </div>
-                    </div>
-                    <div class="my-2 flex justify-end sm:flex-row gap-2 w-full lg:w-auto">
-                        <!-- New Transaction -->
-                        <button wire:click="$dispatch('openNewTransactionModal')"
-                            class="px-4 py-2 border bg-red-800 rounded h-11 w-full sm:w-44 hover:bg-red-400 transition">
-                            New Transaction
-                        </button>
-                    </div>
-                </div>
+            <div class="flex flex-col gap-3">
+
+    <!-- Search -->
+    <input type="text" wire:model.live.debounce.500ms="search" placeholder="Find ..."
+        class="px-5 py-3 border rounded-xl h-14 w-full sm:w-80 lg:w-96
+               border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800
+               text-gray-900 dark:text-zinc-100 
+               hover:bg-gray-200 dark:hover:bg-zinc-700 transition" />
+
+    <!-- Filters -->
+    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-end w-full lg:w-auto">
+
+        <!-- Date from -->
+        <div class="flex flex-col">
+            <label class="text-sm mb-1 text-gray-600 dark:text-gray-300">Date from</label>
+            <input type="date" wire:model.live="dateFrom" max="{{ now()->toDateString() }}"
+                class="px-4 py-2 border rounded-xl h-14 w-full sm:w-48
+                       border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800
+                       text-gray-900 dark:text-zinc-100 
+                       hover:bg-gray-200 dark:hover:bg-zinc-700 transition cursor-pointer">
+        </div>
+
+        <!-- Date to -->
+        <div class="flex flex-col">
+            <label class="text-sm mb-1 text-gray-600 dark:text-gray-300">Date to</label>
+            <input type="date" wire:model.live="dateTo" max="{{ now()->toDateString() }}"
+                class="px-4 py-2 border rounded-xl h-14 w-full sm:w-48
+                       border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800
+                       text-gray-900 dark:text-zinc-100 
+                       hover:bg-gray-200 dark:hover:bg-zinc-700 transition cursor-pointer">
+        </div>
+
+    </div>
+
+    <!-- Button -->
+    <div class="flex justify-end">
+        <button wire:click="$dispatch('openNewTransactionModal')"
+            class="px-6 py-3 border rounded-xl h-14 w-full sm:w-48 font-semibold transition
+                   bg-red-800 text-white border-red-800
+                   hover:bg-red-700 hover:border-red-700
+                   dark:border-zinc-700 dark:bg-zinc-900 
+                   dark:hover:border-rose-500/50 dark:hover:bg-rose-500/10 
+                   dark:text-rose-300">
+            New Transaction
+        </button>
+    </div>
+
+</div>
             </div>
     </section>
     <section class="rounded-xl  bg-white p-4 shadow-sm  dark:bg-zinc-900 sm:p-6">
