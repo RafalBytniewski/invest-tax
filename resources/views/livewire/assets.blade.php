@@ -1,4 +1,4 @@
-<div class="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-4 sm:px-6 lg:px-8">
+<div class="mx-auto w-full max-w-[1600px] space-y-6 sm:px-6 lg:px-8">
 
     @php
         $groupedAssets = $assets->groupBy(fn($asset) => strtoupper(mb_substr($asset->name, 0, 1)));
@@ -23,9 +23,7 @@
         dark:hover:bg-zinc-200';
     @endphp
 
-
-
-    <section class="mx-auto rounded-xl border bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
+        <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
         <div class="flex flex-col gap-6">
             <div class="space-y-2">
                 <p class="text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white sm:text-4xl">

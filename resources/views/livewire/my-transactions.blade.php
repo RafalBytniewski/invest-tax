@@ -1,6 +1,5 @@
-<div class="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-4 sm:px-6 lg:px-8">
-    <section
-        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
+<div class="mx-auto w-full max-w-[1600px] space-y-6 sm:px-6 lg:px-8">
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
         <div class="flex flex-col gap-6">
 
 
