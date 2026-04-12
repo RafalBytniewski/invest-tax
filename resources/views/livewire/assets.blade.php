@@ -25,61 +25,69 @@
 
 
 
-    <section class="bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl p-4 mx-auto">
-
-        <div class="grid gap-6 lg:grid-cols-[1fr_auto] items-start">
-
-            {{-- LEFT SIDE --}}
-            <div>
-                <p class="mt-4 text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-                    Asset Directory
-                </p>
-
-                <p class="mt-2 max-w-xl text-sm text-gray-500 dark:text-zinc-400">
-                    One consistent list with type filters, alphabet navigation and direct access to each asset page.
+    <section class="mx-auto rounded-xl border bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
+        <div class="flex flex-col gap-6">
+            <div class="space-y-2">
+                <p class="text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                    Assets
                 </p>
             </div>
 
-            {{-- FILTERS --}}
-            <div class="w-full max-w-[620px] justify-self-end space-y-5">
+            <div class="border-t border-gray-200 dark:border-zinc-800"></div>
 
+            {{-- RESET FILTERS --}}
+            <div class="flex items-center justify-end">
+                <button wire:click="resetFilters()"
+                    class="inline-flex h-12 w-full items-center justify-center rounded-xl border border-gray-300 bg-white px-5 text-sm font-semibold transition hover:border-rose-300 hover:bg-rose-50 text-rose-700 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-rose-500/50 dark:hover:bg-rose-500/10 dark:text-rose-300 xl:w-auto">
+                    Reset filters
+                </button>
+            </div>
+            <div class="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,0.8fr)_minmax(0,1fr)_auto] xl:items-end">
                 {{-- TYPE FILTER --}}
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <button wire:click="$set('type', 'stock')"
-                        class="h-12 px-10 {{ $baseClasses }} {{ $type === 'stock' ? $activeClasses : $inactiveClasses }}">
-                        <span>Stock</span>
-                        <span class="text-xs mx-2">{{ $type === 'stock' ? $stock : '' }}</span>
-                    </button>
+                <div
+                    class="rounded-xl border border-gray-200 bg-gray-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                    <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
+                        Asset type
+                    </p>
 
-                    <button wire:click="$set('type', 'etf')"
-                        class="h-12 px-10 {{ $baseClasses }} {{ $type === 'etf' ? $activeClasses : $inactiveClasses }}">
-                        <span>ETF</span>
-                        <span class="text-xs mx-2">{{ $type === 'etf' ? $etf : '' }}</span>
-                    </button>
+                    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        <button wire:click="$set('type', 'stock')"
+                            class="h-12 px-4 {{ $baseClasses }} {{ $type === 'stock' ? $activeClasses : $inactiveClasses }}">
+                            <span>Stock</span>
+                            <span class="text-xs mx-2">{{ $type === 'stock' ? $stock : '' }}</span>
+                        </button>
 
-                    <button wire:click="$set('type', 'crypto')"
-                        class="h-12 px-10 {{ $baseClasses }} {{ $type === 'crypto' ? $activeClasses : $inactiveClasses }}">
-                        <span>Crypto</span>
-                        <span class="text-xs mx-2">{{ $type === 'crypto' ? $crypto : '' }}</span>
-                    </button>
+                        <button wire:click="$set('type', 'etf')"
+                            class="h-12 px-4 {{ $baseClasses }} {{ $type === 'etf' ? $activeClasses : $inactiveClasses }}">
+                            <span>ETF</span>
+                            <span class="text-xs mx-2">{{ $type === 'etf' ? $etf : '' }}</span>
+                        </button>
 
-                    <button wire:click="$set('type', null)"
-                        class="col-span-3 h-12 px-10 {{ $baseClasses }} {{ $type === null ? $activeClasses : $inactiveClasses }}">
-                        <span>All</span>
-                        <span class="text-xs mx-2">{{ $type === null ? $assets->count() : '' }}</span>
-                    </button>
+                        <button wire:click="$set('type', 'crypto')"
+                            class="h-12 px-4 {{ $baseClasses }} {{ $type === 'crypto' ? $activeClasses : $inactiveClasses }}">
+                            <span>Crypto</span>
+                            <span class="text-xs mx-2">{{ $type === 'crypto' ? $crypto : '' }}</span>
+                        </button>
+
+                        <button wire:click="$set('type', null)"
+                            class="h-12 px-4 {{ $baseClasses }} {{ $type === null ? $activeClasses : $inactiveClasses }}">
+                            <span>All</span>
+                            <span class="text-xs mx-2">{{ $type === null ? $assets->count() : '' }}</span>
+                        </button>
+                    </div>
                 </div>
 
                 {{-- REGION --}}
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-zinc-400 mb-2">
+                <div
+                    class="rounded-xl border border-gray-200 bg-gray-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                    <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
                         Region
                     </p>
 
                     <div class="flex flex-wrap gap-2">
                         @foreach (['NA', 'EU'] as $reg)
                             <button wire:click="$set('region', '{{ $reg }}')"
-                                class="px-5 h-11 {{ $baseClasses }} {{ $reg === $region ? $activeClasses : $inactiveClasses }}">
+                                class="min-w-[5rem] px-5 h-11 {{ $baseClasses }} {{ $reg === $region ? $activeClasses : $inactiveClasses }}">
                                 {{ $reg }}
                             </button>
                         @endforeach
@@ -87,10 +95,12 @@
                 </div>
 
                 {{-- EXCHANGE  --}}
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-zinc-400 mb-2">
+                <div
+                    class="rounded-xl border border-gray-200 bg-gray-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                    <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
                         Exchange
                     </p>
+
                     <div class="flex flex-wrap gap-2">
                         @foreach (['GPW', 'NYSE', 'NASDAQ'] as $ex)
                             <button wire:click="$set('exchange', '{{ $ex }}')"
@@ -101,13 +111,6 @@
                     </div>
                 </div>
 
-                {{-- RESET FILTERS --}}
-                <div class="justify-self-end">
-                    <button wire:click="resetFilters()"
-                        class="inline-flex h-10 items-center justify-center rounded-xl border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-rose-500/50 dark:hover:bg-rose-500/10 dark:hover:text-rose-300">
-                        Reset filters
-                    </button>
-                </div>
 
             </div>
         </div>
