@@ -1,22 +1,35 @@
-<div class="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6">
-    <section class="rounded-xl  bg-white p-4 shadow-sm  dark:bg-zinc-900 sm:p-6">
-        <div class="p-4">
+<div class="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-4 sm:px-6 lg:px-8">
+    <section
+        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
+        <div class="flex flex-col gap-6">
 
-            <!-- Messages -->
+
+            <div class="space-y-2">
+                <h1 class="text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                    Transactions
+                </h1>
+
+            </div>
+
+            <div class="border-t border-gray-200 dark:border-zinc-800"></div>
+
             @if (session()->has('success'))
-                <div class="p-2 mb-3 text-green-700 bg-green-100 rounded">
+                <div
+                    class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300">
                     {{ session('success') }}
                 </div>
             @endif
 
             @if (session()->has('error'))
-                <div class="p-2 mb-3 text-red-700 bg-red-100 rounded">
+                <div
+                    class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300">
                     {{ session('error') }}
                 </div>
             @endif
 
             @if ($errors->any())
-                <div class="p-2 mb-3 text-red-700 bg-red-100 rounded">
+                <div
+                    class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300">
                     <ul class="list-disc pl-5">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -25,70 +38,70 @@
                 </div>
             @endif
 
-            <div class="grid gap-6 lg:grid-cols-[1fr_auto] items-start">
-
-                {{-- LEFT SIDE --}}
-                <div>
-                    <p
-                        class="mt-4 text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-                        Transactions
-                    </p>
-
-                    <p class="mt-2 max-w-xl text-sm text-gray-500 dark:text-zinc-400">
-                        Lorem ipsum
-                    </p>
-                </div>
-            <div class="flex flex-col gap-3">
-
-    <!-- Search -->
-    <input type="text" wire:model.live.debounce.500ms="search" placeholder="Find ..."
-        class="px-5 py-3 border rounded-xl h-14 w-full sm:w-80 lg:w-96
-               border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800
-               text-gray-900 dark:text-zinc-100 
-               hover:bg-gray-200 dark:hover:bg-zinc-700 transition" />
-
-    <!-- Filters -->
-    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-end w-full lg:w-auto">
-
-        <!-- Date from -->
-        <div class="flex flex-col">
-            <label class="text-sm mb-1 text-gray-600 dark:text-gray-300">Date from</label>
-            <input type="date" wire:model.live="dateFrom" max="{{ now()->toDateString() }}"
-                class="px-4 py-2 border rounded-xl h-14 w-full sm:w-48
-                       border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800
-                       text-gray-900 dark:text-zinc-100 
-                       hover:bg-gray-200 dark:hover:bg-zinc-700 transition cursor-pointer">
-        </div>
-
-        <!-- Date to -->
-        <div class="flex flex-col">
-            <label class="text-sm mb-1 text-gray-600 dark:text-gray-300">Date to</label>
-            <input type="date" wire:model.live="dateTo" max="{{ now()->toDateString() }}"
-                class="px-4 py-2 border rounded-xl h-14 w-full sm:w-48
-                       border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800
-                       text-gray-900 dark:text-zinc-100 
-                       hover:bg-gray-200 dark:hover:bg-zinc-700 transition cursor-pointer">
-        </div>
-
-    </div>
-
-    <!-- Button -->
-    <div class="flex justify-end">
-        <button wire:click="$dispatch('openNewTransactionModal')"
-            class="px-6 py-3 border rounded-xl h-14 w-full sm:w-48 font-semibold transition
-                   bg-red-800 text-white border-red-800
-                   hover:bg-red-700 hover:border-red-700
-                   dark:border-zinc-700 dark:bg-zinc-900 
-                   dark:hover:border-rose-500/50 dark:hover:bg-rose-500/10 
-                   dark:text-rose-300">
-            New Transaction
-        </button>
-    </div>
-
-</div>
+            <div class="flex items-center justify-end">
+                <button type="button" wire:click="resetFilters"
+                    class="inline-flex h-12 w-full items-center justify-center rounded-xl border border-gray-300 bg-white px-5 text-sm font-semibold transition hover:border-rose-300 hover:bg-rose-50 text-rose-700 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-rose-500/50 dark:hover:bg-rose-500/10 dark:text-rose-300 xl:w-auto">
+                    Reset filters
+                </button>
             </div>
+
+            <div
+                class="grid gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.4fr)_repeat(2,minmax(0,1fr))_180px] xl:items-stretch">
+                <div
+                    class="flex h-full flex-col rounded-xl border border-gray-200 bg-gray-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                    <label
+                        class="mb-3 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
+                        Search
+                    </label>
+                    <input type="text" wire:model.live.debounce.500ms="search"
+                        placeholder="Find by asset, wallet or broker"
+                        class="h-12 w-full rounded-xl border border-gray-300 bg-white px-4 text-sm text-gray-900 transition hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-slate-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800 dark:focus:ring-zinc-500" />
+                </div>
+
+                <div
+                    class="flex h-full flex-col rounded-xl border border-gray-200 bg-gray-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                    <label
+                        class="mb-3 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
+                        Date from
+                    </label>
+                    <input type="date" wire:model.live="dateFrom" max="{{ now()->toDateString() }}"
+                        class="h-12 w-full rounded-xl border border-gray-300 bg-white px-4 text-sm text-gray-900 transition hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-slate-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800 dark:focus:ring-zinc-500">
+                </div>
+
+                <div
+                    class="flex h-full flex-col rounded-xl border border-gray-200 bg-gray-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                    <label
+                        class="mb-3 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
+                        Date to
+                    </label>
+                    <input type="date" wire:model.live="dateTo" max="{{ now()->toDateString() }}"
+                        class="h-12 w-full rounded-xl border border-gray-300 bg-white px-4 text-sm text-gray-900 transition hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-slate-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800 dark:focus:ring-zinc-500">
+                </div>
+
+                <div
+                    class="flex h-full flex-col rounded-xl border border-gray-200 bg-gray-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                    <label
+                        class="mb-3 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
+                        Per page
+                    </label>
+                    <select wire:model.live="perPage"
+                        class="h-12 w-full rounded-xl border border-gray-300 bg-white px-4 text-sm text-gray-900 transition hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-slate-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800 dark:focus:ring-zinc-500">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+
     </section>
-    <section class="rounded-xl  bg-white p-4 shadow-sm  dark:bg-zinc-900 sm:p-6">
+    <section class="mx-auto rounded-xl border bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900 sm:px-3">
+        <div class="flex justify-end">
+            <button wire:click="$dispatch('openNewTransactionModal')"
+                class="inline-flex h-12 items-center justify-center rounded-xl border border-slate-900 bg-slate-900 px-5 my-2 text-l font-semibold text-white transition hover:bg-slate-800 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 cursor-pointer">
+                New Transaction
+            </button>
+        </div>
         <!-- Transactions tabel -->
         <div class="overflow-x-auto">
             <x-table>
@@ -184,18 +197,6 @@
                     @endforelse
                 </x-slot>
             </x-table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="mt-3 flex">
-            <label for=""class="pr-2 py-2 ">Per page:</label>
-            <select wire:model.live="perPage" class="px-4 py-2 border rounded h-11 w-22 hover:bg-gray-600 transition">
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-
-            </select>
         </div>
         <div class="mt-4">
             {{ $transactions->links() }}
