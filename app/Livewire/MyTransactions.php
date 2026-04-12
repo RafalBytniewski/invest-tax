@@ -72,6 +72,12 @@ class MyTransactions extends Component
         session()->flash('success', 'Transaction deleted.');
     }
 
+    public function resetFilters(): void
+    {
+        $this->reset(['search', 'dateFrom', 'dateTo']);
+        $this->resetPage();
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();
