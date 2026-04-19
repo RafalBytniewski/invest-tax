@@ -22,6 +22,8 @@ class Asset extends Model
         'image',
         'symbol',
         'asset_type',
+        'sector',
+        'industry',
         'exchange_id'
     ];
 
