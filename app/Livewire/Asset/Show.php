@@ -99,7 +99,7 @@ class Show extends Component
             $this->positionValue = null;
         }
 
-        $this->currentPL = $this->positionValue - ($data->buy_value * $data->buy_qty);
+        $this->currentPL = $this->positionValue - ($this->average*$this->quantity);
         $this->realizedPL = $calculator->realizedPL($data->sell_value, $data->sell_qty, $this->average);
     }
 
