@@ -82,7 +82,12 @@ class Show extends Component
         $this->walletCurrency = Transaction::forUserAssets(Auth::id(), $this->asset->id)
             ->join('wallets', 'transactions.wallet_id', '=', 'wallets.id')
             ->value('wallets.currency');
-        $this->assetCurrency = $asset->exchange->currency;
+
+        if ($asset->asset_type === 'crypto') {
+            $this->assetCurrency = 'USD';
+        } else {
+            $this->assetCurrency = $asset->exchange->currency;
+        }
 
         if ($this->latestPrice !== null) {
             if ($this->walletCurrency == $this->assetCurrency) {
