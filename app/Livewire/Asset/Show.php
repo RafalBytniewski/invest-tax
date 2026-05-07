@@ -53,7 +53,7 @@ class Show extends Component
     public function mount(Asset $asset, AssetCalculator $calculator, ExchangeRateService $rate)
     {
         $this->getTVAssetSymbol($asset);
-        
+
         $data = Transaction::forUserAssets(Auth::id(), $this->asset->id)
             ->selectRaw('
                 SUM(CASE WHEN type = "buy" THEN total_value ELSE 0 END) as buy_value,
@@ -82,16 +82,23 @@ class Show extends Component
         $this->walletCurrency = Transaction::forUserAssets(Auth::id(), $this->asset->id)
             ->join('wallets', 'transactions.wallet_id', '=', 'wallets.id')
             ->value('wallets.currency');
-        $this->assetCurrency = $asset->exchange->currency;
 
+
+        if ($asset->asset_type === 'crypto') {
+            $this->assetCurrency = 'USD';
+        } else {
+            $this->assetCurrency = $asset->exchange->currency;
+        }
+
+        
         if ($this->latestPrice !== null) {
             if ($this->walletCurrency == $this->assetCurrency) {
                 $this->positionValue = $calculator->positionValue($this->latestPrice->close_price, $this->quantity);
             } else {
                 $currencyRate = $rate->getCurrencyPrice($this->assetCurrency, $this->latestPrice->date);
-                if($currencyRate !== null){ 
+                if ($currencyRate !== null) {
                     $this->positionValue = $currencyRate * ($calculator->positionValue($this->latestPrice->close_price, $this->quantity));
-                }else{
+                } else {
                     $this->positionValue = '-';
                 }
             }
@@ -99,7 +106,7 @@ class Show extends Component
             $this->positionValue = null;
         }
 
-        $this->currentPL = $this->positionValue - ($this->average*$this->quantity);
+        $this->currentPL = $this->positionValue - ($this->average * $this->quantity);
         $this->realizedPL = $calculator->realizedPL($data->sell_value, $data->sell_qty, $this->average);
     }
 

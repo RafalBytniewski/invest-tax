@@ -1,4 +1,4 @@
-<div class="mx-auto w-full max-w-[1600px] space-y-6 sm:px-6 lg:px-8">
+<div id="assets-top" class="mx-auto w-full max-w-[1600px] space-y-6 sm:px-6 lg:px-8">
 
     @php
         $groupedAssets = $assets->groupBy(fn($asset) => strtoupper(mb_substr($asset->name, 0, 1)));
@@ -23,7 +23,7 @@
         dark:hover:bg-zinc-200';
     @endphp
 
-        <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
         <div class="flex flex-col gap-6">
             <div class="space-y-2">
                 <p class="text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white sm:text-4xl">
@@ -116,17 +116,82 @@
     {{-- LETTER NAV --}}
     <nav
         class="sticky top-0 z-10 bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl px-4 py-4 space-y-5 mx-auto">
-        <div class="flex flex-wrap justify-center gap-1.5">
-            @foreach ($groupedAssets as $letter => $items)
-                <a href="#letter-{{ $letter }}"
-                    class="rounded-md px-3 py-1 text-xl font-semibold text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white">
-                    {{ $letter }}
-                </a>
-            @endforeach
+        <div class="flex items-center gap-3">
+            <div class="flex flex-1 flex-wrap justify-center gap-1.5">
+                @foreach ($groupedAssets as $letter => $items)
+                    <a href="#letter-{{ $letter }}"
+                        class="rounded-md px-3 py-1 text-xl font-semibold text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white">
+                        {{ $letter }}
+                    </a>
+                @endforeach
+            </div>
+
+            <a href="#assets-top"
+                class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-slate-50 text-slate-700 transition hover:border-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-700 dark:hover:text-white"
+                aria-label="Back to top"
+                title="Back to top">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M10 3a.75.75 0 0 1 .53.22l4.25 4.25a.75.75 0 1 1-1.06 1.06L10.75 5.56V16a.75.75 0 0 1-1.5 0V5.56L6.28 8.53a.75.75 0 1 1-1.06-1.06l4.25-4.25A.75.75 0 0 1 10 3Z"
+                        clip-rule="evenodd" />
+                </svg>
+            </a>
         </div>
     </nav>
     {{-- LIST --}}
     <div class="space-y-10 mx-auto">
+        <div
+            class="scroll-mt-20 bg-white dark:bg-zinc-900 border border-emerald-200 dark:border-emerald-900/60 rounded-xl px-4 py-4 space-y-5 mx-auto">
+
+            <div class="flex flex-col gap-1">
+                <h2 class="text-xl font-bold text-emerald-800 dark:text-emerald-200">
+                    Active
+                </h2>
+                <p class="text-sm text-emerald-700/80 dark:text-emerald-300/80">
+                    {{ $activeAssets->count() }} active assets in current view
+                </p>
+            </div>
+
+            @if ($activeAssets->isNotEmpty())
+                <ul class="divide-y divide-emerald-100 dark:divide-emerald-950/60">
+                    @foreach ($activeAssets as $asset)
+                        <li>
+                            <a href="{{ route('assets.show', $asset->id) }}"
+                                class="flex flex-col gap-3 rounded-xl px-2 py-4 transition hover:bg-emerald-50/70 sm:flex-row sm:items-center sm:justify-between dark:hover:bg-emerald-950/20">
+                                <div class="min-w-0">
+                                    <div
+                                        class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-500 dark:text-emerald-400">
+                                        @if ($asset->asset_type === 'crypto')
+                                            {{ $asset->symbol }}
+                                        @elseif ($asset->exchange_id)
+                                            {{ $asset->symbol }}.{{ $asset->exchange->symbol }}
+                                        @else
+                                            {{ $asset->symbol }}
+                                        @endif
+                                    </div>
+                                    <div class="mt-1 text-base font-medium text-gray-900 dark:text-white">
+                                        {{ $asset->name }}</div>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    @if ($asset->exchange)
+                                        <span
+                                            class="rounded-full border border-emerald-200 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-900/60 dark:text-emerald-300">{{ $asset->exchange->symbol }}</span>
+                                    @endif
+                                    <span
+                                        class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">{{ $asset->asset_type }}</span>
+                                </div>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <p class="text-sm text-emerald-700/80 dark:text-emerald-300/80">
+                    No active assets match current filters.
+                </p>
+            @endif
+        </div>
+
         @foreach ($groupedAssets as $letter => $items)
             <div id="letter-{{ $letter }}"
                 class="scroll-mt-20 bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl px-4 py-4 space-y-5 mx-auto">
