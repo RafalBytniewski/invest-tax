@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Asset;
+use App\Models\Transaction;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Assets extends Component
@@ -20,6 +22,7 @@ class Assets extends Component
     public function render()
     {
         $assets = Asset::orderBy('name')
+            ->with('exchange')
             ->when($this->type, function ($query) {
                 $query->where('asset_type', $this->type);
             })
@@ -34,10 +37,19 @@ class Assets extends Component
                 });
             })
             ->get();
- 
+
+        $activeAssetIds = Transaction::query()
+            ->select('asset_id')
+            ->whereHas('wallet', function ($query) {
+                $query->where('user_id', Auth::id());
+            })
+            ->groupBy('asset_id')
+            ->havingRaw('SUM(quantity) > 0')
+            ->pluck('asset_id');
 
         return view('livewire.assets', [
-            'assets' => $assets
+            'assets' => $assets,
+            'activeAssets' => $assets->whereIn('id', $activeAssetIds)->values(),
         ]);
     }
 }
