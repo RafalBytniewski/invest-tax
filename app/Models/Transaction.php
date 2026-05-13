@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Transaction extends Model
 {
@@ -25,12 +26,14 @@ class Transaction extends Model
         'total_value',
         'date',
         'notes',
+        'affects_wallet_balance',
         'wallet_id',
         'asset_id'
     ];
 
     protected $casts = [
         'date' => 'datetime',
+        'affects_wallet_balance' => 'boolean',
     ];
 
     public function wallet(): BelongsTo
@@ -46,6 +49,11 @@ class Transaction extends Model
     public function fees(): HasMany
     {
         return $this->hasMany(Fee::class);
+    }
+
+    public function walletLedger(): HasOne
+    {
+        return $this->hasOne(WalletLedger::class);
     }
 
     public function scopeSearch($query, $value)

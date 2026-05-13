@@ -23,7 +23,13 @@
             <div class="grid grid-cols-1 gap-4">
                 <x-form.section label="Transaction Context" columns="sm:grid-cols-3">
                     <x-form.select model="wallet" label="Wallet" :options="$wallets" required />
-                    <x-form.select model="asset" label="Asset" :options="$assets" required />
+                    @if ($type !== 'tax')
+                        <x-form.select model="asset" label="Asset" :options="$assets" required />
+                    @else
+                        <div class="rounded-xl border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-500 dark:border-slate-600 dark:text-slate-300">
+                            Tax transaction does not require an asset.
+                        </div>
+                    @endif
                     <x-form.select model="type" label="Type" :options="$types" required />
                 </x-form.section>
 
@@ -33,19 +39,31 @@
                         required />
                     <x-form.input type="number" model="price_per_unit" wireModifier="lazy" label="Price per unit"
                         step="0.01" required />
-                    <x-form.input type="number" model="total_fees" wireModifier="lazy" label="Total fees" value="0"
-                        required />
                     <x-form.input type="number" model="total_value" label="Total value" step="0.01" value="0" />
                     <x-form.input type="date" model="date" label="Date" required />
                 </x-form.section>
+
+                @if ($type === 'buy')
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/40">
+                        <label class="flex items-start gap-3">
+                            <input type="checkbox" wire:model="affects_wallet_balance"
+                                class="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                            <span>
+                                <span class="block text-sm font-medium text-slate-900 dark:text-slate-100">
+                                    Deduct funds from wallet
+                                </span>
+                                <span class="block text-xs text-slate-500 dark:text-slate-300">
+                                    Disable this if the historical deposit was not added to the app yet.
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+                @endif
             </div>
 
             <x-form.section label="Additional" columns="grid-cols-1" class="mt-4">
                 <div class="col-span-2">
                     <x-form.textarea model="notes" label="Notes" placeholder="Write your notes..." maxlength="500" />
-                    <x-form.input  type="file" model="attachments" label="Attachments"/>
-                    <p class="text-sm text-gray-500 dark:text-gray-300" id="file_input_help">SVG, PNG, JPG, DOC or PDF (2MB).</p> 
-                    <p class="text-sm text-gray-500 dark:text-gray-300" id="file_input_help">Upload screenshots, fee confirmations, or PDF statements for future tax verification.</p>
                 </div>
             </x-form.section>
 

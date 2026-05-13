@@ -5,10 +5,13 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Wallet;
 use App\Services\MarketData\StockPriceService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class MyWallets extends Component
 {
     public $price = [];
+    protected $listeners = ['transactionSaved' => 'reloadWallets', 'walletLedgerSaved' => 'reloadWallets'];
 
     protected $stockPriceService;
 
@@ -26,8 +29,22 @@ class MyWallets extends Component
 
     public function mount(StockPriceService $stockPriceService)
     {
-        $this->wallets = Wallet::with('transactions.asset.exchange')->get();
         $this->stockPriceService = $stockPriceService;
+        $this->reloadWallets();
+    }
+
+    public function reloadWallets(): void
+    {
+        $relations = ['broker', 'transactions.asset.exchange'];
+
+        if (Schema::hasTable('wallet_ledgers')) {
+            $relations[] = 'ledgers';
+        }
+
+        $this->wallets = Wallet::query()
+            ->with($relations)
+            ->where('user_id', Auth::id())
+            ->get();
     }
 
 

@@ -135,20 +135,22 @@
 
                     @forelse ($transactions as $transaction)
                         <x-table.row wire.loading.class.delay="opacity-50">
-                            <x-table.cell class="px-4 py-2">{{ $transaction->asset?->name }}</x-table.cell>
+                            <x-table.cell class="px-4 py-2">{{ $transaction->asset?->name ?? '-' }}</x-table.cell>
 
-                            <x-table.cell class="px-4 py-2">{{ $transaction->wallet->broker->name }}</x-table.cell>
+                            <x-table.cell class="px-4 py-2">{{ $transaction->wallet->broker->name ?? '-' }}</x-table.cell>
 
                             <x-table.cell class="px-4 py-2">{{ $transaction->wallet?->name }}</x-table.cell>
 
                             <x-table.cell
-                                class="px-4 py-2  {{ $transaction->type === 'sell' ? 'text-red-500' : 'text-green-500' }}">{{ ucfirst($transaction->type) }}</x-table.cell>
+                                class="px-4 py-2  {{ in_array($transaction->type, ['sell', 'tax'], true) ? 'text-red-500' : 'text-green-500' }}">
+                                {{ str($transaction->type)->replace('_', ' ')->title() }}
+                            </x-table.cell>
 
                             <x-table.cell class="px-4 py-2">{{ $transaction->quantity }}</x-table.cell>
 
                             <x-table.cell
                                 class="px-4 py-2">{{ number_format($transaction->price_per_unit, 2, ',', ' ') }}<span>
-                                    {{ $transaction->asset->exchange->currency ?? $transaction->currency }}</span></x-table.cell>
+                                    {{ $transaction->asset?->exchange?->currency ?? $transaction->currency }}</span></x-table.cell>
 
                             <x-table.cell
                                 class="px-4 py-2">{{ number_format(abs($transaction->total_value), 2, ',', ' ') }}<span>

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 
 class Wallet extends Model
 {
@@ -29,6 +31,11 @@ class Wallet extends Model
         return $this->hasMany(Transaction::class);
     }
 
+    public function ledgers(): HasMany
+    {
+        return $this->hasMany(WalletLedger::class);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -42,6 +49,8 @@ class Wallet extends Model
     public function activeAssetsCollection()
     {
         return $this->transactions()
+            ->whereNotNull('asset_id')
+            ->whereIn('type', ['buy', 'sell'])
             ->selectRaw('asset_id, SUM(quantity) as total_quantity')
             ->groupBy('asset_id')
             ->having('total_quantity', '>', 0)
@@ -84,5 +93,27 @@ class Wallet extends Model
         }
 
         return $realized;
+    }
+
+    public function cashBalance(): float
+    {
+        if (! Schema::hasTable('wallet_ledgers')) {
+            return 0.0;
+        }
+
+        $ledgers = $this->relationLoaded('ledgers')
+            ? $this->ledgers
+            : $this->ledgers()->get();
+
+        return $this->calculateCashBalance($ledgers);
+    }
+
+    protected function calculateCashBalance(Collection $ledgers): float
+    {
+        return (float) $ledgers->sum(function (WalletLedger $ledger) {
+            $amount = (float) $ledger->amount;
+
+            return $ledger->type === 'inflow' ? $amount : -$amount;
+        });
     }
 }

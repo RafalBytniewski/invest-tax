@@ -24,12 +24,18 @@ class TransactionFormModal extends Component
     public $total_value = 0;
     public $date = null;
     public $notes = null;
+    public bool $affects_wallet_balance = true;
+    public $total_fees = 0;
+    public $attachments = null;
 
     public array $wallets = [];
     public array $assets = [];
     public array $types = [
         'buy' => 'Buy',
         'sell' => 'Sell',
+        'dividend' => 'Dividend',
+        'crypto_reward' => 'Crypto Reward',
+        'tax' => 'Tax',
     ];
 
     protected $listeners = [
@@ -84,6 +90,7 @@ class TransactionFormModal extends Component
         $this->price_per_unit = (float) $transaction->price_per_unit;
         $this->date = optional($transaction->date)->format('Y-m-d');
         $this->notes = $transaction->notes;
+        $this->affects_wallet_balance = (bool) $transaction->affects_wallet_balance;
         $this->recalculateTotalValue();
         $this->resetValidation();
         $this->showModal = true;
@@ -102,13 +109,18 @@ class TransactionFormModal extends Component
                 'required',
                 Rule::exists('wallets', 'id')->where(fn ($query) => $query->where('user_id', Auth::id())),
             ],
-            'asset' => 'required|exists:assets,id',
-            'type' => 'required|in:buy,sell',
+            'asset' => [
+                Rule::requiredIf($this->type !== 'tax'),
+                'nullable',
+                'exists:assets,id',
+            ],
+            'type' => 'required|in:buy,sell,dividend,crypto_reward,tax',
             'currency' => 'required|string|size:3',
             'quantity' => 'required|numeric|gt:0',
             'price_per_unit' => 'required|numeric|gte:0',
             'date' => 'required|date',
             'notes' => 'nullable|string|max:500',
+            'affects_wallet_balance' => 'required|boolean',
         ]);
 
         $baseTotalValue = (float) $validated['quantity'] * (float) $validated['price_per_unit'];
@@ -121,9 +133,13 @@ class TransactionFormModal extends Component
             $validated['total_value'] = abs($baseTotalValue);
         }
 
+        $affectsWalletBalance = $validated['type'] === 'buy'
+            ? (bool) $validated['affects_wallet_balance']
+            : true;
+
         $payload = [
             'wallet_id' => (int) $validated['wallet'],
-            'asset_id' => (int) $validated['asset'],
+            'asset_id' => $validated['asset'] !== null ? (int) $validated['asset'] : null,
             'type' => $validated['type'],
             'currency' => strtoupper($validated['currency']),
             'quantity' => $validated['quantity'],
@@ -131,6 +147,7 @@ class TransactionFormModal extends Component
             'total_value' => $validated['total_value'],
             'date' => $validated['date'],
             'notes' => $validated['notes'] ?? null,
+            'affects_wallet_balance' => $affectsWalletBalance,
         ];
 
         if ($this->editingTransactionId !== null) {
@@ -158,7 +175,19 @@ class TransactionFormModal extends Component
         $this->total_value = 0;
         $this->date = now()->format('Y-m-d');
         $this->notes = null;
+        $this->affects_wallet_balance = true;
         $this->resetValidation();
+    }
+
+    public function updatedType($value): void
+    {
+        if ($value !== 'buy') {
+            $this->affects_wallet_balance = true;
+        }
+
+        if ($value === 'tax') {
+            $this->asset = null;
+        }
     }
 
     protected function recalculateTotalValue(): void

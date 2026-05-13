@@ -1,4 +1,9 @@
 <div class="mx-auto w-full max-w-[1600px] space-y-6 sm:px-6 lg:px-8">
+    @php
+        $largestWallet = $wallets->sortByDesc(fn($wallet) => $wallet->cashBalance())->first();
+        $bestWallet = $wallets->sortByDesc(fn($wallet) => $wallet->realizedPL())->first();
+        $totalCash = $wallets->sum(fn($wallet) => $wallet->cashBalance());
+    @endphp
 
     <section class="rounded-xl bg-white dark:bg-zinc-900 sm:p-6">
         <div class="flex flex-col gap-5">
@@ -16,7 +21,7 @@
                     <p class="text-xs text-gray-500 dark:text-zinc-400">Wallets</p>
 
                     <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
-                        4
+                        {{ $wallets->count() }}
                     </p>
 
                     <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
@@ -29,11 +34,11 @@
                     <p class="text-xs text-gray-500 dark:text-zinc-400">Largest wallet</p>
 
                     <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
-                        Test wallet
+                        {{ $largestWallet?->name ?? '-' }}
                     </p>
 
                     <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-                        Broker
+                        {{ $largestWallet?->broker?->name ?? 'No broker' }}
                     </p>
 
                 </div>
@@ -42,24 +47,24 @@
                     <p class="text-xs text-gray-500 dark:text-zinc-400">Best</p>
 
                     <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
-                        Wallet name
+                        {{ $bestWallet?->name ?? '-' }}
                     </p>
 
                     <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-                        PROFT
+                        {{ $bestWallet ? number_format($bestWallet->realizedPL(), 2, ',', ' ') . ' ' . $bestWallet->currency : '-' }}
                     </p>
 
                 </div>
                 {{-- ?? --}}
                 <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
-                    <p class="text-xs text-gray-500 dark:text-zinc-400">??</p>
+                    <p class="text-xs text-gray-500 dark:text-zinc-400">Cash balance</p>
 
                     <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
-                        ??
+                        {{ number_format($totalCash, 2, ',', ' ') }}
                     </p>
 
                     <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-                        ??
+                        all wallets
                     </p>
 
                 </div>
@@ -81,6 +86,11 @@
                     </div>
 
                     <div class="flex flex-wrap gap-2">
+                        <button
+                            wire:click="$dispatch('openWalletLedgerFormModal', { walletId: {{ $wallet->id }} })"
+                            class="rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                            Manage funds
+                        </button>
                         <span
                             class="rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
                             Currency: {{ $wallet->currency }}
@@ -96,24 +106,24 @@
                     </div>
                 </div>
 
-                <div class="grid gap-3 sm:grid-cols-2 xl:min-w-[420px] xl:grid-cols-4">
+                <div class="grid gap-3 sm:grid-cols-2 xl:min-w-[520px] xl:grid-cols-5">
                     <div
                         class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
                         <p class="text-xs text-gray-500 dark:text-zinc-400">Assets</p>
                         <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-zinc-100">
-                            {{ $wallet->active_assets_count }}</p>
+                            {{ $wallet->activeAssetsCollection()->count() }}</p>
                     </div>
                     <div
                         class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
                         <p class="text-xs text-gray-500 dark:text-zinc-400">Transactions</p>
                         <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-zinc-100">
-                            {{ $wallet->transactions_count }}</p>
+                            {{ $wallet->transactions->count() }}</p>
                     </div>
                     <div
                         class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
                         <p class="text-xs text-gray-500 dark:text-zinc-400">Invested</p>
                         <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-zinc-100">
-                            {{ number_format($wallet->invested_total, 2, ',', ' ') }} {{ $wallet->currency }}
+                            {{ number_format($wallet->transactions->where('type', 'buy')->sum('total_value'), 2, ',', ' ') }} {{ $wallet->currency }}
                         </p>
                     </div>
                     <div
@@ -121,6 +131,13 @@
                         <p class="text-xs text-gray-500 dark:text-zinc-400">Realized P/L</p>
                         <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-zinc-100">
                             {{ number_format($wallet->realizedPL(), 2, ',', ' ') }} {{ $wallet->currency }}
+                        </p>
+                    </div>
+                    <div
+                        class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                        <p class="text-xs text-gray-500 dark:text-zinc-400">Cash Balance</p>
+                        <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-zinc-100">
+                            {{ number_format($wallet->cashBalance(), 2, ',', ' ') }} {{ $wallet->currency }}
                         </p>
                     </div>
                 </div>
@@ -308,4 +325,6 @@
             </div>
         </section>
     @endforeach
+
+    <livewire:wallet-ledger-form-modal />
 </div>

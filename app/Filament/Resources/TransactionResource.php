@@ -14,6 +14,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -24,8 +25,6 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Tables\Columns\NumericColumn;
 
 class TransactionResource extends Resource
 {
@@ -44,7 +43,8 @@ class TransactionResource extends Resource
                         ->relationship('wallet', 'name'),
                     Select::make('asset_id')
     ->label('Asset')
-    ->required()
+    ->required(fn (callable $get) => $get('type') !== 'tax')
+    ->nullable()
     ->searchable()
     ->preload(false)
     ->extraAttributes([
@@ -85,7 +85,8 @@ class TransactionResource extends Resource
                             'buy' => 'Buy',
                             'sell' => 'Sell',
                             'dividend' => 'Dividend',
-                            'crypto_reward' => 'Crypto reward'
+                            'crypto_reward' => 'Crypto reward',
+                            'tax' => 'Tax',
                         ]),
                     Select::make('reward_type')
                         ->options([
@@ -130,6 +131,11 @@ class TransactionResource extends Resource
                             }
                             return filled($get('currency_type'));
                         }),
+                    Toggle::make('affects_wallet_balance')
+                        ->label('Deduct funds from wallet')
+                        ->helperText('For buy only. Disable if the deposit was not added to the app yet.')
+                        ->default(true)
+                        ->visible(fn (callable $get) => $get('type') === 'buy'),
                 ])->columns(2),
                 Section::make('Transaction Details')->schema([
                     TextInput::make('quantity')
@@ -265,13 +271,15 @@ class TransactionResource extends Resource
                         'buy' => 'success',
                         'sell' => 'danger',
                         'dividend' => 'primary',
-                        'crypto_reward' => 'primary'
+                        'crypto_reward' => 'primary',
+                        'tax' => 'danger',
                     })
                     ->formatStateUsing(fn(string $state): string => match ($state) {
                         'buy' => 'Buy',
                         'sell' => 'Sell',
                         'dividend' => 'Dividend',
-                        'crypto_reward' => 'Crypto Reward'
+                        'crypto_reward' => 'Crypto Reward',
+                        'tax' => 'Tax',
                     }),
                 TextColumn::make('reward_type')
                     ->label('Reward Type')
