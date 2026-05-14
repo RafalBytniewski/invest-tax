@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Asset;
 
 use App\Models\Asset;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
-class Assets extends Component
+class Index extends Component
 {
     public $type = null;
     public $exchange = null;
@@ -47,7 +47,7 @@ class Assets extends Component
             ->havingRaw('SUM(quantity) > 0')
             ->pluck('asset_id');
 
-        return view('livewire.assets', [
+        return view('livewire.asset.index', [
             'assets' => $assets,
             'activeAssets' => $assets->whereIn('id', $activeAssetIds)->values(),
         ]);
