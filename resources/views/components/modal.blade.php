@@ -1,3 +1,11 @@
+@props([
+    'wallets' => [],
+    'assets' => [],
+    'types' => [],
+    'mode' => 'new',
+    'transactionType' => null,
+])
+
 <div x-data="{ open: @entangle('showModal') }" x-show="open" x-cloak x-transition.opacity.duration.200ms
     x-on:keydown.escape.window="open = false" class="fixed inset-0 z-50 flex items-center justify-center p-4">
     <div x-show="open" x-transition.opacity class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
@@ -23,7 +31,7 @@
             <div class="grid grid-cols-1 gap-4">
                 <x-form.section label="Transaction Context" columns="sm:grid-cols-3">
                     <x-form.select model="wallet" label="Wallet" :options="$wallets" required />
-                    @if ($type !== 'tax')
+                    @if ($transactionType !== 'tax')
                         <x-form.select model="asset" label="Asset" :options="$assets" required />
                     @else
                         <div class="rounded-xl border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-500 dark:border-slate-600 dark:text-slate-300">
@@ -43,7 +51,7 @@
                     <x-form.input type="date" model="date" label="Date" required />
                 </x-form.section>
 
-                @if ($type === 'buy')
+                @if ($transactionType === 'buy')
                     <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/40">
                         <label class="flex items-start gap-3">
                             <input type="checkbox" wire:model="affects_wallet_balance"

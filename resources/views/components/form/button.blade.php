@@ -1,3 +1,3 @@
-<button {{ $attributes->merge(['class' => 'rounded font-bold py-2 px-4 border']) }}>
+<button {{ $attributes->merge(['class' => 'inline-flex min-h-11 items-center justify-center rounded-xl border px-4 py-2 text-sm font-semibold transition']) }}>
     {{ $slot }}
 </button>

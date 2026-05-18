@@ -1,3 +1,3 @@
-<form {{ $attributes->merge(['class' => 'max-w-2xl mx-auto']) }}>
+<form {{ $attributes->merge(['class' => 'mx-auto w-full max-w-3xl']) }}>
     {{ $slot }}
 </form>

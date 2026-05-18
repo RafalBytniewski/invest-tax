@@ -4,12 +4,15 @@
         @click="open = false"></div>
 
     <div x-show="open" x-transition.scale.origin.center.duration.200ms @click.stop
-            class="relative w-full max-w-xl rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800">
+            class="relative w-full max-w-2xl overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800">
         <div
-            class="flex items-center justify-between border-b border-slate-200 bg-white/95 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/95">
+            class="flex items-center justify-between border-b border-slate-200 bg-white/95 px-6 py-5 dark:border-slate-700 dark:bg-slate-800/95">
             <div>
-                <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Manage Funds</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-300">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                    Wallet Ledger
+                </p>
+                <h1 class="mt-1 text-2xl font-semibold text-slate-900 dark:text-slate-100">Manage Funds</h1>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-300">
                     {{ $walletName }} {{ $walletCurrency ? '(' . $walletCurrency . ')' : '' }}
                 </p>
             </div>
@@ -25,6 +28,22 @@
 
         <x-form wire:submit.prevent="save" class="max-w-none p-4 md:p-6">
             <div class="grid grid-cols-1 gap-4">
+                <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-4 dark:border-slate-700 dark:bg-slate-900/50">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                Selected Wallet
+                            </p>
+                            <p class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+                                {{ $walletName ?? 'Wallet' }}
+                            </p>
+                        </div>
+                        <span class="inline-flex w-fit rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                            {{ $walletCurrency ?? 'N/A' }}
+                        </span>
+                    </div>
+                </div>
+
                 <x-form.section label="Ledger Entry" columns="sm:grid-cols-2">
                     <x-form.select model="source" label="Action" :options="[
                         'manual_deposit' => 'Deposit',
@@ -46,7 +65,7 @@
                 </x-form.button>
                 <x-form.button type="submit"
                     class="w-full border-emerald-700 bg-emerald-700 text-white hover:border-emerald-600 hover:bg-emerald-600 sm:w-auto">
-                    Save
+                    Save Entry
                 </x-form.button>
             </div>
         </x-form>

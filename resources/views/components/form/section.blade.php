@@ -1,9 +1,14 @@
-@props(['label'])
+@props([
+    'label',
+    'columns' => 'sm:grid-cols-2',
+])
 
-<div class="bg-white dark:bg-gray-600 rounded-lg  border-gray-200 dark:border-gray-900 p-4 md:p-6 m-2">
-    <h2 class="text-lg font-semibold mb-4">{{ $label }}</h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
+<div {{ $attributes->merge(['class' => 'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/60 md:p-5']) }}>
+    <h2 class="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-slate-900 dark:text-slate-100">
+        {{ $label }}
+    </h2>
+
+    <div class="{{ 'grid grid-cols-1 gap-4 ' . $columns }}">
         {{ $slot }}
     </div>
 </div>
