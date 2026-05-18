@@ -53,7 +53,7 @@ class Show extends Component
     public function mount(Asset $asset, AssetCalculator $calculator, ExchangeRateService $rate)
     {
         $this->getTVAssetSymbol($asset);
-        
+
         $data = Transaction::forUserAssets(Auth::id(), $this->asset->id)
             ->selectRaw('
                 SUM(CASE WHEN type = "buy" THEN total_value ELSE 0 END) as buy_value,
@@ -63,76 +63,76 @@ class Show extends Component
                 COUNT(CASE WHEN type = "buy" THEN 1 END) as buy_transaction,
                 COUNT(CASE WHEN type = "sell" THEN 1 END) as sell_transaction
             ')->first();
-$totalQuantity = $data->buy_qty + $data->sell_qty;
+        $totalQuantity = $data->buy_qty + $data->sell_qty;
 
-if ($data->buy_transaction == 0 && $data->sell_transaction == 0) {
-    $this->average = '-';
-    $this->quantity = 0;
-    $this->sellTransaction = 0;
-    $this->buyTransaction = 0;
-    $this->positionValue = null;
-    $this->realizedPL = 0;
-    $this->currentPL = 0;
+        if ($data->buy_transaction == 0 && $data->sell_transaction == 0) {
+            $this->average = '-';
+            $this->quantity = 0;
+            $this->sellTransaction = 0;
+            $this->buyTransaction = 0;
+            $this->positionValue = null;
+            $this->realizedPL = 0;
+            $this->currentPL = 0;
 
-    return;
-}
+            return;
+        }
 
-$this->sellTransaction = $data->sell_transaction;
-$this->buyTransaction = $data->buy_transaction;
+        $this->sellTransaction = $data->sell_transaction;
+        $this->buyTransaction = $data->buy_transaction;
 
-$this->average = $calculator->average($data->buy_value, $data->buy_qty);
-$this->quantity = $totalQuantity;
+        $this->average = $calculator->average($data->buy_value, $data->buy_qty);
+        $this->quantity = $totalQuantity;
 
-$this->latestPrice = $asset->assetPrices()->latest('date')->first();
+        $this->latestPrice = $asset->assetPrices()->latest('date')->first();
 
-$this->walletCurrency = Transaction::forUserAssets(Auth::id(), $this->asset->id)
-    ->join('wallets', 'transactions.wallet_id', '=', 'wallets.id')
-    ->value('wallets.currency');
+        $this->walletCurrency = Transaction::forUserAssets(Auth::id(), $this->asset->id)
+            ->join('wallets', 'transactions.wallet_id', '=', 'wallets.id')
+            ->value('wallets.currency');
 
-$this->assetCurrency = $asset->asset_type === 'crypto'
-    ? 'USD'
-    : $asset->exchange->currency;
+        $this->assetCurrency = $asset->asset_type === 'crypto'
+            ? 'USD'
+            : $asset->exchange->currency;
 
-if ($this->quantity == 0) {
-    $this->positionValue = 0;
-    $this->currentPL = 0;
-} else {
-    if ($this->latestPrice !== null) {
-        if ($this->walletCurrency == $this->assetCurrency) {
-            $this->positionValue = $calculator->positionValue(
-                $this->latestPrice->close_price,
-                $this->quantity
-            );
+        if ($this->quantity == 0) {
+            $this->positionValue = 0;
+            $this->currentPL = 0;
         } else {
-            $currencyRate = $rate->getCurrencyPrice(
-                $this->assetCurrency,
-                $this->latestPrice->date
-            );
-
-            if ($currencyRate !== null) {
-                $this->positionValue =
-                    $currencyRate *
-                    $calculator->positionValue(
+            if ($this->latestPrice !== null) {
+                if ($this->walletCurrency == $this->assetCurrency) {
+                    $this->positionValue = $calculator->positionValue(
                         $this->latestPrice->close_price,
                         $this->quantity
                     );
+                } else {
+                    $currencyRate = $rate->getCurrencyPrice(
+                        $this->assetCurrency,
+                        $this->latestPrice->date
+                    );
+
+                    if ($currencyRate !== null) {
+                        $this->positionValue =
+                            $currencyRate *
+                            $calculator->positionValue(
+                                $this->latestPrice->close_price,
+                                $this->quantity
+                            );
+                    } else {
+                        $this->positionValue = '-';
+                    }
+                }
             } else {
-                $this->positionValue = '-';
+                $this->positionValue = null;
             }
+
+            $this->currentPL =
+                $this->positionValue - ($this->average * $this->quantity);
         }
-    } else {
-        $this->positionValue = null;
-    }
 
-    $this->currentPL =
-        $this->positionValue - ($this->average * $this->quantity);
-}
-
-$this->realizedPL = $calculator->realizedPL(
-    $data->sell_value,
-    $data->sell_qty,
-    $this->average
-);
+        $this->realizedPL = $calculator->realizedPL(
+            $data->sell_value,
+            $data->sell_qty,
+            $this->average
+        );
     }
 
     public function render()
