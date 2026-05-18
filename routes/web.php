@@ -4,6 +4,7 @@ use App\Livewire\Asset\Index;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use App\Livewire\Wallet\Show as WalletShow;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\MyTransactions;
 use App\Livewire\MyWallets;
@@ -26,7 +27,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/my-transactions', MyTransactions::class)->name('my-transactions');
     Route::get('/assets', Index::class)->name('assets');
     Route::get('/assets/{asset}', Show::class)->name('assets.show');
-    Route::get('/my-walletss', MyWallets::class)->name('my-wallets');
+    Route::get('/my-wallets', MyWallets::class)->name('my-wallets');
+    Route::get('/my-wallets/{wallet}', WalletShow::class)->name('wallets.show');
 
 });
 
