@@ -63,49 +63,76 @@ class Show extends Component
                 COUNT(CASE WHEN type = "buy" THEN 1 END) as buy_transaction,
                 COUNT(CASE WHEN type = "sell" THEN 1 END) as sell_transaction
             ')->first();
-        if (($data->buy_qty + $data->sell_qty) == 0) {
-            $this->average = '-';
-            $this->quantity = 0;
-            $this->sellTransaction = 0;
-            $this->buyTransaction = 0;
-            $this->positionValue = null;
-            return;
-        }
-        $this->sellTransaction = $data->sell_transaction;
-        $this->buyTransaction = $data->buy_transaction;
+$totalQuantity = $data->buy_qty + $data->sell_qty;
 
-        $this->average = $calculator->average($data->buy_value, $data->buy_qty);
-        $this->quantity = $data->buy_qty + $data->sell_qty;
+if ($data->buy_transaction == 0 && $data->sell_transaction == 0) {
+    $this->average = '-';
+    $this->quantity = 0;
+    $this->sellTransaction = 0;
+    $this->buyTransaction = 0;
+    $this->positionValue = null;
+    $this->realizedPL = 0;
+    $this->currentPL = 0;
 
-        $this->latestPrice = $asset->assetPrices()->latest('date')->first();
+    return;
+}
 
-        $this->walletCurrency = Transaction::forUserAssets(Auth::id(), $this->asset->id)
-            ->join('wallets', 'transactions.wallet_id', '=', 'wallets.id')
-            ->value('wallets.currency');
+$this->sellTransaction = $data->sell_transaction;
+$this->buyTransaction = $data->buy_transaction;
 
-        if ($asset->asset_type === 'crypto') {
-            $this->assetCurrency = 'USD';
+$this->average = $calculator->average($data->buy_value, $data->buy_qty);
+$this->quantity = $totalQuantity;
+
+$this->latestPrice = $asset->assetPrices()->latest('date')->first();
+
+$this->walletCurrency = Transaction::forUserAssets(Auth::id(), $this->asset->id)
+    ->join('wallets', 'transactions.wallet_id', '=', 'wallets.id')
+    ->value('wallets.currency');
+
+$this->assetCurrency = $asset->asset_type === 'crypto'
+    ? 'USD'
+    : $asset->exchange->currency;
+
+if ($this->quantity == 0) {
+    $this->positionValue = 0;
+    $this->currentPL = 0;
+} else {
+    if ($this->latestPrice !== null) {
+        if ($this->walletCurrency == $this->assetCurrency) {
+            $this->positionValue = $calculator->positionValue(
+                $this->latestPrice->close_price,
+                $this->quantity
+            );
         } else {
-            $this->assetCurrency = $asset->exchange->currency;
-        }
+            $currencyRate = $rate->getCurrencyPrice(
+                $this->assetCurrency,
+                $this->latestPrice->date
+            );
 
-        if ($this->latestPrice !== null) {
-            if ($this->walletCurrency == $this->assetCurrency) {
-                $this->positionValue = $calculator->positionValue($this->latestPrice->close_price, $this->quantity);
+            if ($currencyRate !== null) {
+                $this->positionValue =
+                    $currencyRate *
+                    $calculator->positionValue(
+                        $this->latestPrice->close_price,
+                        $this->quantity
+                    );
             } else {
-                $currencyRate = $rate->getCurrencyPrice($this->assetCurrency, $this->latestPrice->date);
-                if($currencyRate !== null){ 
-                    $this->positionValue = $currencyRate * ($calculator->positionValue($this->latestPrice->close_price, $this->quantity));
-                }else{
-                    $this->positionValue = '-';
-                }
+                $this->positionValue = '-';
             }
-        } else {
-            $this->positionValue = null;
         }
+    } else {
+        $this->positionValue = null;
+    }
 
-        $this->currentPL = $this->positionValue - ($this->average*$this->quantity);
-        $this->realizedPL = $calculator->realizedPL($data->sell_value, $data->sell_qty, $this->average);
+    $this->currentPL =
+        $this->positionValue - ($this->average * $this->quantity);
+}
+
+$this->realizedPL = $calculator->realizedPL(
+    $data->sell_value,
+    $data->sell_qty,
+    $this->average
+);
     }
 
     public function render()
