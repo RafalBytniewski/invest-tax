@@ -75,9 +75,9 @@
                         <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
                             {{ $wallet->broker?->name ?? 'No broker' }}
                         </p>
-                        <h2 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                        <a href="{{ route('my-wallet.show', $wallet) }}" wire:navigate class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                             {{ $wallet->name }}
-                        </h2>
+                        </a>
                     </div>
 
                     <div class="flex flex-wrap gap-2">
