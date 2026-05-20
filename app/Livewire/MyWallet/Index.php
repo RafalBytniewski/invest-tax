@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\MyWallet;
 
 use Livewire\Component;
 use App\Models\Wallet;
 use App\Services\MarketData\StockPriceService;
 
-class MyWallets extends Component
+class Index extends Component
 {
     public $price = [];
 
@@ -42,6 +42,6 @@ class MyWallets extends Component
 
     public function render()
     {
-        return view('livewire.my-wallets');
+        return view('livewire.my-wallet.index');
     }
 }
