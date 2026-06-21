@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wallet_transactions', function (Blueprint $table) {
+        Schema::create('wallet_ledgers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('wallet_id')
                 ->constrained()
@@ -41,6 +41,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('wallet_transactions');
+        Schema::dropIfExists('wallet_ledgers');
     }
 };

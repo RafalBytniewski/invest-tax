@@ -48,6 +48,11 @@ class Transaction extends Model
         return $this->hasMany(Fee::class);
     }
 
+    public function wallet_ledgers(): HasMany
+    {
+        return $this->hasMany(WalletLedger::class);
+    }
+    
     public function scopeSearch($query, $value)
     {
         $query->where(function ($q) use ($value) {

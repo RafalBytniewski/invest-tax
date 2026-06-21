@@ -39,6 +39,11 @@ class Wallet extends Model
         return $this->belongsTo(Broker::class);
     }
 
+    public function wallet_ledgers(): HasMany
+    {
+        return $this->hasMany(WalletLedger::class);
+    }
+
     public function activeAssetsCollection()
     {
         return $this->transactions()
