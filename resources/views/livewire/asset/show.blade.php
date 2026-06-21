@@ -1,6 +1,16 @@
 <div class="mx-auto w-full max-w-[1600px] space-y-6 sm:px-6 lg:px-8">
     {{-- ASSET DETAIL --}}
     <section class="rounded-xl bg-white dark:bg-zinc-900 sm:p-6">
+        @error('currency')
+            <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
+                {{ $message }}
+            </div>
+        @enderror
+        @error('transactions')
+            <div class="mb-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-950/30 dark:text-red-200">
+                {{ $message }}
+            </div>
+        @enderror
         <div class="flex flex-col gap-5">
             <div class="space-y-2">
                 <h1 class="text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white sm:text-4xl">
@@ -37,7 +47,7 @@
             <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
                 <p class="text-xs text-gray-500 dark:text-zinc-400">Position Value</p>
 
-                @if ($positionValue !== null)
+                @if ($positionValue !== null && $walletCurrency !== null)
                     <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
                         {{ number_format($positionValue, 2, '.', ' ') }}
                         <span class="text-sm text-gray-500 dark:text-zinc-400">{{ $walletCurrency }}</span>
@@ -76,13 +86,14 @@
             <div class="rounded-xl border border-purple-200 bg-gray-50 p-4 dark:border-purple-700 dark:bg-zinc-800">
                 <p class="text-xs text-gray-500 dark:text-zinc-400">Current P/L</p>
 
-                @if ($currentPL !== 0 && $positionValue !== null)
+                @if ($currentPL !== null && $positionValue !== null)
                     <p
                         class="text-xl font-semibold @if ($currentPL > 0) text-green-500 @elseif($currentPL < 0) text-red-500 @else text-gray-500 @endif">
                         {{ number_format($currentPL, 2, '.', ' ') }}
                         <span class="text-sm">{{ $walletCurrency }}</span>
-                        -
-                        {{ abs(number_format($currentPL / $positionValue, 2, '.', ' ') * 100) }} %
+                        @if ($costBasis > 0)
+                            - {{ number_format(($currentPL / $costBasis) * 100, 2, '.', ' ') }} %
+                        @endif
                     </p>
 
                     <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
@@ -99,7 +110,7 @@
 
                 @if ($realizedPL !== 0)
                     <p
-                        class="text-xl font-semibold @if ($realizedPL > 0) text-green-500 @elseif($currentPL < 0) text-red-500 @else text-gray-500 @endif">
+                        class="text-xl font-semibold @if ($realizedPL > 0) text-green-500 @elseif($realizedPL < 0) text-red-500 @else text-gray-500 @endif">
                         {{ number_format($realizedPL, 2, '.', ' ') }}
                         <span class="text-sm">{{ $walletCurrency }}</span>
                     </p>
