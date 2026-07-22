@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Services\Asset\AssetCalculator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Wallet extends Model
 {
@@ -21,7 +23,7 @@ class Wallet extends Model
         'description',
         'user_id',
         'currency',
-        'broker_id'
+        'broker_id',
     ];
 
     public function transactions(): HasMany
@@ -44,9 +46,10 @@ class Wallet extends Model
         return $this->hasMany(WalletLedger::class);
     }
 
-    public function activeAssetsCollection()
+    public function activeAssetsCollection(): Collection
     {
         return $this->transactions()
+            ->whereIn('type', ['buy', 'sell'])
             ->selectRaw('asset_id, SUM(quantity) as total_quantity')
             ->groupBy('asset_id')
             ->having('total_quantity', '>', 0)
@@ -56,38 +59,47 @@ class Wallet extends Model
             ->values();
     }
 
-
-    public function averageBuyPrice($assetId)
+    /**
+     * Return the FIFO summary of one asset held in this wallet.
+     *
+     * @return array{
+     *     quantity: float,
+     *     cost_basis: float,
+     *     average: ?float,
+     *     realized_pl: float,
+     *     buy_count: int,
+     *     sell_count: int
+     * }
+     */
+    public function assetSummary(int $assetId): array
     {
-        $buy = $this->transactions()
+        $transactions = $this->transactions()
             ->where('asset_id', $assetId)
-            ->where('type', 'buy');
+            ->whereIn('type', ['buy', 'sell'])
+            ->orderBy('date')
+            ->orderBy('id')
+            ->get();
 
-        $quantity = $buy->sum('quantity');
-        if ($quantity == 0) {
-            return 0;
-        }
-
-        return $buy->sum('total_value') / $quantity;
+        return app(AssetCalculator::class)->calculate($transactions);
     }
 
-
-    public function realizedPL()
+    public function averageBuyPrice(int $assetId): float
     {
-        $realized = 0;
+        return (float) ($this->assetSummary($assetId)['average'] ?? 0.0);
+    }
 
-        foreach ($this->transactions->where('type', 'sell') as $t) {
-            $avg = $this->averageBuyPrice($t->asset_id);
+    public function realizedPL(): float
+    {
+        $calculator = app(AssetCalculator::class);
+        $transactionsByAsset = $this->transactions()
+            ->whereIn('type', ['buy', 'sell'])
+            ->orderBy('date')
+            ->orderBy('id')
+            ->get()
+            ->groupBy('asset_id');
 
-            // bierzemy ABS, żeby ignorować minus w bazie
-            $sellQuantity = abs($t->quantity);
-            $sellTotal = abs($t->total_value);
-
-            $sellPrice = $sellTotal / $sellQuantity;
-
-            $realized += ($sellPrice - $avg) * $sellQuantity;
-        }
-
-        return $realized;
+        return (float) $transactionsByAsset->sum(
+            fn (Collection $transactions): float => $calculator->calculate($transactions)['realized_pl']
+        );
     }
 }
