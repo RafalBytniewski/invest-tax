@@ -39,18 +39,36 @@ class Show extends Component
     public function saveFunds(): void
     {
         $validated = $this->validate([
-            'fundType' => ['required', Rule::in(['deposit', 'withdraw'])],
-            'fundAmount' => ['required', 'numeric', 'gt:0'],
+            'fundType' => ['required', Rule::in(['deposit', 'withdraw', 'correction'])],
+            'fundAmount' => [
+                'required',
+                'numeric',
+                $this->fundType === 'correction' ? 'gte:0' : 'gt:0',
+            ],
             'fundDate' => ['required', 'date'],
-            'fundNotes' => ['nullable', 'string', 'max:500'],
+            'fundNotes' => [Rule::requiredIf($this->fundType === 'correction'), 'nullable', 'string', 'max:500'],
         ]);
 
         $amount = abs((float) $validated['fundAmount']);
 
+        if ($validated['fundType'] === 'withdraw') {
+            $amount = -$amount;
+        }
+
+        if ($validated['fundType'] === 'correction') {
+            $amount = (float) $validated['fundAmount'] - $this->wallet->cashBalance();
+
+            if (abs($amount) < 0.00000001) {
+                $this->addError('fundAmount', 'The actual balance already matches the tracked balance.');
+
+                return;
+            }
+        }
+
         WalletLedger::create([
             'wallet_id' => $this->wallet->id,
             'type' => $validated['fundType'],
-            'amount' => $validated['fundType'] === 'withdraw' ? -$amount : $amount,
+            'amount' => $amount,
             'date' => $validated['fundDate'],
             'notes' => $validated['fundNotes'] ?? null,
         ]);
@@ -92,6 +110,10 @@ class Show extends Component
 
     public function render()
     {
+        // Livewire rehydrates Eloquent models from database attributes only, so this
+        // calculated value must be restored after every component request.
+        $this->wallet->setAttribute('cash_balance', $this->wallet->cashBalance());
+
         return view('livewire.my-wallet.show', [
             'transactions' => $this->wallet->transactions->take(10),
             'walletLedgers' => $this->wallet->walletLedgers->take(15),

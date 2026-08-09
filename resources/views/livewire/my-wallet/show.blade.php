@@ -79,10 +79,19 @@
 
             @if ($showFundsForm)
                 <form wire:submit="saveFunds" class="mt-4 grid gap-3 border-t border-gray-200 pt-4 dark:border-zinc-700 sm:grid-cols-2 lg:grid-cols-4">
-                    <x-form.select model="fundType" label="Type" :options="['deposit' => 'Deposit', 'withdraw' => 'Withdraw']" />
-                    <x-form.input type="number" model="fundAmount" label="Amount" step="0.01" min="0.01" :suffix="$wallet->currency" />
+                    <x-form.select model="fundType" wireModifier="live" label="Type" :options="['deposit' => 'Deposit', 'withdraw' => 'Withdraw', 'correction' => 'Correction']" />
+                    <div>
+                        <x-form.input type="number" model="fundAmount" wireModifier="live.debounce.300ms" :label="$fundType === 'correction' ? 'Actual cash balance' : 'Amount'" step="0.01" :min="$fundType === 'correction' ? '0' : '0.01'" :suffix="$wallet->currency" />
+                        @if ($fundType === 'correction' && is_numeric($fundAmount))
+                            @php($correctionAmount = (float) $fundAmount - $wallet->cash_balance)
+                            <p class="-mt-3 mb-5 text-xs text-gray-500 dark:text-zinc-400">
+                                Tracked: {{ number_format($wallet->cash_balance, 2, ',', ' ') }} {{ $wallet->currency }}
+                                &rarr; correction: {{ $correctionAmount > 0 ? '+' : '' }}{{ number_format($correctionAmount, 2, ',', ' ') }} {{ $wallet->currency }}
+                            </p>
+                        @endif
+                    </div>
                     <x-form.input type="date" model="fundDate" label="Date" />
-                    <x-form.input model="fundNotes" label="Notes" />
+                    <x-form.input model="fundNotes" :label="$fundType === 'correction' ? 'Notes (required)' : 'Notes'" />
 
                     <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-4">
                         <button type="submit"

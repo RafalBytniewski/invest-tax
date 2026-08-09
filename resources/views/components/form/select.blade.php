@@ -3,6 +3,7 @@
     'label',
     'options' => [],
     'value' => null,
+    'wireModifier' => null,
 ])
 
 <div class="relative z-0 w-full mb-5 group">
@@ -12,7 +13,7 @@
     </label>
 
     <select
-        wire:model="{{ $model }}"
+        wire:model{{ $wireModifier ? ".{$wireModifier}" : '' }}="{{ $model }}"
         id="{{ $model }}"
         {{ $attributes
             ->merge([

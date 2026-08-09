@@ -23,6 +23,7 @@ return new class extends Migration
             $table->enum('type', [
                 'deposit',
                 'withdraw',
+                'correction',
                 'buy',
                 'sell',
                 'dividend',
