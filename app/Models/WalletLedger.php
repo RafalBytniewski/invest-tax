@@ -21,11 +21,21 @@ class WalletLedger extends Model
         'date',
         'notes',
         'wallet_id',
-        'transaction_id'
+        'transaction_id',
+    ];
+
+    protected $casts = [
+        'amount' => 'decimal:8',
+        'date' => 'datetime',
     ];
 
     public function wallet(): BelongsTo
     {
         return $this->belongsTo(Wallet::class);
+    }
+
+    public function transaction(): BelongsTo
+    {
+        return $this->belongsTo(Transaction::class);
     }
 }

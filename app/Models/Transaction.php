@@ -26,7 +26,7 @@ class Transaction extends Model
         'date',
         'notes',
         'wallet_id',
-        'asset_id'
+        'asset_id',
     ];
 
     protected $casts = [
@@ -48,11 +48,16 @@ class Transaction extends Model
         return $this->hasMany(Fee::class);
     }
 
-    public function wallet_ledgers(): HasMany
+    public function walletLedgers(): HasMany
     {
         return $this->hasMany(WalletLedger::class);
     }
-    
+
+    public function wallet_ledgers(): HasMany
+    {
+        return $this->walletLedgers();
+    }
+
     public function scopeSearch($query, $value)
     {
         $query->where(function ($q) use ($value) {
@@ -71,7 +76,8 @@ class Transaction extends Model
         });
     }
 
-    public function scopeForUserAssets($query, $userId , $assetId){
+    public function scopeForUserAssets($query, $userId, $assetId)
+    {
         return $query
             ->where('asset_id', $assetId)
             ->whereHas('wallet', function ($q) use ($userId) {

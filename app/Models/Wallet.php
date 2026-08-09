@@ -21,7 +21,7 @@ class Wallet extends Model
         'description',
         'user_id',
         'currency',
-        'broker_id'
+        'broker_id',
     ];
 
     public function transactions(): HasMany
@@ -39,9 +39,19 @@ class Wallet extends Model
         return $this->belongsTo(Broker::class);
     }
 
-    public function wallet_ledgers(): HasMany
+    public function walletLedgers(): HasMany
     {
         return $this->hasMany(WalletLedger::class);
+    }
+
+    public function wallet_ledgers(): HasMany
+    {
+        return $this->walletLedgers();
+    }
+
+    public function cashBalance(): float
+    {
+        return (float) $this->walletLedgers()->sum('amount');
     }
 
     public function activeAssetsCollection()
@@ -56,7 +66,6 @@ class Wallet extends Model
             ->values();
     }
 
-
     public function averageBuyPrice($assetId)
     {
         $buy = $this->transactions()
@@ -70,7 +79,6 @@ class Wallet extends Model
 
         return $buy->sum('total_value') / $quantity;
     }
-
 
     public function realizedPL()
     {

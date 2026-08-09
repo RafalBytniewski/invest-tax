@@ -61,6 +61,95 @@
                 </p>
             </div>
         </div>
+
+        <div class="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-zinc-400">Cash</p>
+                    <p class="text-2xl font-semibold text-gray-900 dark:text-zinc-100">
+                        {{ number_format($wallet->cash_balance, 2, ',', ' ') }} {{ $wallet->currency }}
+                    </p>
+                </div>
+
+                <button type="button" wire:click="toggleFundsForm"
+                    class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-white dark:border-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-700">
+                    Manage funds
+                </button>
+            </div>
+
+            @if ($showFundsForm)
+                <form wire:submit="saveFunds" class="mt-4 grid gap-3 border-t border-gray-200 pt-4 dark:border-zinc-700 sm:grid-cols-2 lg:grid-cols-4">
+                    <x-form.select model="fundType" label="Type" :options="['deposit' => 'Deposit', 'withdraw' => 'Withdraw']" />
+                    <x-form.input type="number" model="fundAmount" label="Amount" step="0.01" min="0.01" :suffix="$wallet->currency" />
+                    <x-form.input type="date" model="fundDate" label="Date" />
+                    <x-form.input model="fundNotes" label="Notes" />
+
+                    <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-4">
+                        <button type="submit"
+                            class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300">
+                            Save
+                        </button>
+                        <button type="button" wire:click="toggleFundsForm"
+                            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-white dark:border-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-700">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            @endif
+        </div>
+    </section>
+
+    <section class="rounded-xl bg-white dark:bg-zinc-900 sm:p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-zinc-100">Cash ledger</h2>
+        <div class="mt-3 overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead
+                    class="border-b border-gray-200 text-left text-xs uppercase text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
+                    <tr>
+                        <th class="px-2 py-2">Date</th>
+                        <th class="px-2 py-2">Type</th>
+                        <th class="px-2 py-2">Source</th>
+                        <th class="px-2 py-2">Notes</th>
+                        <th class="px-2 py-2 text-right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($walletLedgers as $ledger)
+                        <tr class="border-b border-gray-100 dark:border-zinc-800">
+                            <td class="px-2 py-2 text-gray-700 dark:text-zinc-200">
+                                {{ $ledger->date->format('Y-m-d') }}
+                            </td>
+                            <td class="px-2 py-2">
+                                <span
+                                    class="rounded px-2 py-0.5 text-xs font-semibold {{ $ledger->amount < 0 ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' }}">
+                                    {{ strtoupper($ledger->type) }}
+                                </span>
+                            </td>
+                            <td class="px-2 py-2 text-gray-700 dark:text-zinc-200">
+                                @if ($ledger->transaction)
+                                    {{ $ledger->transaction->asset?->symbol ?? 'Transaction' }}
+                                @else
+                                    Manual
+                                @endif
+                            </td>
+                            <td class="px-2 py-2 text-gray-700 dark:text-zinc-200">
+                                {{ $ledger->notes ?: '-' }}
+                            </td>
+                            <td class="px-2 py-2 text-right font-semibold {{ $ledger->amount < 0 ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300' }}">
+                                {{ number_format($ledger->amount, 2, ',', ' ') }}
+                                <span class="text-xs text-gray-500 dark:text-zinc-400">{{ $wallet->currency }}</span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-2 py-4 text-sm text-gray-500 dark:text-zinc-400">
+                                No cash ledger entries yet.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </section>
 
     <section class="rounded-xl bg-white dark:bg-zinc-900 sm:p-6">
