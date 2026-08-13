@@ -8,26 +8,59 @@ use Illuminate\Support\Facades\DB;
 
 class AssetImportService
 {
-    public function import(string $filePath, string $type): void
-    {
-        DB::transaction(function () use ($filePath, $type) {
+    public function import(
+        string $filePath,
+        string $type,
+        bool $reset = false,
+        ?callable $onProgress = null
+    ): array {
+        return DB::transaction(function () use (
+            $filePath,
+            $type,
+            $reset,
+            $onProgress
+        ) {
+            $assetType = $this->mapAssetType($type);
 
-            $json = json_decode(file_get_contents($filePath), true);
+            if ($reset) {
+                $this->reset($assetType);
+            }
+
+            $json = json_decode(
+                file_get_contents($filePath),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
+
+            $totalAssets = count($json);
+            $currentAsset = 0;
+
+            $newAssets = 0;
+            $existingAssets = 0;
+            $pricesProcessed = 0;
+            $assetsWithoutPrices = [];
 
             foreach ($json as $item) {
+                $currentAsset++;
 
                 $asset = Asset::firstOrNew([
-                    'symbol' => $item['symbol']
+                    'symbol' => $item['symbol'],
+                    'asset_type' => $assetType,
                 ]);
 
-                // zawsze ustaw jeśli nowy rekord
                 if (!$asset->exists) {
+                    $newAssets++;
+
                     $asset->name = $item['name'];
-                    $asset->asset_type = $type;
-                    $asset->exchange_id = $this->mapExchange($item['exchange'] ?? null);
+                    $asset->exchange_id = $this->mapExchange(
+                        $item['exchange'] ?? null
+                    );
+                } else {
+                    $existingAssets++;
                 }
 
-                // update tylko gdy null w DB
+                // Update only when null in DB
                 if (is_null($asset->sector) && !empty($item['sector'])) {
                     $asset->sector = $item['sector'];
                 }
@@ -36,15 +69,20 @@ class AssetImportService
                     $asset->industry = $item['industry'];
                 }
 
-                // opcjonalnie update name jeśli pusty
+                // Update name if empty
                 if (empty($asset->name) && !empty($item['name'])) {
                     $asset->name = $item['name'];
                 }
 
                 $asset->save();
 
-                foreach ($item['prices'] as $price) {
+                $prices = $item['prices'] ?? [];
 
+                if (empty($prices)) {
+                    $assetsWithoutPrices[] = $asset->symbol;
+                }
+
+                foreach ($prices as $price) {
                     AssetPrice::updateOrCreate(
                         [
                             'asset_id' => $asset->id,
@@ -55,21 +93,49 @@ class AssetImportService
                             'close_price' => $price['close'],
                         ]
                     );
+
+                    $pricesProcessed++;
+                }
+
+                if ($onProgress) {
+                    $onProgress(
+                        $currentAsset,
+                        $totalAssets,
+                        $asset->symbol
+                    );
                 }
             }
+
+            return [
+                'new_assets' => $newAssets,
+                'existing_assets' => $existingAssets,
+                'prices_processed' => $pricesProcessed,
+                'assets_without_prices' => $assetsWithoutPrices,
+            ];
         });
     }
 
-    public function reset(string $type): void
+    public function reset(string $assetType): void
     {
-        DB::transaction(function () use ($type) {
+        $assetIds = Asset::where('asset_type', $assetType)->pluck('id');
 
-            $assetIds = Asset::where('asset_type', $type)->pluck('id');
+        AssetPrice::whereIn('asset_id', $assetIds)->delete();
 
-            AssetPrice::whereIn('asset_id', $assetIds)->delete();
+        Asset::where('asset_type', $assetType)->delete();
+    }
 
-            Asset::where('asset_type', $type)->delete();
-        });
+    private function mapAssetType(string $type): string
+    {
+        return match ($type) {
+            'us-stock',
+            'eu-stock',
+            'pl-stock' => 'stock',
+
+            'etf' => 'etf',
+            'crypto' => 'crypto',
+
+            default => $type,
+        };
     }
 
     private function mapExchange(?string $exchange): ?int
@@ -86,7 +152,7 @@ class AssetImportService
             'XETRA' => 4,
             'NYSE' => 5,
             'XPAR' => 6,
-            default => null
+            default => null,
         };
     }
 }
