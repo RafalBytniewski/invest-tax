@@ -38,6 +38,10 @@ class Show extends Component
 
     public int $buyTransaction = 0;
 
+    public array $chartData = [];
+
+    public array $chartTransactions = [];
+
     protected function getTVAssetSymbol(Asset $asset): void
     {
         $this->assetSymbol = $asset->asset_type === 'crypto'
@@ -49,6 +53,32 @@ class Show extends Component
     {
         $this->asset = $asset->loadMissing('exchange');
         $this->getTVAssetSymbol($this->asset);
+        $this->assetCurrency = $this->asset->asset_type === 'crypto'
+            ? 'USD'
+            : $this->asset->exchange?->currency;
+        $this->latestPrice = $this->asset->assetPrices()->latest('date')->first();
+
+        $this->chartData = $this->asset->assetPrices()
+            ->orderBy('date')
+            ->get(['date', 'close_price'])
+            ->map(fn ($price) => [
+                'date' => (string) $price->date,
+                'close_price' => (float) $price->close_price,
+            ])
+            ->toArray();
+
+        $this->chartTransactions = Transaction::forUserAssets(Auth::id(), $this->asset->id)
+            ->orderBy('date')
+            ->get(['id', 'type', 'date', 'price_per_unit', 'quantity', 'currency'])
+            ->map(fn (Transaction $transaction) => [
+                'id' => $transaction->id,
+                'type' => $transaction->type,
+                'date' => $transaction->date->format('Y-m-d'),
+                'price' => (float) $transaction->price_per_unit,
+                'quantity' => abs((float) $transaction->quantity),
+                'currency' => $transaction->currency,
+            ])
+            ->toArray();
 
         $transactions = Transaction::forUserAssets(Auth::id(), $this->asset->id)
             ->whereIn('type', ['buy', 'sell'])
