@@ -1,6 +1,6 @@
-<div class="mx-auto w-full max-w-[1600px] space-y-6 sm:px-6 lg:px-8">
+<div class="mx-auto w-full max-w-[1600px] space-y-6 px-4 sm:px-6 lg:px-8">
     {{-- ASSET DETAIL --}}
-    <section class="rounded-xl bg-white dark:bg-zinc-900 sm:p-6">
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
         @error('currency')
             <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
                 {{ $message }}
@@ -12,8 +12,8 @@
             </div>
         @enderror
         <div class="flex flex-col gap-5">
-            <div class="space-y-2">
-                <h1 class="text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+            <div>
+                <h1 class="text-2xl font-bold uppercase tracking-tight text-gray-900 dark:text-white sm:text-3xl lg:text-4xl">
                     {{ $asset->name }}
                 </h1>
             </div>
@@ -44,126 +44,138 @@
 
         <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {{-- Position Value --}}
-            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Position Value</p>
+            <div class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Position Value</p>
+
+                    @if ($positionValue !== null && $walletCurrency !== null)
+                        <p class="mt-1 text-2xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-zinc-50">
+                            {{ number_format($positionValue, 2, '.', ' ') }}
+                            <span class="text-sm font-semibold text-gray-500 dark:text-zinc-400">{{ $walletCurrency }}</span>
+                        </p>
+                    @else
+                        <p class="mt-1 text-2xl font-bold tracking-tight text-gray-400 dark:text-zinc-600">-</p>
+                    @endif
+                </div>
 
                 @if ($positionValue !== null && $walletCurrency !== null)
-                    <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
-                        {{ number_format($positionValue, 2, '.', ' ') }}
-                        <span class="text-sm text-gray-500 dark:text-zinc-400">{{ $walletCurrency }}</span>
-                        -
-                        {{ $quantity }}
-                        <span class="text-sm text-gray-500 dark:text-zinc-400">{{ $asset->symbol }}</span>
-                    </p>
-
-                    <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-                        {{ $latestPrice?->date }}
-                    </p>
-                @else
-                    <p class="text-xl font-semibold text-gray-400 dark:text-zinc-500">-</p>
+                    <div class="mt-3 flex items-center justify-between border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
+                        <span class="font-medium text-gray-700 dark:text-zinc-300">{{ $quantity }} {{ $asset->symbol }}</span>
+                        @if ($latestPrice?->date)
+                            <span>{{ $latestPrice->date }}</span>
+                        @endif
+                    </div>
                 @endif
             </div>
 
             {{-- Average Buy Price --}}
-            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Average Buy Price</p>
+            <div class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Average Buy Price</p>
 
-                @if (is_numeric($average))
-                    <p class="text-xl font-semibold text-gray-900 dark:text-zinc-100">
-                        {{ $average }}
-                        <span class="text-sm text-gray-500 dark:text-zinc-400">{{ $walletCurrency }}</span>
-                    </p>
+                    @if (is_numeric($average))
+                        <p class="mt-1 text-2xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-zinc-50">
+                            {{ number_format((float) $average, 2, '.', ' ') }}
+                            <span class="text-sm font-semibold text-gray-500 dark:text-zinc-400">{{ $walletCurrency }}</span>
+                        </p>
+                    @else
+                        <p class="mt-1 text-2xl font-bold tracking-tight text-gray-400 dark:text-zinc-600">-</p>
+                    @endif
+                </div>
 
-                    <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-                        based on {{ $buyTransaction }} buys
-                    </p>
-                @else
-                    <p class="text-xl font-semibold text-gray-400 dark:text-zinc-500">-</p>
-                @endif
+                <div class="mt-3 border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
+                    @if (is_numeric($average))
+                        <span>based on <strong class="font-semibold text-gray-700 dark:text-zinc-300">{{ $buyTransaction }}</strong> {{ $buyTransaction === 1 ? 'buy' : 'buys' }}</span>
+                    @else
+                        <span>No purchase history</span>
+                    @endif
+                </div>
             </div>
 
             {{-- Current P/L --}}
-            <div class="rounded-xl border border-purple-200 bg-gray-50 p-4 dark:border-purple-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Current P/L</p>
-
-                @if ($currentPL !== null && $positionValue !== null)
-                    <p
-                        class="text-xl font-semibold @if ($currentPL > 0) text-green-500 @elseif($currentPL < 0) text-red-500 @else text-gray-500 @endif">
-                        {{ number_format($currentPL, 2, '.', ' ') }}
-                        <span class="text-sm">{{ $walletCurrency }}</span>
-                        @if ($costBasis > 0)
-                            - {{ number_format(($currentPL / $costBasis) * 100, 2, '.', ' ') }} %
+            <div class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                <div>
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Current P/L</p>
+                        @if ($currentPL !== null && $costBasis > 0)
+                            <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums {{ $currentPL >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300' }}">
+                                {{ $currentPL >= 0 ? '+' : '' }}{{ number_format(($currentPL / $costBasis) * 100, 2, '.', ' ') }}%
+                            </span>
                         @endif
-                    </p>
+                    </div>
 
-                    <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-                        {{ $latestPrice?->date }}
-                    </p>
-                @else
-                    <p class="text-xl font-semibold text-gray-400 dark:text-zinc-500">-</p>
-                @endif
+                    @if ($currentPL !== null && $positionValue !== null)
+                        <p class="mt-1 text-2xl font-bold tracking-tight tabular-nums {{ $currentPL > 0 ? 'text-emerald-600 dark:text-emerald-400' : ($currentPL < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-gray-900 dark:text-zinc-50') }}">
+                            {{ $currentPL > 0 ? '+' : '' }}{{ number_format($currentPL, 2, '.', ' ') }}
+                            <span class="text-sm font-semibold opacity-75">{{ $walletCurrency }}</span>
+                        </p>
+                    @else
+                        <p class="mt-1 text-2xl font-bold tracking-tight text-gray-400 dark:text-zinc-600">-</p>
+                    @endif
+                </div>
+
+                <div class="mt-3 border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
+                    @if ($latestPrice?->date)
+                        <span>{{ $latestPrice->date }}</span>
+                    @else
+                        <span>No market price</span>
+                    @endif
+                </div>
             </div>
 
             {{-- Realized P/L --}}
-            <div class="rounded-xl border border-blue-200 bg-gray-50 p-4 dark:border-blue-700 dark:bg-zinc-800">
-                <p class="text-xs text-gray-500 dark:text-zinc-400">Realized P/L</p>
+            <div class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Realized P/L</p>
 
-                @if ($realizedPL !== 0)
-                    <p
-                        class="text-xl font-semibold @if ($realizedPL > 0) text-green-500 @elseif($realizedPL < 0) text-red-500 @else text-gray-500 @endif">
-                        {{ number_format($realizedPL, 2, '.', ' ') }}
-                        <span class="text-sm">{{ $walletCurrency }}</span>
-                    </p>
+                    @if ($realizedPL !== 0)
+                        <p class="mt-1 text-2xl font-bold tracking-tight tabular-nums {{ $realizedPL > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">
+                            {{ $realizedPL > 0 ? '+' : '' }}{{ number_format($realizedPL, 2, '.', ' ') }}
+                            <span class="text-sm font-semibold opacity-75">{{ $walletCurrency }}</span>
+                        </p>
+                    @else
+                        <p class="mt-1 text-2xl font-bold tracking-tight text-gray-400 dark:text-zinc-600">-</p>
+                    @endif
+                </div>
 
-                    <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-                        from {{ $sellTransaction }} sells
-                    </p>
-                @else
-                    <p class="text-xl font-semibold text-gray-400 dark:text-zinc-500">-</p>
-                @endif
+                <div class="mt-3 border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
+                    @if ($realizedPL !== 0)
+                        <span>from <strong class="font-semibold text-gray-700 dark:text-zinc-300">{{ $sellTransaction }}</strong> {{ $sellTransaction === 1 ? 'sell' : 'sells' }}</span>
+                    @else
+                        <span>No sells yet</span>
+                    @endif
+                </div>
             </div>
         </div>
     </section>
     {{-- CHARTS --}}
-    <section class="rounded-xl bg-white dark:bg-zinc-900 sm:p-6" x-data="{ chartType: 'chartjs' }">
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6" x-data="{ chartType: 'chartjs' }">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400">
-                    Market chart
+                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-400">
+                    Market Chart
                 </p>
-                <h2 class="mt-1 text-2xl font-bold text-gray-900 dark:text-zinc-100">
-                    {{ $asset->name }} price history
+                <h2 class="mt-1 text-xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
+                    Price history
                 </h2>
-                <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-                    Close prices from stored market data.
+                <p class="mt-0.5 text-xs text-gray-500 dark:text-zinc-400">
+                    Historical close prices and your buy/sell orders.
                 </p>
             </div>
 
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950/40">
-                    <p class="text-xs font-medium text-gray-500 dark:text-zinc-400">Latest close</p>
-                    <p class="mt-1 text-xl font-semibold text-gray-900 dark:text-zinc-100">
-                        @if ($latestPrice)
-                            {{ number_format($latestPrice->close_price, 2, '.', ' ') }}
-                            <span class="text-sm text-gray-500 dark:text-zinc-400">{{ $assetCurrency }}</span>
-                        @else
-                            -
-                        @endif
-                    </p>
-                </div>
-
+            <div class="w-full sm:w-auto">
                 {{-- Chart Switcher Toggle --}}
-                <div class="inline-flex rounded-xl border border-gray-200 bg-gray-100 p-1 dark:border-zinc-800 dark:bg-zinc-950/60">
+                <div class="grid w-full grid-cols-2 rounded-xl border border-gray-200 bg-gray-100 p-1.5 dark:border-zinc-800 dark:bg-zinc-950/60 sm:inline-flex sm:w-auto">
                     <button type="button"
                         @click="chartType = 'chartjs'; $nextTick(() => { window.initOrResizeAssetPriceChart && window.initOrResizeAssetPriceChart(); })"
                         :class="chartType === 'chartjs' ? 'bg-white text-gray-900 shadow-sm dark:bg-zinc-800 dark:text-white font-semibold' : 'text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white font-medium'"
-                        class="rounded-lg px-3 py-2 text-xs transition">
-                        Chart.js
+                        class="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-center text-sm transition cursor-pointer">
+                        Price History
                     </button>
                     <button type="button"
                         @click="chartType = 'tradingview'; $nextTick(() => { window.initTradingViewWidget && window.initTradingViewWidget(); window.dispatchEvent(new Event('resize')); })"
                         :class="chartType === 'tradingview' ? 'bg-white text-gray-900 shadow-sm dark:bg-zinc-800 dark:text-white font-semibold' : 'text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white font-medium'"
-                        class="rounded-lg px-3 py-2 text-xs transition">
+                        class="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-center text-sm transition cursor-pointer">
                         TradingView
                     </button>
                 </div>
@@ -254,23 +266,23 @@
 
                         <div class="flex flex-wrap gap-2" aria-label="Chart timeframe">
                             <button type="button" data-asset-chart-range="{{ $asset->id }}" data-days="30"
-                                class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-emerald-500 dark:hover:text-emerald-400">
+                                class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-400 hover:text-blue-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-blue-500 dark:hover:text-blue-400">
                                 1M
                             </button>
                             <button type="button" data-asset-chart-range="{{ $asset->id }}" data-days="90"
-                                class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-emerald-500 dark:hover:text-emerald-400">
+                                class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-400 hover:text-blue-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-blue-500 dark:hover:text-blue-400">
                                 3M
                             </button>
                             <button type="button" data-asset-chart-range="{{ $asset->id }}" data-days="180"
-                                class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-emerald-500 dark:hover:text-emerald-400">
+                                class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-400 hover:text-blue-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-blue-500 dark:hover:text-blue-400">
                                 6M
                             </button>
                             <button type="button" data-asset-chart-range="{{ $asset->id }}" data-days="365"
-                                class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-emerald-500 dark:hover:text-emerald-400">
+                                class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-400 hover:text-blue-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-blue-500 dark:hover:text-blue-400">
                                 1Y
                             </button>
                             <button type="button" data-asset-chart-range="{{ $asset->id }}" data-days="all"
-                                class="rounded-lg border border-emerald-500 bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white transition">
+                                class="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition">
                                 ALL
                             </button>
                         </div>
@@ -281,17 +293,17 @@
                     </div>
 
                     <div class="mt-5 grid gap-3 sm:grid-cols-3">
-                        <div class="rounded-lg border border-gray-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-                            <p class="text-xs text-gray-500 dark:text-zinc-400">Range change</p>
-                            <p id="asset-chart-change-{{ $asset->id }}" class="mt-1 text-base font-semibold">-</p>
+                        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Range change</p>
+                            <p id="asset-chart-change-{{ $asset->id }}" class="mt-1.5 text-xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-zinc-100 sm:text-2xl">-</p>
                         </div>
-                        <div class="rounded-lg border border-gray-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-                            <p class="text-xs text-gray-500 dark:text-zinc-400">Low in range</p>
-                            <p id="asset-chart-low-{{ $asset->id }}" class="mt-1 text-base font-semibold text-gray-900 dark:text-zinc-100">-</p>
+                        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Low in range</p>
+                            <p id="asset-chart-low-{{ $asset->id }}" class="mt-1.5 text-xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-zinc-100 sm:text-2xl">-</p>
                         </div>
-                        <div class="rounded-lg border border-gray-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-                            <p class="text-xs text-gray-500 dark:text-zinc-400">High in range</p>
-                            <p id="asset-chart-high-{{ $asset->id }}" class="mt-1 text-base font-semibold text-gray-900 dark:text-zinc-100">-</p>
+                        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">High in range</p>
+                            <p id="asset-chart-high-{{ $asset->id }}" class="mt-1.5 text-xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-zinc-100 sm:text-2xl">-</p>
                         </div>
                     </div>
                 </div>
@@ -372,8 +384,8 @@
                             const setActiveButton = (days) => {
                                 buttons.forEach(button => {
                                     const isActive = button.dataset.days === String(days);
-                                    button.classList.toggle('border-emerald-500', isActive);
-                                    button.classList.toggle('bg-emerald-500', isActive);
+                                    button.classList.toggle('border-blue-600', isActive);
+                                    button.classList.toggle('bg-blue-600', isActive);
                                     button.classList.toggle('text-white', isActive);
                                     button.classList.toggle('border-gray-200', !isActive);
                                     button.classList.toggle('text-gray-600', !isActive);
@@ -397,10 +409,45 @@
                                     : `Last ${days} days: ${first.date} - ${last.date}`;
 
                                 changeValue.textContent = `${isPositive ? '+' : ''}${money.format(change)} ${currency} (${isPositive ? '+' : ''}${percent.format(changePercent)}%)`;
-                                changeValue.classList.toggle('text-emerald-500', isPositive);
-                                changeValue.classList.toggle('text-rose-500', !isPositive);
+                                changeValue.classList.toggle('text-emerald-600', isPositive);
+                                changeValue.classList.toggle('dark:text-emerald-400', isPositive);
+                                changeValue.classList.toggle('text-rose-600', !isPositive);
+                                changeValue.classList.toggle('dark:text-rose-400', !isPositive);
                                 lowValue.textContent = `${money.format(low)} ${currency}`;
                                 highValue.textContent = `${money.format(high)} ${currency}`;
+                            };
+
+                            const calculateRangeDays = (data, days) => {
+                                if (days !== 'all' && !isNaN(Number(days))) {
+                                    return Number(days);
+                                }
+                                if (!data || data.length < 2) {
+                                    return 0;
+                                }
+                                const firstDate = new Date(data[0].date).getTime();
+                                const lastDate = new Date(data[data.length - 1].date).getTime();
+                                return Math.max(0, Math.round((lastDate - firstDate) / (1000 * 60 * 60 * 24)));
+                            };
+
+                            const formatAxisDate = (dateStr, rangeDays) => {
+                                if (!dateStr) return '';
+                                const d = new Date(dateStr);
+                                if (isNaN(d.getTime())) return dateStr;
+
+                                const day = d.getDate();
+                                const monthShort = d.toLocaleDateString('en-US', { month: 'short' });
+                                const year = d.getFullYear();
+
+                                if (rangeDays <= 185) {
+                                    // <= 6 months: D-M (e.g. "15 Mar", "2 Apr")
+                                    return `${day} ${monthShort}`;
+                                } else if (rangeDays <= 370) {
+                                    // 6 months - 1 year: Month (e.g. "Mar '24")
+                                    return `${monthShort} '${String(year).slice(-2)}`;
+                                } else {
+                                    // > 1 year: Month & Year (e.g. "Mar 2024")
+                                    return `${monthShort} ${year}`;
+                                }
                             };
 
                             const xAxisHoverHighlight = {
@@ -414,33 +461,64 @@
 
                                     const { ctx, chartArea, scales } = chart;
                                     const xScale = scales.x;
+                                    const yScale = scales.y;
                                     const activeDataset = chart.data.datasets[activeElement.datasetIndex];
                                     const activePoint = activeDataset?.data?.[activeElement.index];
                                     const hoveredIndex = Math.round(Number(activePoint?.x ?? activeElement.index));
                                     const hoveredValue = Number(activePoint?.y);
-                                    const label = visibleChartData[hoveredIndex]?.date;
+                                    const rawDate = visibleChartData[hoveredIndex]?.date;
 
-                                    if (!label || Number.isNaN(hoveredValue)) {
+                                    if (!rawDate || Number.isNaN(hoveredValue)) {
                                         return;
                                     }
 
                                     const x = xScale.getPixelForValue(hoveredIndex);
-                                    const y = scales.y.getPixelForValue(hoveredValue);
-                                    const valueLabel = `${money.format(hoveredValue)} ${currency}`;
-                                    ctx.save();
-                                    ctx.font = '12px sans-serif';
+                                    const y = yScale.getPixelForValue(hoveredValue);
 
-                                    const labelWidth = ctx.measureText(label).width + 18;
-                                    const labelHeight = 24;
-                                    const valueLabelWidth = ctx.measureText(valueLabel).width + 18;
-                                    const valueLabelHeight = 24;
+                                    // 1. Draw crosshair lines (horizontal & vertical)
+                                    ctx.save();
+                                    ctx.beginPath();
+                                    ctx.rect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+                                    ctx.clip();
+
+                                    ctx.setLineDash([4, 4]);
+                                    ctx.lineWidth = 1;
+                                    ctx.strokeStyle = 'rgba(156, 163, 175, 0.55)';
+
+                                    // Vertical crosshair line
+                                    ctx.beginPath();
+                                    ctx.moveTo(x, chartArea.top);
+                                    ctx.lineTo(x, chartArea.bottom);
+                                    ctx.stroke();
+
+                                    // Horizontal crosshair line
+                                    ctx.beginPath();
+                                    ctx.moveTo(chartArea.left, y);
+                                    ctx.lineTo(chartArea.right, y);
+                                    ctx.stroke();
+                                    ctx.restore();
+
+                                    // 2. Format axis badges
+                                    const dateObj = new Date(rawDate);
+                                    const label = !isNaN(dateObj.getTime())
+                                        ? dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+                                        : rawDate;
+                                    const valueLabel = `${money.format(hoveredValue)} ${currency}`;
+
+                                    ctx.save();
+                                    ctx.font = '500 11px sans-serif';
+
+                                    const labelWidth = ctx.measureText(label).width + 16;
+                                    const labelHeight = 22;
+                                    const valueLabelWidth = ctx.measureText(valueLabel).width + 16;
+                                    const valueLabelHeight = 22;
                                     const labelX = Math.min(
                                         Math.max(x - labelWidth / 2, chartArea.left),
                                         chartArea.right - labelWidth,
                                     );
-                                    const labelY = xScale.top + 6;
+                                    const labelY = xScale.top + 5;
                                     const valueLabelX = Math.min(
-                                        Math.max(scales.y.left + 4, 0),
+                                        Math.max(yScale.left + 4, 0),
                                         chart.width - valueLabelWidth - 2,
                                     );
                                     const valueLabelY = Math.min(
@@ -448,19 +526,13 @@
                                         chartArea.bottom - valueLabelHeight,
                                     );
 
-                                    ctx.fillStyle = '#22c55e';
+                                    ctx.fillStyle = '#2563eb';
                                     ctx.beginPath();
                                     if (ctx.roundRect) {
-                                        ctx.roundRect(labelX, labelY, labelWidth, labelHeight, 6);
+                                        ctx.roundRect(labelX, labelY, labelWidth, labelHeight, 5);
+                                        ctx.roundRect(valueLabelX, valueLabelY, valueLabelWidth, valueLabelHeight, 5);
                                     } else {
                                         ctx.rect(labelX, labelY, labelWidth, labelHeight);
-                                    }
-                                    ctx.fill();
-
-                                    ctx.beginPath();
-                                    if (ctx.roundRect) {
-                                        ctx.roundRect(valueLabelX, valueLabelY, valueLabelWidth, valueLabelHeight, 6);
-                                    } else {
                                         ctx.rect(valueLabelX, valueLabelY, valueLabelWidth, valueLabelHeight);
                                     }
                                     ctx.fill();
@@ -486,12 +558,13 @@
                                             x: index,
                                             y: point.close_price,
                                         })),
-                                        borderColor: '#22c55e',
-                                        backgroundColor: 'rgba(34, 197, 94, 0.12)',
+                                        borderColor: '#3b82f6',
+                                        backgroundColor: 'rgba(59, 130, 246, 0.10)',
                                         borderWidth: 2,
                                         tension: 0.25,
                                         pointRadius: 0,
                                         fill: true,
+                                        order: 2,
                                     }, {
                                         type: 'scatter',
                                         label: 'Buy',
@@ -499,8 +572,9 @@
                                         backgroundColor: '#22c55e',
                                         borderColor: '#ffffff',
                                         borderWidth: 2,
-                                        pointRadius: 5,
-                                        pointHoverRadius: 7,
+                                        pointRadius: 6,
+                                        pointHoverRadius: 8,
+                                        order: 0,
                                     }, {
                                         type: 'scatter',
                                         label: 'Sell',
@@ -508,8 +582,9 @@
                                         backgroundColor: '#f43f5e',
                                         borderColor: '#ffffff',
                                         borderWidth: 2,
-                                        pointRadius: 5,
-                                        pointHoverRadius: 7,
+                                        pointRadius: 6,
+                                        pointHoverRadius: 8,
+                                        order: 0,
                                     }],
                                 },
                                 options: {
@@ -534,7 +609,11 @@
                                                 maxRotation: 0,
                                                 autoSkip: true,
                                                 maxTicksLimit: 8,
-                                                callback: value => chartData[Math.round(value)]?.date ?? '',
+                                                callback: value => {
+                                                    const point = chartData[Math.round(value)];
+                                                    if (!point) return '';
+                                                    return formatAxisDate(point.date, calculateRangeDays(chartData, 'all'));
+                                                },
                                             },
                                             grid: {
                                                 color: 'rgba(161, 161, 170, 0.12)',
@@ -592,6 +671,8 @@
                                 if (!chart) return;
                                 visibleChartData = data;
 
+                                const rangeDays = calculateRangeDays(data, days);
+
                                 chart.data.datasets[0].data = data.map((point, index) => ({
                                     x: index,
                                     y: point.close_price,
@@ -599,7 +680,11 @@
                                 chart.data.datasets[1].data = transactionsForRange(data, 'buy');
                                 chart.data.datasets[2].data = transactionsForRange(data, 'sell');
                                 chart.options.scales.x.max = Math.max(data.length - 1, 0);
-                                chart.options.scales.x.ticks.callback = value => data[Math.round(value)]?.date ?? '';
+                                chart.options.scales.x.ticks.callback = value => {
+                                    const point = data[Math.round(value)];
+                                    if (!point) return '';
+                                    return formatAxisDate(point.date, rangeDays);
+                                };
                                 chart.update();
 
                                 setActiveButton(days);
@@ -637,9 +722,19 @@
         </div>
     </section>
     {{-- TRANSACTIONS --}}
-    <section class="rounded-xl bg-white dark:bg-zinc-900 sm:p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-zinc-100">Your recent transactions</h2>
-        <div class="mt-3 overflow-x-auto">
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-400">
+                Activity
+            </p>
+            <h2 class="mt-1 text-xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
+                Recent transactions
+            </h2>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-zinc-400">
+                All recorded purchases and sales for {{ $asset->name }}.
+            </p>
+        </div>
+        <div class="mt-4 overflow-x-auto">
             <table class="min-w-full text-sm">
                 <thead
                     class="border-b border-gray-200 text-left text-xs uppercase text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
