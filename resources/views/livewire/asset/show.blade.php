@@ -1,19 +1,23 @@
 <div class="mx-auto w-full max-w-[1600px] space-y-6 px-4 sm:px-6 lg:px-8">
     {{-- ASSET DETAIL --}}
-    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
+    <section
+        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
         @error('currency')
-            <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
+            <div
+                class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
                 {{ $message }}
             </div>
         @enderror
         @error('transactions')
-            <div class="mb-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-950/30 dark:text-red-200">
+            <div
+                class="mb-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-950/30 dark:text-red-200">
                 {{ $message }}
             </div>
         @enderror
         <div class="flex flex-col gap-5">
             <div>
-                <h1 class="text-2xl font-bold uppercase tracking-tight text-gray-900 dark:text-white sm:text-3xl lg:text-4xl">
+                <h1
+                    class="text-2xl font-bold uppercase tracking-tight text-gray-900 dark:text-white sm:text-3xl lg:text-4xl">
                     {{ $asset->name }}
                 </h1>
             </div>
@@ -44,14 +48,17 @@
 
         <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {{-- Position Value --}}
-            <div class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+            <div
+                class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
                 <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Position Value</p>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
+                        Position Value</p>
 
                     @if ($positionValue !== null && $walletCurrency !== null)
                         <p class="mt-1 text-2xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-zinc-50">
                             {{ number_format($positionValue, 2, '.', ' ') }}
-                            <span class="text-sm font-semibold text-gray-500 dark:text-zinc-400">{{ $walletCurrency }}</span>
+                            <span
+                                class="text-sm font-semibold text-gray-500 dark:text-zinc-400">{{ $walletCurrency }}</span>
                         </p>
                     @else
                         <p class="mt-1 text-2xl font-bold tracking-tight text-gray-400 dark:text-zinc-600">-</p>
@@ -59,8 +66,10 @@
                 </div>
 
                 @if ($positionValue !== null && $walletCurrency !== null)
-                    <div class="mt-3 flex items-center justify-between border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
-                        <span class="font-medium text-gray-700 dark:text-zinc-300">{{ $quantity }} {{ $asset->symbol }}</span>
+                    <div
+                        class="mt-3 flex items-center justify-between border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
+                        <span class="font-medium text-gray-700 dark:text-zinc-300">{{ $quantity }}
+                            {{ $asset->symbol }}</span>
                         @if ($latestPrice?->date)
                             <span>{{ $latestPrice->date }}</span>
                         @endif
@@ -69,23 +78,29 @@
             </div>
 
             {{-- Average Buy Price --}}
-            <div class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+            <div
+                class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
                 <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Average Buy Price</p>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
+                        Average Buy Price</p>
 
                     @if (is_numeric($average))
                         <p class="mt-1 text-2xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-zinc-50">
                             {{ number_format((float) $average, 2, '.', ' ') }}
-                            <span class="text-sm font-semibold text-gray-500 dark:text-zinc-400">{{ $walletCurrency }}</span>
+                            <span
+                                class="text-sm font-semibold text-gray-500 dark:text-zinc-400">{{ $walletCurrency }}</span>
                         </p>
                     @else
                         <p class="mt-1 text-2xl font-bold tracking-tight text-gray-400 dark:text-zinc-600">-</p>
                     @endif
                 </div>
 
-                <div class="mt-3 border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
+                <div
+                    class="mt-3 border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
                     @if (is_numeric($average))
-                        <span>based on <strong class="font-semibold text-gray-700 dark:text-zinc-300">{{ $buyTransaction }}</strong> {{ $buyTransaction === 1 ? 'buy' : 'buys' }}</span>
+                        <span>based on <strong
+                                class="font-semibold text-gray-700 dark:text-zinc-300">{{ $buyTransaction }}</strong>
+                            {{ $buyTransaction === 1 ? 'buy' : 'buys' }}</span>
                     @else
                         <span>No purchase history</span>
                     @endif
@@ -93,19 +108,23 @@
             </div>
 
             {{-- Current P/L --}}
-            <div class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+            <div
+                class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
                 <div>
                     <div class="flex items-center justify-between gap-2">
-                        <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Current P/L</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
+                            Current P/L</p>
                         @if ($currentPL !== null && $costBasis > 0)
-                            <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums {{ $currentPL >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300' }}">
+                            <span
+                                class="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums {{ $currentPL >= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300' }}">
                                 {{ $currentPL >= 0 ? '+' : '' }}{{ number_format(($currentPL / $costBasis) * 100, 2, '.', ' ') }}%
                             </span>
                         @endif
                     </div>
 
                     @if ($currentPL !== null && $positionValue !== null)
-                        <p class="mt-1 text-2xl font-bold tracking-tight tabular-nums {{ $currentPL > 0 ? 'text-emerald-600 dark:text-emerald-400' : ($currentPL < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-gray-900 dark:text-zinc-50') }}">
+                        <p
+                            class="mt-1 text-2xl font-bold tracking-tight tabular-nums {{ $currentPL > 0 ? 'text-emerald-600 dark:text-emerald-400' : ($currentPL < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-gray-900 dark:text-zinc-50') }}">
                             {{ $currentPL > 0 ? '+' : '' }}{{ number_format($currentPL, 2, '.', ' ') }}
                             <span class="text-sm font-semibold opacity-75">{{ $walletCurrency }}</span>
                         </p>
@@ -114,7 +133,8 @@
                     @endif
                 </div>
 
-                <div class="mt-3 border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
+                <div
+                    class="mt-3 border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
                     @if ($latestPrice?->date)
                         <span>{{ $latestPrice->date }}</span>
                     @else
@@ -124,12 +144,15 @@
             </div>
 
             {{-- Realized P/L --}}
-            <div class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+            <div
+                class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
                 <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Realized P/L</p>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
+                        Realized P/L</p>
 
-                    @if ($realizedPL !== 0)
-                        <p class="mt-1 text-2xl font-bold tracking-tight tabular-nums {{ $realizedPL > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">
+                    @if ($sellTransaction > 0)
+                        <p
+                            class="mt-1 text-2xl font-bold tracking-tight tabular-nums {{ $realizedPL > 0 ? 'text-emerald-600 dark:text-emerald-400' : ($realizedPL < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-gray-900 dark:text-zinc-50') }}">
                             {{ $realizedPL > 0 ? '+' : '' }}{{ number_format($realizedPL, 2, '.', ' ') }}
                             <span class="text-sm font-semibold opacity-75">{{ $walletCurrency }}</span>
                         </p>
@@ -138,9 +161,12 @@
                     @endif
                 </div>
 
-                <div class="mt-3 border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
-                    @if ($realizedPL !== 0)
-                        <span>from <strong class="font-semibold text-gray-700 dark:text-zinc-300">{{ $sellTransaction }}</strong> {{ $sellTransaction === 1 ? 'sell' : 'sells' }}</span>
+                <div
+                    class="mt-3 border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
+                    @if ($sellTransaction > 0)
+                        <span>from <strong
+                                class="font-semibold text-gray-700 dark:text-zinc-300">{{ $sellTransaction }}</strong>
+                            {{ $sellTransaction === 1 ? 'sell' : 'sells' }}</span>
                     @else
                         <span>No sells yet</span>
                     @endif
@@ -149,7 +175,9 @@
         </div>
     </section>
     {{-- CHARTS --}}
-    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6" x-data="{ chartType: 'chartjs' }">
+    <section
+        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6"
+        x-data="{ chartType: 'chartjs' }">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-400">
@@ -165,16 +193,21 @@
 
             <div class="w-full sm:w-auto">
                 {{-- Chart Switcher Toggle --}}
-                <div class="grid w-full grid-cols-2 rounded-xl border border-gray-200 bg-gray-100 p-1.5 dark:border-zinc-800 dark:bg-zinc-950/60 sm:inline-flex sm:w-auto">
+                <div
+                    class="grid w-full grid-cols-2 rounded-xl border border-gray-200 bg-gray-100 p-1.5 dark:border-zinc-800 dark:bg-zinc-950/60 sm:inline-flex sm:w-auto">
                     <button type="button"
                         @click="chartType = 'chartjs'; $nextTick(() => { window.initOrResizeAssetPriceChart && window.initOrResizeAssetPriceChart(); })"
-                        :class="chartType === 'chartjs' ? 'bg-white text-gray-900 shadow-sm dark:bg-zinc-800 dark:text-white font-semibold' : 'text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white font-medium'"
+                        :class="chartType === 'chartjs' ?
+                            'bg-white text-gray-900 shadow-sm dark:bg-zinc-800 dark:text-white font-semibold' :
+                            'text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white font-medium'"
                         class="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-center text-sm transition cursor-pointer">
                         Price History
                     </button>
                     <button type="button"
                         @click="chartType = 'tradingview'; $nextTick(() => { window.initTradingViewWidget && window.initTradingViewWidget(); window.dispatchEvent(new Event('resize')); })"
-                        :class="chartType === 'tradingview' ? 'bg-white text-gray-900 shadow-sm dark:bg-zinc-800 dark:text-white font-semibold' : 'text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white font-medium'"
+                        :class="chartType === 'tradingview' ?
+                            'bg-white text-gray-900 shadow-sm dark:bg-zinc-800 dark:text-white font-semibold' :
+                            'text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white font-medium'"
                         class="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-center text-sm transition cursor-pointer">
                         TradingView
                     </button>
@@ -184,7 +217,8 @@
 
         {{-- TradingView Chart Container --}}
         <div x-show="chartType === 'tradingview'" x-cloak class="mt-6">
-            <div wire:ignore class="overflow-hidden rounded-xl border border-gray-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-950/40">
+            <div wire:ignore
+                class="overflow-hidden rounded-xl border border-gray-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-950/40">
                 <div id="tv-container" class="tradingview-widget-container">
                     <div class="tradingview-widget-container__widget"></div>
                 </div>
@@ -196,7 +230,8 @@
                 let tvLoaded = false;
                 const initTradingView = () => {
                     const container = document.querySelector("#tv-container");
-                    if (!container || tvLoaded || container.querySelector("iframe") || container.querySelector("script[src*='tradingview']")) {
+                    if (!container || tvLoaded || container.querySelector("iframe") || container.querySelector(
+                            "script[src*='tradingview']")) {
                         return;
                     }
                     const symbol = "{{ $assetSymbol }}";
@@ -243,13 +278,16 @@
         {{-- Chart.js Chart Container --}}
         <div x-show="chartType === 'chartjs'" x-cloak class="mt-6">
             @if (!empty($chartData))
-                <div wire:ignore class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                <div wire:ignore
+                    class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
                     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
+                            <p
+                                class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
                                 Stored close price
                             </p>
-                            <p id="asset-chart-range-label-{{ $asset->id }}" class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
+                            <p id="asset-chart-range-label-{{ $asset->id }}"
+                                class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
                                 All available data
                             </p>
                             <div class="mt-3 flex flex-wrap gap-4 text-xs font-medium text-gray-500 dark:text-zinc-400">
@@ -293,17 +331,36 @@
                     </div>
 
                     <div class="mt-5 grid gap-3 sm:grid-cols-3">
-                        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
-                            <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Range change</p>
-                            <p id="asset-chart-change-{{ $asset->id }}" class="mt-1.5 text-xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-zinc-100 sm:text-2xl">-</p>
+                        <div
+                            class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
+                            <div class="flex items-center justify-between gap-2">
+                                <p
+                                    class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
+                                    Range change</p>
+                                <span id="asset-chart-change-badge-{{ $asset->id }}"
+                                    class="hidden inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums"></span>
+                            </div>
+                            <p id="asset-chart-change-{{ $asset->id }}"
+                                class="mt-1 text-2xl font-bold tracking-tight tabular-nums text-gray-400 dark:text-zinc-600">
+                                -</p>
                         </div>
-                        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
-                            <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Low in range</p>
-                            <p id="asset-chart-low-{{ $asset->id }}" class="mt-1.5 text-xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-zinc-100 sm:text-2xl">-</p>
+                        <div
+                            class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
+                            <p
+                                class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
+                                Low in range</p>
+                            <p id="asset-chart-low-{{ $asset->id }}"
+                                class="mt-1 text-2xl font-bold tracking-tight tabular-nums text-gray-400 dark:text-zinc-600">
+                                -</p>
                         </div>
-                        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
-                            <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">High in range</p>
-                            <p id="asset-chart-high-{{ $asset->id }}" class="mt-1.5 text-xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-zinc-100 sm:text-2xl">-</p>
+                        <div
+                            class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
+                            <p
+                                class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
+                                High in range</p>
+                            <p id="asset-chart-high-{{ $asset->id }}"
+                                class="mt-1 text-2xl font-bold tracking-tight tabular-nums text-gray-400 dark:text-zinc-600">
+                                -</p>
                         </div>
                     </div>
                 </div>
@@ -352,7 +409,8 @@
                                 const target = new Date(transactionDate).getTime();
 
                                 return data.reduce((closestIndex, point, index) => {
-                                    const closestDistance = Math.abs(new Date(data[closestIndex].date).getTime() - target);
+                                    const closestDistance = Math.abs(new Date(data[closestIndex].date).getTime() -
+                                        target);
                                     const currentDistance = Math.abs(new Date(point.date).getTime() - target);
 
                                     return currentDistance < closestDistance ? index : closestIndex;
@@ -404,11 +462,12 @@
                                 const changePercent = first.close_price !== 0 ? (change / first.close_price) * 100 : 0;
                                 const isPositive = change >= 0;
 
-                                rangeLabel.textContent = days === 'all'
-                                    ? `${first.date} - ${last.date}`
-                                    : `Last ${days} days: ${first.date} - ${last.date}`;
+                                rangeLabel.textContent = days === 'all' ?
+                                    `${first.date} - ${last.date}` :
+                                    `Last ${days} days: ${first.date} - ${last.date}`;
 
-                                changeValue.textContent = `${isPositive ? '+' : ''}${money.format(change)} ${currency} (${isPositive ? '+' : ''}${percent.format(changePercent)}%)`;
+                                changeValue.textContent =
+                                    `${isPositive ? '+' : ''}${money.format(change)} ${currency} (${isPositive ? '+' : ''}${percent.format(changePercent)}%)`;
                                 changeValue.classList.toggle('text-emerald-600', isPositive);
                                 changeValue.classList.toggle('dark:text-emerald-400', isPositive);
                                 changeValue.classList.toggle('text-rose-600', !isPositive);
@@ -435,7 +494,9 @@
                                 if (isNaN(d.getTime())) return dateStr;
 
                                 const day = d.getDate();
-                                const monthShort = d.toLocaleDateString('en-US', { month: 'short' });
+                                const monthShort = d.toLocaleDateString('en-US', {
+                                    month: 'short'
+                                });
                                 const year = d.getFullYear();
 
                                 if (rangeDays <= 185) {
@@ -459,7 +520,11 @@
                                         return;
                                     }
 
-                                    const { ctx, chartArea, scales } = chart;
+                                    const {
+                                        ctx,
+                                        chartArea,
+                                        scales
+                                    } = chart;
                                     const xScale = scales.x;
                                     const yScale = scales.y;
                                     const activeDataset = chart.data.datasets[activeElement.datasetIndex];
@@ -478,7 +543,8 @@
                                     // 1. Draw crosshair lines (horizontal & vertical)
                                     ctx.save();
                                     ctx.beginPath();
-                                    ctx.rect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+                                    ctx.rect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea
+                                        .bottom - chartArea.top);
                                     ctx.clip();
 
                                     ctx.setLineDash([4, 4]);
@@ -500,9 +566,13 @@
 
                                     // 2. Format axis badges
                                     const dateObj = new Date(rawDate);
-                                    const label = !isNaN(dateObj.getTime())
-                                        ? dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
-                                        : rawDate;
+                                    const label = !isNaN(dateObj.getTime()) ?
+                                        dateObj.toLocaleDateString('en-US', {
+                                            day: 'numeric',
+                                            month: 'short',
+                                            year: 'numeric'
+                                        }) :
+                                        rawDate;
                                     const valueLabel = `${money.format(hoveredValue)} ${currency}`;
 
                                     ctx.save();
@@ -541,7 +611,8 @@
                                     ctx.textAlign = 'center';
                                     ctx.textBaseline = 'middle';
                                     ctx.fillText(label, labelX + labelWidth / 2, labelY + labelHeight / 2);
-                                    ctx.fillText(valueLabel, valueLabelX + valueLabelWidth / 2, valueLabelY + valueLabelHeight / 2);
+                                    ctx.fillText(valueLabel, valueLabelX + valueLabelWidth / 2, valueLabelY +
+                                        valueLabelHeight / 2);
                                     ctx.restore();
                                 },
                             };
@@ -612,7 +683,8 @@
                                                 callback: value => {
                                                     const point = chartData[Math.round(value)];
                                                     if (!point) return '';
-                                                    return formatAxisDate(point.date, calculateRangeDays(chartData, 'all'));
+                                                    return formatAxisDate(point.date, calculateRangeDays(chartData,
+                                                        'all'));
                                                 },
                                             },
                                             grid: {
@@ -647,7 +719,8 @@
                                                     const item = items[0];
                                                     const transaction = item?.raw?.transaction;
 
-                                                    return transaction?.date ?? visibleChartData[Math.round(item?.parsed.x)]?.date ?? '';
+                                                    return transaction?.date ?? visibleChartData[Math.round(item
+                                                        ?.parsed.x)]?.date ?? '';
                                                 },
                                                 label: context => {
                                                     const transaction = context.raw?.transaction;
@@ -715,14 +788,16 @@
                     })();
                 </script>
             @else
-                <div class="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-300 px-4 text-sm text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
+                <div
+                    class="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-gray-300 px-4 text-sm text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
                     No historical prices to display on the chart.
                 </div>
             @endif
         </div>
     </section>
     {{-- TRANSACTIONS --}}
-    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
+    <section
+        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
         <div>
             <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-400">
                 Activity
