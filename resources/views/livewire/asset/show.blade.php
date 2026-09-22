@@ -286,10 +286,29 @@
                                 class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
                                 Stored close price
                             </p>
-                            <p id="asset-chart-range-label-{{ $asset->id }}"
-                                class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-                                All available data
-                            </p>
+                            <div
+                                class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-gray-500 dark:text-zinc-400">
+                                <span id="asset-chart-range-label-{{ $asset->id }}"
+                                    class="font-medium text-gray-700 dark:text-zinc-200">
+                                    All available data
+                                </span>
+                                <span class="text-gray-300 dark:text-zinc-700">/</span>
+                                <span class="text-xs">
+                                    Change
+                                    <span id="asset-chart-change-{{ $asset->id }}"
+                                        class="ml-1 font-semibold tabular-nums text-gray-400 dark:text-zinc-600">-</span>
+                                </span>
+                                <span class="text-xs">
+                                    Low
+                                    <span id="asset-chart-low-{{ $asset->id }}"
+                                        class="ml-1 font-semibold tabular-nums text-gray-400 dark:text-zinc-600">-</span>
+                                </span>
+                                <span class="text-xs">
+                                    High
+                                    <span id="asset-chart-high-{{ $asset->id }}"
+                                        class="ml-1 font-semibold tabular-nums text-gray-400 dark:text-zinc-600">-</span>
+                                </span>
+                            </div>
                             <div class="mt-3 flex flex-wrap gap-4 text-xs font-medium text-gray-500 dark:text-zinc-400">
                                 <span class="inline-flex items-center gap-2">
                                     <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
@@ -329,40 +348,6 @@
                     <div class="mt-5 h-[380px]">
                         <canvas id="asset-price-chart-{{ $asset->id }}"></canvas>
                     </div>
-
-                    <div class="mt-5 grid gap-3 sm:grid-cols-3">
-                        <div
-                            class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
-                            <div class="flex items-center justify-between gap-2">
-                                <p
-                                    class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
-                                    Range change</p>
-                                <span id="asset-chart-change-badge-{{ $asset->id }}"
-                                    class="hidden inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums"></span>
-                            </div>
-                            <p id="asset-chart-change-{{ $asset->id }}"
-                                class="mt-1 text-2xl font-bold tracking-tight tabular-nums text-gray-400 dark:text-zinc-600">
-                                -</p>
-                        </div>
-                        <div
-                            class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
-                            <p
-                                class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
-                                Low in range</p>
-                            <p id="asset-chart-low-{{ $asset->id }}"
-                                class="mt-1 text-2xl font-bold tracking-tight tabular-nums text-gray-400 dark:text-zinc-600">
-                                -</p>
-                        </div>
-                        <div
-                            class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
-                            <p
-                                class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
-                                High in range</p>
-                            <p id="asset-chart-high-{{ $asset->id }}"
-                                class="mt-1 text-2xl font-bold tracking-tight tabular-nums text-gray-400 dark:text-zinc-600">
-                                -</p>
-                        </div>
-                    </div>
                 </div>
 
                 <script>
@@ -390,6 +375,11 @@
                             const percent = new Intl.NumberFormat('en-US', {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
+                            });
+                            const summaryDate = new Intl.DateTimeFormat('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
                             });
 
                             const filterByRange = (days) => {
@@ -452,6 +442,20 @@
                                 });
                             };
 
+                            const setValueColor = (element, isPositive) => {
+                                element.classList.toggle('text-gray-400', false);
+                                element.classList.toggle('dark:text-zinc-600', false);
+                                element.classList.toggle('text-emerald-600', isPositive);
+                                element.classList.toggle('dark:text-emerald-400', isPositive);
+                                element.classList.toggle('text-rose-600', !isPositive);
+                                element.classList.toggle('dark:text-rose-400', !isPositive);
+                            };
+
+                            const formatSummaryDate = (dateStr) => {
+                                const date = new Date(dateStr);
+                                return isNaN(date.getTime()) ? dateStr : summaryDate.format(date);
+                            };
+
                             const updateSummary = (data, days) => {
                                 const first = data[0];
                                 const last = data[data.length - 1];
@@ -461,19 +465,19 @@
                                 const change = last.close_price - first.close_price;
                                 const changePercent = first.close_price !== 0 ? (change / first.close_price) * 100 : 0;
                                 const isPositive = change >= 0;
+                                const dateRange = `${formatSummaryDate(first.date)} - ${formatSummaryDate(last.date)}`;
 
                                 rangeLabel.textContent = days === 'all' ?
-                                    `${first.date} - ${last.date}` :
-                                    `Last ${days} days: ${first.date} - ${last.date}`;
+                                    `All data: ${dateRange}` :
+                                    `Last ${days} days: ${dateRange}`;
 
                                 changeValue.textContent =
                                     `${isPositive ? '+' : ''}${money.format(change)} ${currency} (${isPositive ? '+' : ''}${percent.format(changePercent)}%)`;
-                                changeValue.classList.toggle('text-emerald-600', isPositive);
-                                changeValue.classList.toggle('dark:text-emerald-400', isPositive);
-                                changeValue.classList.toggle('text-rose-600', !isPositive);
-                                changeValue.classList.toggle('dark:text-rose-400', !isPositive);
+                                setValueColor(changeValue, isPositive);
                                 lowValue.textContent = `${money.format(low)} ${currency}`;
+                                setValueColor(lowValue, false);
                                 highValue.textContent = `${money.format(high)} ${currency}`;
+                                setValueColor(highValue, true);
                             };
 
                             const calculateRangeDays = (data, days) => {
