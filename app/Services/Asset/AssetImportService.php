@@ -4,6 +4,7 @@ namespace App\Services\Asset;
 
 use App\Models\Asset;
 use App\Models\AssetPrice;
+use App\Models\Dividend;
 use Illuminate\Support\Facades\DB;
 
 class AssetImportService
@@ -40,6 +41,8 @@ class AssetImportService
             $existingAssets = 0;
             $pricesProcessed = 0;
             $assetsWithoutPrices = [];
+            $assetWithoutDividend = 0;
+            $dividendProcessed = 0;
 
             foreach ($json as $item) {
                 $currentAsset++;
@@ -97,6 +100,21 @@ class AssetImportService
                     $pricesProcessed++;
                 }
 
+                $dividends = $item['dividends'] ?? [];
+                if(!empty($dividends)){
+                    $assetWithoutDividend++;
+                }
+                foreach($dividends as $dividend){
+                    Dividend::updateOrCreate(
+                        [
+                            'asset_id' => $asset->id,
+                            'ex_date' => $dividend['date'],
+                            'amount' => $dividend['amount']
+                        ]
+                    );
+                    $dividendProcessed++;
+                }
+
                 if ($onProgress) {
                     $onProgress(
                         $currentAsset,
@@ -111,6 +129,8 @@ class AssetImportService
                 'existing_assets' => $existingAssets,
                 'prices_processed' => $pricesProcessed,
                 'assets_without_prices' => $assetsWithoutPrices,
+                'assets_without_dividend' => $assetWithoutDividend,
+                'dividend_processed' => $dividendProcessed
             ];
         });
     }

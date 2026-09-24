@@ -97,6 +97,11 @@ class ImportAssets extends Command
                         'Assets without prices',
                         count($stats['assets_without_prices']),
                     ],
+                    ['Dividend processed', $stats['dividend_processed']],
+                    [
+                        'Asset without prices', 
+                        count($stats['asset_without_prices'])
+                    ]
                 ]
             );
 
