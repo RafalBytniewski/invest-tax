@@ -66,10 +66,10 @@ class ImportAssets extends Command
                     string $symbol
                 ) use (&$progressBar): void {
                     if ($progressBar === null) {
-                        $progressBar = $this->output->createProgressBar($total);
+                        $progressBar = $this->output->createProgressBar();
 
                         $progressBar->setFormat(
-                            ' %current%/%max% [%bar%] %percent:3s%% %message%'
+                            ' %current% assets imported %message%'
                         );
 
                         $progressBar->start();
@@ -99,8 +99,8 @@ class ImportAssets extends Command
                     ],
                     ['Dividend processed', $stats['dividend_processed']],
                     [
-                        'Asset without prices', 
-                        count($stats['asset_without_prices'])
+                        'Assets without dividends',
+                        $stats['assets_without_dividend'],
                     ]
                 ]
             );
