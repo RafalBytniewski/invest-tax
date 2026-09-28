@@ -338,6 +338,10 @@
                                 class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-400 hover:text-blue-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-blue-500 dark:hover:text-blue-400">
                                 1Y
                             </button>
+                            <button type="button" data-asset-chart-range="{{ $asset->id }}" data-days="5y"
+                                class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-400 hover:text-blue-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-blue-500 dark:hover:text-blue-400">
+                                5Y
+                            </button>
                             <button type="button" data-asset-chart-range="{{ $asset->id }}" data-days="all"
                                 class="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition">
                                 ALL
@@ -389,7 +393,11 @@
 
                                 const lastDate = new Date(chartData[chartData.length - 1].date);
                                 const fromDate = new Date(lastDate);
-                                fromDate.setDate(fromDate.getDate() - Number(days));
+                                if (days === '5y') {
+                                    fromDate.setFullYear(fromDate.getFullYear() - 5);
+                                } else {
+                                    fromDate.setDate(fromDate.getDate() - Number(days));
+                                }
 
                                 const filtered = chartData.filter(point => new Date(point.date) >= fromDate);
                                 return filtered.length ? filtered : chartData;
@@ -397,14 +405,18 @@
 
                             const findClosestPointIndex = (data, transactionDate) => {
                                 const target = new Date(transactionDate).getTime();
+                                const validIndexes = data
+                                    .map((point, index) => point.close_price === null ? -1 : index)
+                                    .filter(index => index >= 0);
 
-                                return data.reduce((closestIndex, point, index) => {
-                                    const closestDistance = Math.abs(new Date(data[closestIndex].date).getTime() -
-                                        target);
-                                    const currentDistance = Math.abs(new Date(point.date).getTime() - target);
+                                if (!validIndexes.length) return 0;
+
+                                return validIndexes.reduce((closestIndex, index) => {
+                                    const closestDistance = Math.abs(new Date(data[closestIndex].date).getTime() - target);
+                                    const currentDistance = Math.abs(new Date(data[index].date).getTime() - target);
 
                                     return currentDistance < closestDistance ? index : closestIndex;
-                                }, 0);
+                                }, validIndexes[0]);
                             };
 
                             const transactionsForRange = (data, type) => {
@@ -457,19 +469,29 @@
                             };
 
                             const updateSummary = (data, days) => {
-                                const first = data[0];
-                                const last = data[data.length - 1];
-                                const values = data.map(point => point.close_price);
+                                const validData = data.filter(point => point.close_price !== null && Number.isFinite(Number(point.close_price)));
+                                const first = validData[0];
+                                const last = validData[validData.length - 1];
+                                const values = validData.map(point => Number(point.close_price));
+                                const dateRange = `${formatSummaryDate(data[0].date)} - ${formatSummaryDate(data[data.length - 1].date)}`;
+
+                                rangeLabel.textContent = days === 'all' ?
+                                    `All data: ${dateRange}` :
+                                    days === '5y' ? `Last 5 years: ${dateRange}` :
+                                    `Last ${days} days: ${dateRange}`;
+
+                                if (!validData.length) {
+                                    changeValue.textContent = '—';
+                                    lowValue.textContent = '—';
+                                    highValue.textContent = '—';
+                                    return;
+                                }
+
                                 const low = Math.min(...values);
                                 const high = Math.max(...values);
                                 const change = last.close_price - first.close_price;
                                 const changePercent = first.close_price !== 0 ? (change / first.close_price) * 100 : 0;
                                 const isPositive = change >= 0;
-                                const dateRange = `${formatSummaryDate(first.date)} - ${formatSummaryDate(last.date)}`;
-
-                                rangeLabel.textContent = days === 'all' ?
-                                    `All data: ${dateRange}` :
-                                    `Last ${days} days: ${dateRange}`;
 
                                 changeValue.textContent =
                                     `${isPositive ? '+' : ''}${money.format(change)} ${currency} (${isPositive ? '+' : ''}${percent.format(changePercent)}%)`;

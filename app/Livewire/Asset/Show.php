@@ -63,7 +63,7 @@ class Show extends Component
             ->get(['date', 'close_price'])
             ->map(fn ($price) => [
                 'date' => (string) $price->date,
-                'close_price' => (float) $price->close_price,
+                'close_price' => $price->close_price === null ? null : (float) $price->close_price,
             ])
             ->toArray();
 
