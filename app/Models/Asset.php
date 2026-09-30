@@ -42,4 +42,8 @@ class Asset extends Model
     public function assetPrices(): HasMany{
         return $this->hasMany(AssetPrice::class);
     }
+
+    public function dividends(): HasMany{
+        return $this->hasMany(Dividend::class);
+    }
 }

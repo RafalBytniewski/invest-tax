@@ -162,8 +162,14 @@ class Show extends Component
             ->limit(10)
             ->get();
 
+        $dividends = $this->asset->dividends()
+            ->orderByDesc('ex_date')
+            ->limit(4)
+            ->get();
+
         return view('livewire.asset.show', [
             'transactions' => $transactions,
+            'dividends' => $dividends,
         ]);
     }
 }
