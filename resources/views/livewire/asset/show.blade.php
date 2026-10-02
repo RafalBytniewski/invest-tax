@@ -821,6 +821,57 @@
             @endif
         </div>
     </section>
+    {{-- DIVIDENDS --}}
+    <section
+        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-400">
+                Income
+            </p>
+            <h2 class="mt-1 text-xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
+                Dividends
+            </h2>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-zinc-400">
+                Recent dividend payouts for {{ $asset->name }}.
+            </p>
+        </div>
+        @if ($dividends->isNotEmpty())
+            <div class="mt-4 overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead
+                        class="border-b border-gray-200 text-left text-xs uppercase text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
+                        <tr>
+                            <th class="px-2 py-2">Ex-Date</th>
+                            <th class="px-2 py-2 ">Amount per Share</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($dividends as $dividend)
+                            <tr class="border-b border-gray-100 dark:border-zinc-800">
+                                <td class="px-2 py-2 text-gray-700 dark:text-zinc-200">
+                                    {{ $dividend->ex_date->format('Y-m-d') }}
+                                </td>
+                                <td class="px-2 py-2 tabular-nums text-gray-700 dark:text-zinc-200">
+                                    {{ rtrim(rtrim($dividend->amount, '0'), '.') }}
+                                    <span class="ml-1 text-xs text-gray-500 dark:text-zinc-400">{{ $asset->asset_type === 'crypto' ? 'USD' : ($asset->exchange?->currency ?? '') }}</span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 text-center">
+                <a href="#"
+                    class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 transition hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+                    See full history <span aria-hidden="true">&rarr;</span>
+                </a>
+            </div>
+        @else
+            <p class="mt-4 rounded-lg border border-dashed border-gray-300 px-3 py-4 text-sm text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
+                This company does not pay dividends.
+            </p>
+        @endif
+    </section>
     {{-- TRANSACTIONS --}}
     <section
         class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
