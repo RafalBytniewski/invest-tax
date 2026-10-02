@@ -842,7 +842,7 @@
                         class="border-b border-gray-200 text-left text-xs uppercase text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
                         <tr>
                             <th class="px-2 py-2">Ex-Date</th>
-                            <th class="px-2 py-2 text-right">Amount per Share</th>
+                            <th class="px-2 py-2 ">Amount per Share</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -851,8 +851,8 @@
                                 <td class="px-2 py-2 text-gray-700 dark:text-zinc-200">
                                     {{ $dividend->ex_date->format('Y-m-d') }}
                                 </td>
-                                <td class="px-2 py-2 text-right tabular-nums text-gray-700 dark:text-zinc-200">
-                                    {{ number_format((float) $dividend->amount, 4, '.', ' ') }}
+                                <td class="px-2 py-2 tabular-nums text-gray-700 dark:text-zinc-200">
+                                    {{ rtrim(rtrim($dividend->amount, '0'), '.') }}
                                     <span class="ml-1 text-xs text-gray-500 dark:text-zinc-400">{{ $asset->asset_type === 'crypto' ? 'USD' : ($asset->exchange?->currency ?? '') }}</span>
                                 </td>
                             </tr>
