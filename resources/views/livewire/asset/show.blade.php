@@ -861,7 +861,7 @@
                 </table>
             </div>
             <div class="mt-4 text-center">
-                <a href="#"
+                <a href="{{ route('assets.dividends', $asset) }}"
                     class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 transition hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
                     See full history <span aria-hidden="true">&rarr;</span>
                 </a>
