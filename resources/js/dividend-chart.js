@@ -258,8 +258,8 @@ const initializeDividendCharts = () => {
             button.onclick = () => updateChart(button.dataset.years);
         });
 
-        updateChart('all');
-    });
+        updateChart('all');   
+     });
 };
 
 document.addEventListener('DOMContentLoaded', initializeDividendCharts);
