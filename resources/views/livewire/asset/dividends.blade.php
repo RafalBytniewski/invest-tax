@@ -14,6 +14,40 @@
         </div>
 
         <div class="mt-5 overflow-x-auto">
+            @if (count($dividendChartData) > 0)
+                <div class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-zinc-800">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Dividend history
+                        </h2>
+                        <div class="flex flex-wrap gap-2" aria-label="Chart timeframe">
+                            <button type="button" data-dividend-chart-range="{{ $asset->id }}" data-years="3"
+                                class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-400 hover:text-blue-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-blue-500 dark:hover:text-blue-400">
+                                3Y
+                            </button>
+                            <button type="button" data-dividend-chart-range="{{ $asset->id }}" data-years="10"
+                                class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-400 hover:text-blue-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-blue-500 dark:hover:text-blue-400">
+                                10Y
+                            </button>
+                            <button type="button" data-dividend-chart-range="{{ $asset->id }}" data-years="all"
+                                class="rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition">
+                                ALL
+                            </button>
+                        </div>
+                    </div>
+                    <div class="relative h-72 w-full sm:h-96">
+                        <canvas
+                            id="dividend-chart-{{ $asset->id }}"
+                            data-dividend-chart="{{ $asset->id }}"
+                            data-dividend-currency="{{ $asset->asset_type === 'crypto' ? 'USD' : ($asset->exchange?->currency ?? '') }}"
+                            data-chart-data='@json($dividendChartData)'
+                            aria-label="Dividend amount history chart"
+                            role="img"
+                        ></canvas>
+                    </div>
+                </div>
+            @endif
+
             <table class="min-w-full text-left text-sm">
                 <thead
                     class="border-b border-gray-200 text-xs uppercase tracking-[0.12em] text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
