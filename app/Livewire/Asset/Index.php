@@ -4,38 +4,54 @@ namespace App\Livewire\Asset;
 
 use App\Models\Asset;
 use App\Models\Transaction;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Index extends Component
 {
-    public $type = null;
-    public $exchange = null;
-    public $region = null;
+    public string $search = '';
 
-    public function resetFilters(){
-        $this->type = null;
-        $this->exchange = null;
-        $this->region = null;
+    /**
+     * Search all assets by their symbol or name after at least three characters.
+     *
+     * @return Collection<int, Asset>
+     */
+    protected function searchAssets(): Collection
+    {
+        $search = trim($this->search);
+
+        if (mb_strlen($search) < 3) {
+            return collect();
+        }
+
+        return Asset::query()
+            ->with('exchange')
+            ->where(function (Builder $query) use ($search): void {
+                $query
+                    ->where('symbol', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%");
+            })
+            ->orderBy('name')
+            ->get();
     }
 
-    public function render()
+    public function render(): View
     {
-        $assets = Asset::orderBy('name')
+        $userAssetIds = Transaction::query()
+            ->select('asset_id')
+            ->whereHas('wallet', function (Builder $query): void {
+                $query->where('user_id', Auth::id());
+            })
+            ->distinct()
+            ->pluck('asset_id');
+
+        $assets = Asset::query()
+            ->whereIn('id', $userAssetIds)
             ->with('exchange')
-            ->when($this->type, function ($query) {
-                $query->where('asset_type', $this->type);
-            })
-            ->when($this->exchange, function ($query) {
-                $query->whereHas('exchange', function ($q) {
-                    $q->where('symbol', $this->exchange);
-                });
-            })
-            ->when($this->region, function ($query) {
-                $query->whereHas('exchange', function ($q) {
-                    $q->where('region', $this->region);
-                });
-            })
+            ->orderBy('name')
             ->get();
 
         $activeAssetIds = Transaction::query()
@@ -50,6 +66,8 @@ class Index extends Component
         return view('livewire.asset.index', [
             'assets' => $assets,
             'activeAssets' => $assets->whereIn('id', $activeAssetIds)->values(),
+            'otherAssets' => $assets->whereNotIn('id', $activeAssetIds)->values(),
+            'searchResults' => $this->searchAssets(),
         ]);
     }
 }
