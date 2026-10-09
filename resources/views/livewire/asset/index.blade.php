@@ -1,239 +1,148 @@
-<div id="assets-top" class="mx-auto w-full max-w-[1600px] space-y-6 sm:px-6 lg:px-8">
-
-    @php
-        $groupedAssets = $assets->groupBy(fn($asset) => strtoupper(mb_substr($asset->name, 0, 1)));
-
-        $crypto = $assets->where('asset_type', 'crypto')->count();
-        $stock = $assets->where('asset_type', 'stock')->count();
-        $etf = $assets->where('asset_type', 'etf')->count();
-    @endphp
-
-    @php
-        $baseClasses = 'rounded-xl font-semibold
-        flex items-center justify-center transition cursor-pointer';
-
-        $inactiveClasses = 'border border-gray-300 
-        dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800
-        text-gray-900 dark:text-zinc-100
-        hover:bg-gray-300 dark:hover:bg-zinc-700';
-
-        $activeClasses = 'border-slate-900 bg-slate-900 text-white
-        shadow-sm shadow-slate-900/15 hover:bg-slate-800
-        dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900
-        dark:hover:bg-zinc-200';
-    @endphp
-
+<div class="mx-auto w-full max-w-[1600px] space-y-6 sm:px-6 lg:px-8">
     <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
-        <div class="flex flex-col gap-6">
-            <div class="space-y-2">
-                <p class="text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+        <div class="flex flex-col gap-5">
+            <div>
+                <h1 class="text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white sm:text-4xl">
                     Assets
+                </h1>
+                <p class="mt-2 text-sm text-gray-500 dark:text-zinc-400">
+                    Search your assets by name or symbol.
                 </p>
             </div>
 
-            <div class="border-t border-gray-200 dark:border-zinc-800"></div>
+            <div class="relative">
+                <label for="asset-search" class="sr-only">Search assets</label>
+                <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-gray-400 dark:text-zinc-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.464 9.775l3.63 3.631a.75.75 0 1 0 1.06-1.06l-3.63-3.63A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd" />
+                </svg>
 
-            {{-- RESET FILTERS --}}
-            <div class="flex items-center justify-end">
-                <button wire:click="resetFilters()"
-                    class="inline-flex h-12 w-full items-center justify-center rounded-xl border border-gray-300 bg-white px-5 text-sm font-semibold transition hover:border-rose-300 hover:bg-rose-50 text-rose-700 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-rose-500/50 dark:hover:bg-rose-500/10 dark:text-rose-300 xl:w-auto">
-                    Reset filters
-                </button>
+                <input
+                    id="asset-search"
+                    type="search"
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Search by symbol or name..."
+                    class="h-12 w-full rounded-xl border border-gray-300 bg-gray-50 pl-12 pr-12 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-700 dark:bg-zinc-950/40 dark:text-white dark:placeholder:text-zinc-500"
+                >
+
+                @if ($search !== '')
+                    <button
+                        type="button"
+                        wire:click="$set('search', '')"
+                        class="absolute right-3 top-1/2 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-200 hover:text-gray-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+                        aria-label="Clear search"
+                    >
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                @endif
+
+                @if (mb_strlen(trim($search)) >= 3)
+                    <div class="absolute inset-x-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+                        @if ($searchResults->isNotEmpty())
+                            <div class="divide-y divide-gray-100 dark:divide-zinc-800">
+                                @foreach ($searchResults as $asset)
+                                    <a href="{{ route('assets.show', $asset) }}" wire:navigate class="flex items-center justify-between gap-4 px-4 py-3 transition hover:bg-gray-50 dark:hover:bg-zinc-800/70">
+                                        <div class="min-w-0">
+                                            <p class="truncate font-medium text-gray-900 dark:text-white">{{ $asset->name }}</p>
+                                            <p class="mt-1 text-xs text-gray-500 dark:text-zinc-400">
+                                                {{ $asset->symbol }}
+                                                @if ($asset->exchange)
+                                                    <span class="text-gray-400 dark:text-zinc-500">· {{ $asset->exchange->symbol }}</span>
+                                                @endif
+                                            </p>
+                                        </div>
+
+                                        <span class="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase text-gray-600 dark:bg-zinc-800 dark:text-zinc-400">
+                                            {{ $asset->asset_type }}
+                                        </span>
+                                    </a>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="px-4 py-4 text-sm text-gray-500 dark:text-zinc-400">
+                                No assets found.
+                            </p>
+                        @endif
+                    </div>
+                @elseif ($search !== '')
+                    <p class="absolute inset-x-0 top-full z-20 mt-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-500 shadow-lg dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400">
+                        Type at least 3 characters to search.
+                    </p>
+                @endif
             </div>
-            <div class="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,0.8fr)_minmax(0,1fr)_auto] xl:items-end">
-                {{-- TYPE FILTER --}}
-                <div
-                    class="rounded-xl border border-gray-200 bg-gray-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
-                    <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
-                        Asset type
-                    </p>
 
-                    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                        <button wire:click="$set('type', 'stock')"
-                            class="h-12 px-4 {{ $baseClasses }} {{ $type === 'stock' ? $activeClasses : $inactiveClasses }}">
-                            <span>Stock</span>
-                            <span class="text-xs mx-2">{{ $type === 'stock' ? $stock : '' }}</span>
-                        </button>
-
-                        <button wire:click="$set('type', 'etf')"
-                            class="h-12 px-4 {{ $baseClasses }} {{ $type === 'etf' ? $activeClasses : $inactiveClasses }}">
-                            <span>ETF</span>
-                            <span class="text-xs mx-2">{{ $type === 'etf' ? $etf : '' }}</span>
-                        </button>
-
-                        <button wire:click="$set('type', 'crypto')"
-                            class="h-12 px-4 {{ $baseClasses }} {{ $type === 'crypto' ? $activeClasses : $inactiveClasses }}">
-                            <span>Crypto</span>
-                            <span class="text-xs mx-2">{{ $type === 'crypto' ? $crypto : '' }}</span>
-                        </button>
-
-                        <button wire:click="$set('type', null)"
-                            class="h-12 px-4 {{ $baseClasses }} {{ $type === null ? $activeClasses : $inactiveClasses }}">
-                            <span>All</span>
-                            <span class="text-xs mx-2">{{ $type === null ? $assets->count() : '' }}</span>
-                        </button>
-                    </div>
-                </div>
-
-                {{-- REGION --}}
-                <div
-                    class="rounded-xl border border-gray-200 bg-gray-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
-                    <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
-                        Region
-                    </p>
-
-                    <div class="flex flex-wrap gap-2">
-                        @foreach (['NA', 'EU'] as $reg)
-                            <button wire:click="$set('region', '{{ $reg }}')"
-                                class="min-w-[5rem] px-5 h-11 {{ $baseClasses }} {{ $reg === $region ? $activeClasses : $inactiveClasses }}">
-                                {{ $reg }}
-                            </button>
-                        @endforeach
-                    </div>
-                </div>
-
-                {{-- EXCHANGE  --}}
-                <div
-                    class="rounded-xl border border-gray-200 bg-gray-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
-                    <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-zinc-400">
-                        Exchange
-                    </p>
-
-                    <div class="flex flex-wrap gap-2">
-                        @foreach (['GPW', 'NYSE', 'NASDAQ'] as $ex)
-                            <button wire:click="$set('exchange', '{{ $ex }}')"
-                                class="px-5 h-11 {{ $baseClasses }} {{ $ex === $exchange ? $activeClasses : $inactiveClasses }}">
-                                {{ $ex }}
-                            </button>
-                        @endforeach
-                    </div>
-                </div>
-
-
-            </div>
+            <p class="text-sm text-gray-500 dark:text-zinc-400">
+                {{ $assets->count() }} {{ $assets->count() === 1 ? 'tracked asset' : 'tracked assets' }}
+            </p>
         </div>
     </section>
-    {{-- LETTER NAV --}}
-    <nav
-        class="sticky top-0 z-10 bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl px-4 py-4 space-y-5 mx-auto">
-        <div class="flex items-center gap-3">
-            <div class="flex flex-1 flex-wrap justify-center gap-1.5">
-                @foreach ($groupedAssets as $letter => $items)
-                    <a href="#letter-{{ $letter }}"
-                        class="rounded-md px-3 py-1 text-xl font-semibold text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white">
-                        {{ $letter }}
+
+    <section class="overflow-hidden rounded-xl border border-emerald-200 bg-emerald-50/40 shadow-sm dark:border-emerald-900/60 dark:bg-emerald-950/20">
+        <div class="border-b border-emerald-200 px-4 py-4 dark:border-emerald-900/60 sm:px-6">
+            <h2 class="text-xl font-bold text-emerald-800 dark:text-emerald-200">Your portfolio</h2>
+            <p class="mt-1 text-sm text-emerald-700/80 dark:text-emerald-300/80">
+                {{ $activeAssets->count() }} active {{ $activeAssets->count() === 1 ? 'asset' : 'assets' }} in your wallets.
+            </p>
+        </div>
+
+        @if ($activeAssets->isNotEmpty())
+            <div class="divide-y divide-emerald-200 dark:divide-emerald-900/60">
+                @foreach ($activeAssets as $asset)
+                    <a href="{{ route('assets.show', $asset) }}" wire:navigate class="flex items-center justify-between gap-4 px-4 py-4 transition hover:bg-emerald-100/70 dark:hover:bg-emerald-950/40 sm:px-6">
+                        <div class="min-w-0">
+                            <p class="truncate font-semibold text-emerald-950 dark:text-emerald-100">{{ $asset->name }}</p>
+                            <p class="mt-1 text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                                {{ $asset->symbol }}
+                                @if ($asset->exchange)
+                                    <span class="text-emerald-600/70 dark:text-emerald-400/70">· {{ $asset->exchange->symbol }}</span>
+                                @endif
+                            </p>
+                        </div>
+
+                        <span class="shrink-0 rounded-full bg-emerald-200 px-3 py-1 text-xs font-semibold uppercase text-emerald-800 dark:bg-emerald-900/70 dark:text-emerald-200">
+                            {{ $asset->asset_type }}
+                        </span>
                     </a>
                 @endforeach
             </div>
+        @else
+            <p class="px-4 py-6 text-sm text-emerald-700/80 dark:text-emerald-300/80 sm:px-6">
+                No active assets match your search.
+            </p>
+        @endif
+    </section>
 
-            <a href="#assets-top"
-                class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-slate-50 text-slate-700 transition hover:border-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-700 dark:hover:text-white"
-                aria-label="Back to top"
-                title="Back to top">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd"
-                        d="M10 3a.75.75 0 0 1 .53.22l4.25 4.25a.75.75 0 1 1-1.06 1.06L10.75 5.56V16a.75.75 0 0 1-1.5 0V5.56L6.28 8.53a.75.75 0 1 1-1.06-1.06l4.25-4.25A.75.75 0 0 1 10 3Z"
-                        clip-rule="evenodd" />
-                </svg>
-            </a>
-        </div>
-    </nav>
-    {{-- LIST --}}
-    <div class="space-y-10 mx-auto">
-        <div
-            class="scroll-mt-20 bg-white dark:bg-zinc-900 border border-emerald-200 dark:border-emerald-900/60 rounded-xl px-4 py-4 space-y-5 mx-auto">
-
-            <div class="flex flex-col gap-1">
-                <h2 class="text-xl font-bold text-emerald-800 dark:text-emerald-200">
-                    Active
-                </h2>
-                <p class="text-sm text-emerald-700/80 dark:text-emerald-300/80">
-                    {{ $activeAssets->count() }} active assets in current view
-                </p>
-            </div>
-
-            @if ($activeAssets->isNotEmpty())
-                <ul class="divide-y divide-emerald-100 dark:divide-emerald-950/60">
-                    @foreach ($activeAssets as $asset)
-                        <li>
-                            <a href="{{ route('assets.show', $asset->id) }}"
-                                class="flex flex-col gap-3 rounded-xl px-2 py-4 transition hover:bg-emerald-50/70 sm:flex-row sm:items-center sm:justify-between dark:hover:bg-emerald-950/20">
-                                <div class="min-w-0">
-                                    <div
-                                        class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-500 dark:text-emerald-400">
-                                        @if ($asset->asset_type === 'crypto')
-                                            {{ $asset->symbol }}
-                                        @elseif ($asset->exchange_id)
-                                            {{ $asset->symbol }}.{{ $asset->exchange->symbol }}
-                                        @else
-                                            {{ $asset->symbol }}
-                                        @endif
-                                    </div>
-                                    <div class="mt-1 text-base font-medium text-gray-900 dark:text-white">
-                                        {{ $asset->name }}</div>
-                                </div>
-
-                                <div class="flex items-center gap-3">
-                                    @if ($asset->exchange)
-                                        <span
-                                            class="rounded-full border border-emerald-200 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-900/60 dark:text-emerald-300">{{ $asset->exchange->symbol }}</span>
-                                    @endif
-                                    <span
-                                        class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">{{ $asset->asset_type }}</span>
-                                </div>
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-            @else
-                <p class="text-sm text-emerald-700/80 dark:text-emerald-300/80">
-                    No active assets match current filters.
-                </p>
-            @endif
+    <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div class="border-b border-gray-200 px-4 py-4 dark:border-zinc-800 sm:px-6">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Other assets</h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
+                Assets you’ve traded but don’t currently hold.
+            </p>
         </div>
 
-        @foreach ($groupedAssets as $letter => $items)
-            <div id="letter-{{ $letter }}"
-                class="scroll-mt-20 bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl px-4 py-4 space-y-5 mx-auto">
+        @if ($otherAssets->isNotEmpty())
+            <div class="divide-y divide-gray-100 dark:divide-zinc-800">
+                @foreach ($otherAssets as $asset)
+                    <a href="{{ route('assets.show', $asset) }}" wire:navigate class="flex items-center justify-between gap-4 px-4 py-4 transition hover:bg-gray-50 dark:hover:bg-zinc-950/50 sm:px-6">
+                        <div class="min-w-0">
+                            <p class="truncate font-medium text-gray-800 dark:text-zinc-200">{{ $asset->name }}</p>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
+                                {{ $asset->symbol }}
+                                @if ($asset->exchange)
+                                    <span class="text-gray-400 dark:text-zinc-500">· {{ $asset->exchange->symbol }}</span>
+                                @endif
+                            </p>
+                        </div>
 
-                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-3">
-                    {{ $letter }}
-                </h2>
-
-                <ul class="divide-y divide-gray-100 dark:divide-zinc-700">
-                    @foreach ($items as $asset)
-                        <li>
-                            <a href="{{ route('assets.show', $asset->id) }}"
-                                class="flex flex-col gap-3 rounded-xl px-2 py-4 transition hover:bg-gray-50 sm:flex-row sm:items-center sm:justify-between dark:hover:bg-zinc-950/50">
-                                <div class="min-w-0">
-                                    <div
-                                        class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-zinc-500">
-                                        @if ($asset->asset_type === 'crypto')
-                                            {{ $asset->symbol }}
-                                        @elseif ($asset->exchange_id)
-                                            {{ $asset->symbol }}.{{ $asset->exchange->symbol }}
-                                        @else
-                                            {{ $asset->symbol }}
-                                        @endif
-                                    </div>
-                                    <div class="mt-1 text-base font-medium text-gray-900 dark:text-white">
-                                        {{ $asset->name }}</div>
-                                </div>
-
-                                <div class="flex items-center gap-3">
-                                    @if ($asset->exchange)
-                                        <span
-                                            class="rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-500 dark:border-zinc-700 dark:text-zinc-400">{{ $asset->exchange->symbol }}</span>
-                                    @endif
-                                    <span
-                                        class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase text-gray-700 dark:bg-zinc-800 dark:text-zinc-300">{{ $asset->asset_type }}</span>
-                                </div>
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
+                        <span class="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase text-gray-600 dark:bg-zinc-800 dark:text-zinc-400">
+                            {{ $asset->asset_type }}
+                        </span>
+                    </a>
+                @endforeach
             </div>
-        @endforeach
-    </div>
-
+        @else
+            <p class="px-4 py-6 text-sm text-gray-500 dark:text-zinc-400 sm:px-6">
+                No other assets match your search.
+            </p>
+        @endif
+    </section>
 </div>
