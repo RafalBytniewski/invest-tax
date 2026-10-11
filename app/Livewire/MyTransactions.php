@@ -2,46 +2,65 @@
 
 namespace App\Livewire;
 
+use App\Models\Asset;
+use App\Models\Transaction;
+use App\Models\Wallet;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Transaction;
-use Illuminate\Database\Eloquent\Builder;
 
 class MyTransactions extends Component
 {
     use WithPagination;
 
     protected const ALLOWED_SORT_FIELDS = ['asset', 'broker', 'wallet', 'type', 'quantity', 'price', 'total_value', 'date'];
+
     protected $listeners = ['transactionSaved' => '$refresh'];
 
-    // paginate
-    public $perPage = '10';
+    public string $perPage = '10';
 
-    // searching feature
-    public $search = '';
+    public string $search = '';
 
-    // filter by date
-    public $dateFrom = '';
-    public $dateTo = '';
+    public string $dateFrom = '';
 
-    // sorting feature
-    public $sortField = 'date';
-    public $sortDirection = 'asc';
-    protected $queryString = ['sortField', 'sortDirection'];
+    public string $dateTo = '';
 
-    public function mount(): void
+    public string $sortField = 'date';
+
+    public string $sortDirection = 'desc';
+
+    public ?Wallet $wallet = null;
+
+    public ?Asset $asset = null;
+
+    protected $queryString = [
+        'search',
+        'dateFrom',
+        'dateTo',
+        'sortField',
+        'sortDirection',
+    ];
+
+    public function mount(?Wallet $wallet = null, ?Asset $asset = null): void
     {
+        if ($wallet?->exists) {
+            abort_unless($wallet->user_id === Auth::id(), 403);
+            $this->wallet = $wallet;
+        }
+
+        $this->asset = $asset?->exists ? $asset : null;
+
         if (! in_array($this->sortField, self::ALLOWED_SORT_FIELDS, true)) {
             $this->sortField = 'date';
         }
 
         if (! in_array($this->sortDirection, ['asc', 'desc'], true)) {
-            $this->sortDirection = 'asc';
+            $this->sortDirection = 'desc';
         }
     }
 
-    public function sortBy($field)
+    public function sortBy(string $field): void
     {
         if (! in_array($field, self::ALLOWED_SORT_FIELDS, true)) {
             return;
@@ -53,6 +72,14 @@ class MyTransactions extends Component
             $this->sortField = $field;
             $this->sortDirection = 'asc';
         }
+
+        $this->resetPage();
+    }
+
+    public function resetFilters(): void
+    {
+        $this->reset(['search', 'dateFrom', 'dateTo']);
+        $this->resetPage();
     }
 
     public function deleteTransaction(int $id): void
@@ -66,6 +93,7 @@ class MyTransactions extends Component
 
         if ($deleted === 0) {
             session()->flash('error', 'Transaction could not be deleted.');
+
             return;
         }
 
@@ -92,9 +120,20 @@ class MyTransactions extends Component
         $this->resetPage();
     }
 
+    protected function scopeQuery(Builder $query): Builder
+    {
+        return $query
+            ->when($this->wallet !== null, function (Builder $query): void {
+                $query->where('wallet_id', $this->wallet->id);
+            })
+            ->when($this->asset !== null, function (Builder $query): void {
+                $query->where('asset_id', $this->asset->id);
+            });
+    }
+
     protected function baseQuery(): Builder
     {
-        return Transaction::query()
+        return $this->scopeQuery(Transaction::query())
             ->with(['asset.exchange', 'wallet.broker'])
             ->whereHas('wallet', function (Builder $query) {
                 $query->where('user_id', Auth::id());
@@ -116,18 +155,21 @@ class MyTransactions extends Component
             'asset' => $query
                 ->leftJoin('assets as sort_assets', 'sort_assets.id', '=', 'transactions.asset_id')
                 ->orderBy('sort_assets.name', $direction)
+                ->orderBy('transactions.id')
                 ->select('transactions.*'),
             'wallet' => $query
                 ->leftJoin('wallets as sort_wallets', 'sort_wallets.id', '=', 'transactions.wallet_id')
                 ->orderBy('sort_wallets.name', $direction)
+                ->orderBy('transactions.id')
                 ->select('transactions.*'),
             'broker' => $query
                 ->leftJoin('wallets as sort_wallets', 'sort_wallets.id', '=', 'transactions.wallet_id')
                 ->leftJoin('brokers as sort_brokers', 'sort_brokers.id', '=', 'sort_wallets.broker_id')
                 ->orderBy('sort_brokers.name', $direction)
+                ->orderBy('transactions.id')
                 ->select('transactions.*'),
-            'price' => $query->orderBy('price_per_unit', $direction),
-            default => $query->orderBy($this->sortField, $direction),
+            'price' => $query->orderBy('price_per_unit', $direction)->orderBy('id'),
+            default => $query->orderBy($this->sortField, $direction)->orderBy('id'),
         };
     }
 
@@ -138,6 +180,7 @@ class MyTransactions extends Component
 
         return view('livewire.my-transactions', [
             'transactions' => $transactions,
+            'contextTitle' => $this->wallet?->name ?? $this->asset?->name,
         ]);
     }
 }

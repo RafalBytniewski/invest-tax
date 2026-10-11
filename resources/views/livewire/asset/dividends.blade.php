@@ -82,7 +82,7 @@
 
         @if ($dividends->hasPages())
             <div class="mt-5">
-                {{ $dividends->links() }}
+                {{ $dividends->links('pagination.tailwind') }}
             </div>
         @endif
     </section>

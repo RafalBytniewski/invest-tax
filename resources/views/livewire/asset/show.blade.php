@@ -875,48 +875,54 @@
     {{-- TRANSACTIONS --}}
     <section
         class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
-        <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-400">
-                Activity
-            </p>
-            <h2 class="mt-1 text-xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
-                Recent transactions
-            </h2>
-            <p class="mt-0.5 text-xs text-gray-500 dark:text-zinc-400">
-                All recorded purchases and sales for {{ $asset->name }}.
-            </p>
+        <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-400">
+                    Activity
+                </p>
+                <h2 class="mt-1 text-xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
+                    Recent transactions
+                </h2>
+                <p class="mt-0.5 text-xs text-gray-500 dark:text-zinc-400">
+                    All recorded purchases and sales for {{ $asset->name }}.
+                </p>
+            </div>
+            <a href="{{ route('assets.transactions', $asset) }}" wire:navigate
+                class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 transition hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+                See all transactions <span aria-hidden="true">&rarr;</span>
+            </a>
         </div>
         <div class="mt-4 overflow-x-auto">
-            <table class="min-w-full text-sm">
+            <table class="min-w-full text-left text-sm">
                 <thead
-                    class="border-b border-gray-200 text-left text-xs uppercase text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
+                    class="border-b border-gray-200 text-xs uppercase tracking-[0.12em] text-gray-500 dark:border-zinc-700 dark:text-zinc-400">
                     <tr>
-                        <th class="px-2 py-2">Date</th>
-                        <th class="px-2 py-2">Type</th>
-                        <th class="px-2 py-2 text-right">Quantity</th>
-                        <th class="px-2 py-2 text-right">Price</th>
-                        <th class="px-2 py-2">Wallet</th>
+                        <th class="px-2 py-3 font-semibold">Date</th>
+                        <th class="px-2 py-3 font-semibold">Type</th>
+                        <th class="px-2 py-3 text-right font-semibold">Quantity</th>
+                        <th class="px-2 py-3 text-right font-semibold">Price</th>
+                        <th class="px-2 py-3 font-semibold">Wallet</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
                     @forelse ($transactions as $transaction)
-                        <tr class="border-b border-gray-100 dark:border-zinc-800">
-                            <td class="px-2 py-2 text-gray-700 dark:text-zinc-200">
+                        <tr>
+                            <td class="whitespace-nowrap px-2 py-3 text-gray-700 dark:text-zinc-200">
                                 {{ $transaction->date->format('Y-m-d') }}</td>
-                            <td class="px-2 py-2">
+                            <td class="whitespace-nowrap px-2 py-3">
                                 <span
                                     class="rounded px-2 py-0.5 text-xs font-semibold {{ $transaction->type === 'sell' ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' }}">
                                     {{ strtoupper($transaction->type) }}
                                 </span>
                             </td>
-                            <td class="px-2 py-2 text-right text-gray-700 dark:text-zinc-200">
+                            <td class="whitespace-nowrap px-2 py-3 text-right tabular-nums text-gray-700 dark:text-zinc-200">
                                 {{ abs($transaction->quantity) }}</td>
-                            <td class="px-2 py-2 text-right text-gray-700 dark:text-zinc-200">
+                            <td class="whitespace-nowrap px-2 py-3 text-right tabular-nums text-gray-700 dark:text-zinc-200">
                                 {{ $transaction->price_per_unit }}
                                 <span
                                     class="text-xs text-gray-500 dark:text-zinc-400">{{ $transaction->currency }}</span>
                             </td>
-                            <td class="px-2 py-2 text-gray-700 dark:text-zinc-200">
+                            <td class="whitespace-nowrap px-2 py-3 text-gray-700 dark:text-zinc-200">
                                 {{ $transaction->wallet?->name ?? '-' }}
                                 <span
                                     class="text-xs text-gray-500 dark:text-zinc-400">{{ $transaction->wallet?->broker?->name ? '(' . $transaction->wallet->broker->name . ')' : '' }}</span>
