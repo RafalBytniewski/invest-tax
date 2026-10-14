@@ -1,10 +1,10 @@
 <x-layouts.app :title="__('Dashboard')">
     <div class="flex w-full flex-1 flex-col gap-6">
-        <div class="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-zinc-900">
-            <div class="tradingview-widget-container w-full" style="height: 46px;">
-                <div class="tradingview-widget-container__widget" style="height: 46px;"></div>
-                <div class="tradingview-widget-copyright px-3 py-1 text-xs text-neutral-500">
-                    <a href="https://www.tradingview.com/markets/" rel="noopener nofollow" target="_blank">Market data by TradingView</a>
+        <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="tradingview-widget-container h-[46px] w-full">
+                <div class="tradingview-widget-container__widget h-[46px]"></div>
+                <div class="tradingview-widget-copyright px-3 py-1 text-xs text-zinc-500 dark:text-zinc-400">
+                    <a href="https://www.tradingview.com/markets/" rel="noopener nofollow" target="_blank">{{ __('Market data by TradingView') }}</a>
                 </div>
                 <script type="application/json" data-tradingview-widget data-src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js">
                     {
@@ -21,7 +21,7 @@
                         "colorTheme": "dark",
                         "isTransparent": false,
                         "displayMode": "adaptive",
-                        "locale": "en"
+                        "locale": "{{ app()->getLocale() }}"
                     }
                 </script>
             </div>
@@ -30,10 +30,10 @@
         <div>
             <div class="mb-3 flex items-center justify-between gap-4">
                 <div>
-                    <flux:heading size="lg">Market snapshot</flux:heading>
-                    <flux:text class="mt-1">Najważniejsze indeksy i aktywa w jednym miejscu.</flux:text>
+                    <flux:heading size="lg">{{ __('Market snapshot') }}</flux:heading>
+                    <flux:text class="mt-1">{{ __('Najważniejsze indeksy i aktywa w jednym miejscu.') }}</flux:text>
                 </div>
-                <span class="hidden text-xs text-neutral-500 sm:block dark:text-neutral-400">Powered by TradingView</span>
+                <span class="hidden text-xs text-zinc-500 sm:block dark:text-zinc-400">{{ __('Powered by TradingView') }}</span>
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -43,19 +43,19 @@
                     ['symbol' => 'FOREXCOM:NSXUSD', 'name' => 'Nasdaq 100'],
                     ['symbol' => 'INDEX:DEU40', 'name' => 'DAX'],
                 ] as $market)
-                    <div class="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-zinc-900">
-                        <div class="border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
+                    <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+                        <div class="border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
                             <flux:heading size="sm">{{ $market['name'] }}</flux:heading>
                         </div>
-                        <div class="tradingview-widget-container" style="height: 110px;">
-                            <div class="tradingview-widget-container__widget" style="height: 110px;"></div>
+                        <div class="tradingview-widget-container h-[110px]">
+                            <div class="tradingview-widget-container__widget h-[110px]"></div>
                             <script type="application/json" data-tradingview-widget data-src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js">
                                 {
                                     "symbol": "{{ $market['symbol'] }}",
                                     "width": "100%",
                                     "colorTheme": "dark",
                                     "isTransparent": false,
-                                    "locale": "en"
+                                    "locale": "{{ app()->getLocale() }}"
                                 }
                             </script>
                         </div>
@@ -65,21 +65,21 @@
         </div>
 
         <div class="grid gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(320px,1fr)]">
-            <section class="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-zinc-900">
-                <div class="border-b border-neutral-200 px-5 py-4 dark:border-neutral-700">
-                    <flux:heading size="lg">Market overview</flux:heading>
-                    <flux:text class="mt-1">Indeksy, futures, obligacje i waluty.</flux:text>
+            <section class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+                <div class="border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
+                    <flux:heading size="lg">{{ __('Market overview') }}</flux:heading>
+                    <flux:text class="mt-1">{{ __('Indeksy, futures, obligacje i waluty.') }}</flux:text>
                 </div>
-                <div class="tradingview-widget-container" style="height: 520px;">
-                    <div class="tradingview-widget-container__widget" style="height: 520px;"></div>
-                    <div class="tradingview-widget-copyright px-4 py-2 text-xs text-neutral-500">
-                        <a href="https://www.tradingview.com/markets/" rel="noopener nofollow" target="_blank">World markets by TradingView</a>
+                <div class="tradingview-widget-container h-[520px]">
+                    <div class="tradingview-widget-container__widget h-[520px]"></div>
+                    <div class="tradingview-widget-copyright px-4 py-2 text-xs text-zinc-500 dark:text-zinc-400">
+                        <a href="https://www.tradingview.com/markets/" rel="noopener nofollow" target="_blank">{{ __('World markets by TradingView') }}</a>
                     </div>
                     <script type="application/json" data-tradingview-widget data-src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js">
                         {
                             "colorTheme": "dark",
                             "dateRange": "12M",
-                            "locale": "en",
+                            "locale": "{{ app()->getLocale() }}",
                             "isTransparent": false,
                             "showFloatingTooltip": false,
                             "tabs": [
@@ -119,21 +119,21 @@
                 </div>
             </section>
 
-            <section class="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-zinc-900">
-                <div class="border-b border-neutral-200 px-5 py-4 dark:border-neutral-700">
-                    <flux:heading size="lg">Economic calendar</flux:heading>
-                    <flux:text class="mt-1">Najważniejsze wydarzenia makroekonomiczne.</flux:text>
+            <section class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+                <div class="border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
+                    <flux:heading size="lg">{{ __('Economic calendar') }}</flux:heading>
+                    <flux:text class="mt-1">{{ __('Najważniejsze wydarzenia makroekonomiczne.') }}</flux:text>
                 </div>
-                <div class="tradingview-widget-container" style="height: 520px;">
-                    <div class="tradingview-widget-container__widget" style="height: 520px;"></div>
-                    <div class="tradingview-widget-copyright px-4 py-2 text-xs text-neutral-500">
-                        <a href="https://www.tradingview.com/economic-calendar/" rel="noopener nofollow" target="_blank">Economic calendar by TradingView</a>
+                <div class="tradingview-widget-container h-[520px]">
+                    <div class="tradingview-widget-container__widget h-[520px]"></div>
+                    <div class="tradingview-widget-copyright px-4 py-2 text-xs text-zinc-500 dark:text-zinc-400">
+                        <a href="https://www.tradingview.com/economic-calendar/" rel="noopener nofollow" target="_blank">{{ __('Economic calendar by TradingView') }}</a>
                     </div>
                     <script type="application/json" data-tradingview-widget data-src="https://s3.tradingview.com/external-embedding/embed-widget-events.js">
                         {
                             "colorTheme": "dark",
                             "isTransparent": false,
-                            "locale": "en",
+                            "locale": "{{ app()->getLocale() }}",
                             "countryFilter": "pl,eu,gb,us,de",
                             "importanceFilter": "1",
                             "width": "100%",
