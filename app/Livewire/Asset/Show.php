@@ -12,6 +12,8 @@ use Livewire\Component;
 
 class Show extends Component
 {
+    protected $listeners = ['transactionSaved' => 'refreshAfterTransaction'];
+
     public Asset $asset;
 
     public $assetSymbol;
@@ -52,6 +54,16 @@ class Show extends Component
     public function mount(Asset $asset, AssetCalculator $calculator, ExchangeRateService $rate): void
     {
         $this->asset = $asset->loadMissing('exchange');
+        $this->refreshAssetData($calculator, $rate);
+    }
+
+    public function refreshAfterTransaction(): void
+    {
+        $this->refreshAssetData(app(AssetCalculator::class), app(ExchangeRateService::class));
+    }
+
+    protected function refreshAssetData(AssetCalculator $calculator, ExchangeRateService $rate): void
+    {
         $this->getTVAssetSymbol($this->asset);
         $this->assetCurrency = $this->asset->asset_type === 'crypto'
             ? 'USD'

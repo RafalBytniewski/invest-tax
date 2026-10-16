@@ -12,21 +12,33 @@ use Livewire\Component;
 class TransactionFormModal extends Component
 {
     public ?int $editingTransactionId = null;
+
     public bool $showModal = false;
+
     public string $mode = '';
 
     public $wallet = null;
+
     public $asset = null;
+
     public $type = null;
+
     public $currency = null;
+
     public $quantity = null;
+
     public $price_per_unit = null;
+
     public $total_value = 0;
+
     public $date = null;
+
     public $notes = null;
 
     public array $wallets = [];
+
     public array $assets = [];
+
     public array $types = [
         'buy' => 'Buy',
         'sell' => 'Sell',
@@ -57,16 +69,29 @@ class TransactionFormModal extends Component
     {
         if ($transactionId === null) {
             $this->openCreateModal();
+
             return;
         }
 
         $this->openEditModal($transactionId);
     }
 
-    public function openCreateModal(): void
+    public function openCreateModal(?int $walletId = null, ?int $assetId = null): void
     {
         $this->mode = 'new';
         $this->resetForm();
+
+        if ($walletId !== null) {
+            $wallet = Wallet::query()->findOrFail($walletId);
+            abort_unless($wallet->user_id === Auth::id(), 403);
+            $this->wallet = $wallet->id;
+            $this->currency = strtoupper((string) $wallet->currency);
+        }
+
+        if ($assetId !== null) {
+            $this->asset = Asset::query()->findOrFail($assetId)->id;
+        }
+
         $this->showModal = true;
     }
 

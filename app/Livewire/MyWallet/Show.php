@@ -10,6 +10,8 @@ use Livewire\Component;
 
 class Show extends Component
 {
+    protected $listeners = ['transactionSaved' => 'refreshAfterTransaction'];
+
     public Wallet $wallet;
 
     public bool $showFundsForm = false;
@@ -34,6 +36,11 @@ class Show extends Component
     public function toggleFundsForm(): void
     {
         $this->showFundsForm = ! $this->showFundsForm;
+    }
+
+    public function refreshAfterTransaction(): void
+    {
+        $this->refreshWallet();
     }
 
     public function saveFunds(): void
