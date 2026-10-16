@@ -7,11 +7,14 @@ use App\Models\Asset;
 use App\Models\Broker;
 use App\Models\User;
 use App\Models\Wallet;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
 class TransactionFormModalTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_new_transaction_can_be_opened_with_wallet_and_asset_context(): void
     {
         $user = User::factory()->create();
@@ -57,6 +60,7 @@ class TransactionFormModalTest extends TestCase
             ->set('currency', 'pln')
             ->set('quantity', 2)
             ->set('price_per_unit', 125.50)
+            ->set('total_value', 251)
             ->set('date', '2026-10-14')
             ->call('save')
             ->assertSet('showModal', false);
@@ -69,6 +73,48 @@ class TransactionFormModalTest extends TestCase
             'quantity' => -2,
             'price_per_unit' => 125.50,
             'total_value' => -251,
+        ]);
+    }
+
+    public function test_transaction_uses_a_manual_total_value_and_saves_multiple_fees(): void
+    {
+        $user = User::factory()->create();
+        $wallet = $this->createWallet($user, 'Main wallet');
+        $asset = $this->createAsset('Apple');
+
+        $this->actingAs($user);
+
+        Livewire::test(TransactionFormModal::class)
+            ->set('wallet', $wallet->id)
+            ->set('asset', $asset->id)
+            ->set('type', 'buy')
+            ->set('currency', 'GBP')
+            ->set('quantity', 2)
+            ->set('price_per_unit', 125.50)
+            ->set('total_value', 260)
+            ->set('fees', [
+                ['type' => 'exchange/broker', 'currency' => 'GBP', 'value' => 2.50],
+                ['type' => 'network', 'currency' => 'USD', 'value' => 1.25],
+            ])
+            ->set('date', '2026-10-14')
+            ->call('save');
+
+        $transaction = $wallet->transactions()->firstOrFail();
+
+        $this->assertSame(260.0, (float) $transaction->total_value);
+        $this->assertDatabaseCount('fees', 2);
+        $this->assertDatabaseHas('fees', [
+            'transaction_id' => $transaction->id,
+            'type' => 'exchange/broker',
+            'currency_type' => 'fiat',
+            'currency' => 'GBP',
+            'value' => 2.50,
+        ]);
+        $this->assertDatabaseHas('fees', [
+            'transaction_id' => $transaction->id,
+            'type' => 'network',
+            'currency' => 'USD',
+            'value' => 1.25,
         ]);
     }
 

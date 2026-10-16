@@ -73,7 +73,12 @@
 
                     <div>
                         <label for="transaction-currency" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Currency</label>
-                        <input id="transaction-currency" type="text" maxlength="3" wire:model="currency" placeholder="PLN" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm uppercase text-gray-900 placeholder:text-gray-400 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                        <select id="transaction-currency" wire:model="currency" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                            <option value="">Select currency</option>
+                            @foreach ($currencies as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
                         @error('currency') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
                     </div>
 
@@ -91,7 +96,8 @@
 
                     <div>
                         <label for="transaction-total" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Total value</label>
-                        <input id="transaction-total" type="number" step="0.01" wire:model="total_value" readonly class="h-11 w-full rounded-lg border border-gray-200 bg-gray-100 px-3 text-sm text-gray-600 outline-none dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-400">
+                        <input id="transaction-total" type="number" step="0.01" min="0" wire:model="total_value" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                        @error('total_value') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
@@ -99,6 +105,54 @@
                         <input id="transaction-date" type="date" wire:model="date" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
                         @error('date') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
                     </div>
+                </div>
+
+                <div class="rounded-lg border border-gray-200 dark:border-zinc-800">
+                    <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-4 py-3 dark:border-zinc-800">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-zinc-100">Transaction fees</h3>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-zinc-400">Optional fees saved separately from the transaction value.</p>
+                        </div>
+                        <button type="button" wire:click="addFee" class="rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800">Add fee</button>
+                    </div>
+
+                    @if (count($fees) > 0)
+                        <div class="space-y-4 p-4">
+                            @foreach ($fees as $index => $fee)
+                                <div class="grid gap-4 sm:grid-cols-[1fr_0.7fr_0.7fr_auto]">
+                                    <div>
+                                        <label for="transaction-fee-type-{{ $index }}" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Type</label>
+                                        <select id="transaction-fee-type-{{ $index }}" wire:model="fees.{{ $index }}.type" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                                            @foreach ($feeTypes as $value => $label)
+                                                <option value="{{ $value }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error("fees.{$index}.type") <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
+                                    </div>
+
+                                    <div>
+                                        <label for="transaction-fee-currency-{{ $index }}" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Currency</label>
+                                        <select id="transaction-fee-currency-{{ $index }}" wire:model="fees.{{ $index }}.currency" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                                            @foreach ($currencies as $value => $label)
+                                                <option value="{{ $value }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error("fees.{$index}.currency") <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
+                                    </div>
+
+                                    <div>
+                                        <label for="transaction-fee-value-{{ $index }}" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Value</label>
+                                        <input id="transaction-fee-value-{{ $index }}" type="number" step="0.01" min="0" wire:model="fees.{{ $index }}.value" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                                        @error("fees.{$index}.value") <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
+                                    </div>
+
+                                    <div class="flex items-end">
+                                        <button type="button" wire:click="removeFee({{ $index }})" class="h-11 w-full rounded-lg border border-rose-200 px-3 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 dark:border-rose-900 dark:text-rose-400 dark:hover:bg-rose-950/30" aria-label="Remove fee">Remove</button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 <div>

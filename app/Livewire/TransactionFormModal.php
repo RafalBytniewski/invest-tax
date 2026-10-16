@@ -3,9 +3,11 @@
 namespace App\Livewire;
 
 use App\Models\Asset;
+use App\Models\Fee;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
@@ -35,6 +37,8 @@ class TransactionFormModal extends Component
 
     public $notes = null;
 
+    public array $fees = [];
+
     public array $wallets = [];
 
     public array $assets = [];
@@ -42,6 +46,19 @@ class TransactionFormModal extends Component
     public array $types = [
         'buy' => 'Buy',
         'sell' => 'Sell',
+    ];
+
+    public array $currencies = [
+        'PLN' => 'PLN',
+        'USD' => 'USD',
+        'EUR' => 'EUR',
+        'GBP' => 'GBP',
+    ];
+
+    public array $feeTypes = [
+        'exchange/broker' => 'Exchange/Broker fee',
+        'network' => 'Network fee',
+        'withdrawal' => 'Withdrawal fee',
     ];
 
     protected $listeners = [
@@ -109,9 +126,33 @@ class TransactionFormModal extends Component
         $this->price_per_unit = (float) $transaction->price_per_unit;
         $this->date = optional($transaction->date)->format('Y-m-d');
         $this->notes = $transaction->notes;
-        $this->recalculateTotalValue();
+        $this->total_value = abs((float) $transaction->total_value);
+        $this->fees = $transaction->fees
+            ->map(fn (Fee $fee): array => [
+                'type' => $fee->type,
+                'currency' => strtoupper((string) $fee->currency),
+                'value' => (float) $fee->value,
+            ])
+            ->values()
+            ->all();
         $this->resetValidation();
         $this->showModal = true;
+    }
+
+    public function addFee(): void
+    {
+        $this->fees[] = [
+            'type' => 'exchange/broker',
+            'currency' => $this->currency ?? 'PLN',
+            'value' => null,
+        ];
+    }
+
+    public function removeFee(int $index): void
+    {
+        unset($this->fees[$index]);
+        $this->fees = array_values($this->fees);
+        $this->resetValidation();
     }
 
     public function closeModal(): void
@@ -122,6 +163,12 @@ class TransactionFormModal extends Component
 
     public function save(): void
     {
+        $this->currency = strtoupper((string) $this->currency);
+
+        foreach ($this->fees as $index => $fee) {
+            $this->fees[$index]['currency'] = strtoupper((string) ($fee['currency'] ?? ''));
+        }
+
         $validated = $this->validate([
             'wallet' => [
                 'required',
@@ -129,21 +176,24 @@ class TransactionFormModal extends Component
             ],
             'asset' => 'required|exists:assets,id',
             'type' => 'required|in:buy,sell',
-            'currency' => 'required|string|size:3',
+            'currency' => ['required', 'string', 'size:3', Rule::in(array_keys($this->currencies))],
             'quantity' => 'required|numeric|gt:0',
             'price_per_unit' => 'required|numeric|gte:0',
+            'total_value' => 'required|numeric|gte:0',
             'date' => 'required|date',
             'notes' => 'nullable|string|max:500',
+            'fees' => 'array',
+            'fees.*.type' => ['required', Rule::in(array_keys($this->feeTypes))],
+            'fees.*.currency' => ['required', 'string', 'size:3', Rule::in(array_keys($this->currencies))],
+            'fees.*.value' => 'required|numeric|gt:0',
         ]);
-
-        $baseTotalValue = (float) $validated['quantity'] * (float) $validated['price_per_unit'];
 
         if ($validated['type'] === 'sell') {
             $validated['quantity'] = -abs((float) $validated['quantity']);
-            $validated['total_value'] = -abs($baseTotalValue);
+            $validated['total_value'] = -abs((float) $validated['total_value']);
         } else {
             $validated['quantity'] = abs((float) $validated['quantity']);
-            $validated['total_value'] = abs($baseTotalValue);
+            $validated['total_value'] = abs((float) $validated['total_value']);
         }
 
         $payload = [
@@ -158,14 +208,27 @@ class TransactionFormModal extends Component
             'notes' => $validated['notes'] ?? null,
         ];
 
-        if ($this->editingTransactionId !== null) {
-            $transaction = $this->ownedTransactionsQuery()->findOrFail($this->editingTransactionId);
-            $transaction->update($payload);
-            session()->flash('success', 'Transaction updated.');
-        } else {
-            Transaction::create($payload);
-            session()->flash('success', 'Transaction created.');
-        }
+        DB::transaction(function () use ($payload, $validated): void {
+            if ($this->editingTransactionId !== null) {
+                $transaction = $this->ownedTransactionsQuery()->findOrFail($this->editingTransactionId);
+                $transaction->update($payload);
+                $transaction->fees()->delete();
+            } else {
+                $transaction = Transaction::create($payload);
+            }
+
+            $transaction->fees()->createMany(array_map(
+                fn (array $fee): array => [
+                    'type' => $fee['type'],
+                    'currency_type' => 'fiat',
+                    'currency' => strtoupper($fee['currency']),
+                    'value' => (float) $fee['value'],
+                ],
+                $validated['fees'] ?? [],
+            ));
+        });
+
+        session()->flash('success', $this->editingTransactionId !== null ? 'Transaction updated.' : 'Transaction created.');
 
         $this->closeModal();
         $this->dispatch('transactionSaved');
@@ -183,6 +246,7 @@ class TransactionFormModal extends Component
         $this->total_value = 0;
         $this->date = now()->format('Y-m-d');
         $this->notes = null;
+        $this->fees = [];
         $this->resetValidation();
     }
 
