@@ -155,6 +155,41 @@
                     @endif
                 </div>
 
+                <div class="rounded-lg border border-gray-200 dark:border-zinc-800">
+                    <div class="border-b border-gray-200 px-4 py-3 dark:border-zinc-800">
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-zinc-100">Attachments</h3>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-zinc-400">Add purchase confirmations, fee receipts or statements. Files remain private.</p>
+                    </div>
+
+                    <div class="grid gap-4 p-4 sm:grid-cols-2">
+                        <div>
+                            <label for="transaction-attachment-type" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Document type</label>
+                            <select id="transaction-attachment-type" wire:model="attachmentType" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                                @foreach ($attachmentTypes as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            @error('attachmentType') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div>
+                            <label for="transaction-attachments" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Files</label>
+                            <input id="transaction-attachments" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.csv" wire:model="attachmentFiles" class="block h-11 w-full cursor-pointer rounded-lg border border-gray-300 bg-white text-sm text-gray-700 file:mr-3 file:h-full file:border-0 file:bg-gray-100 file:px-3 file:text-sm file:font-semibold dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:file:bg-zinc-800">
+                            <p class="mt-2 text-xs text-gray-500 dark:text-zinc-400">PDF, JPG, PNG or CSV, up to 10 MB per file.</p>
+                            @error('attachmentFiles') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
+                            @error('attachmentFiles.*') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    @if (count($attachmentFiles) > 0)
+                        <div class="space-y-2 border-t border-gray-200 px-4 py-3 dark:border-zinc-800">
+                            @foreach ($attachmentFiles as $file)
+                                <p class="text-sm text-gray-700 dark:text-zinc-300">{{ $file->getClientOriginalName() }}</p>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
                 <div>
                     <label for="transaction-notes" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Notes</label>
                     <textarea id="transaction-notes" wire:model="notes" maxlength="500" rows="3" placeholder="Optional notes" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"></textarea>

@@ -84,18 +84,20 @@ class MyTransactions extends Component
 
     public function deleteTransaction(int $id): void
     {
-        $deleted = Transaction::query()
+        $transaction = Transaction::query()
             ->where('id', $id)
             ->whereHas('wallet', function (Builder $query) {
                 $query->where('user_id', Auth::id());
             })
-            ->delete();
+            ->first();
 
-        if ($deleted === 0) {
+        if ($transaction === null) {
             session()->flash('error', 'Transaction could not be deleted.');
 
             return;
         }
+
+        $transaction->delete();
 
         session()->flash('success', 'Transaction deleted.');
     }

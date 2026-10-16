@@ -8,6 +8,8 @@ use App\Models\Broker;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -83,6 +85,9 @@ class TransactionFormModalTest extends TestCase
         $asset = $this->createAsset('Apple');
 
         $this->actingAs($user);
+        Storage::fake('local');
+
+        $proof = UploadedFile::fake()->create('purchase-proof.pdf', 100, 'application/pdf');
 
         Livewire::test(TransactionFormModal::class)
             ->set('wallet', $wallet->id)
@@ -96,6 +101,8 @@ class TransactionFormModalTest extends TestCase
                 ['type' => 'exchange/broker', 'currency' => 'GBP', 'value' => 2.50],
                 ['type' => 'network', 'currency' => 'USD', 'value' => 1.25],
             ])
+            ->set('attachmentType', 'purchase_proof')
+            ->set('attachmentFiles', [$proof])
             ->set('date', '2026-10-14')
             ->call('save');
 
@@ -116,6 +123,19 @@ class TransactionFormModalTest extends TestCase
             'currency' => 'USD',
             'value' => 1.25,
         ]);
+        $this->assertDatabaseHas('attachments', [
+            'transaction_id' => $transaction->id,
+            'type' => 'purchase_proof',
+            'original_name' => 'purchase-proof.pdf',
+            'mime_type' => 'application/pdf',
+        ]);
+
+        $attachment = $transaction->attachments()->firstOrFail();
+        Storage::disk('local')->assertExists($attachment->path);
+
+        $transaction->delete();
+
+        Storage::disk('local')->assertMissing($attachment->path);
     }
 
     private function createWallet(User $user, string $name): Wallet

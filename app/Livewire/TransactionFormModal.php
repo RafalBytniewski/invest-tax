@@ -6,13 +6,19 @@ use App\Models\Asset;
 use App\Models\Fee;
 use App\Models\Transaction;
 use App\Models\Wallet;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
+use Livewire\WithFileUploads;
+use Throwable;
 
 class TransactionFormModal extends Component
 {
+    use WithFileUploads;
+
     public ?int $editingTransactionId = null;
 
     public bool $showModal = false;
@@ -39,6 +45,10 @@ class TransactionFormModal extends Component
 
     public array $fees = [];
 
+    public array $attachmentFiles = [];
+
+    public string $attachmentType = 'other';
+
     public array $wallets = [];
 
     public array $assets = [];
@@ -59,6 +69,13 @@ class TransactionFormModal extends Component
         'exchange/broker' => 'Exchange/Broker fee',
         'network' => 'Network fee',
         'withdrawal' => 'Withdrawal fee',
+    ];
+
+    public array $attachmentTypes = [
+        'purchase_proof' => 'Purchase proof',
+        'fee_proof' => 'Fee proof',
+        'statement' => 'Account statement',
+        'other' => 'Other',
     ];
 
     protected $listeners = [
@@ -158,6 +175,8 @@ class TransactionFormModal extends Component
     public function closeModal(): void
     {
         $this->showModal = false;
+        $this->attachmentFiles = [];
+        $this->attachmentType = 'other';
         $this->resetValidation();
     }
 
@@ -186,6 +205,9 @@ class TransactionFormModal extends Component
             'fees.*.type' => ['required', Rule::in(array_keys($this->feeTypes))],
             'fees.*.currency' => ['required', 'string', 'size:3', Rule::in(array_keys($this->currencies))],
             'fees.*.value' => 'required|numeric|gt:0',
+            'attachmentType' => ['required', Rule::in(array_keys($this->attachmentTypes))],
+            'attachmentFiles' => 'array|max:2',
+            'attachmentFiles.*' => 'file|max:10240|mimes:pdf,jpg,jpeg,png,csv',
         ]);
 
         if ($validated['type'] === 'sell') {
@@ -208,25 +230,49 @@ class TransactionFormModal extends Component
             'notes' => $validated['notes'] ?? null,
         ];
 
-        DB::transaction(function () use ($payload, $validated): void {
-            if ($this->editingTransactionId !== null) {
-                $transaction = $this->ownedTransactionsQuery()->findOrFail($this->editingTransactionId);
-                $transaction->update($payload);
-                $transaction->fees()->delete();
-            } else {
-                $transaction = Transaction::create($payload);
-            }
+        $storedAttachmentPaths = [];
 
-            $transaction->fees()->createMany(array_map(
-                fn (array $fee): array => [
-                    'type' => $fee['type'],
-                    'currency_type' => 'fiat',
-                    'currency' => strtoupper($fee['currency']),
-                    'value' => (float) $fee['value'],
-                ],
-                $validated['fees'] ?? [],
-            ));
-        });
+        try {
+            DB::transaction(function () use ($payload, $validated, &$storedAttachmentPaths): void {
+                if ($this->editingTransactionId !== null) {
+                    $transaction = $this->ownedTransactionsQuery()->findOrFail($this->editingTransactionId);
+                    $transaction->update($payload);
+                    $transaction->fees()->get()->each->delete();
+                } else {
+                    $transaction = Transaction::create($payload);
+                }
+
+                $transaction->fees()->createMany(array_map(
+                    fn (array $fee): array => [
+                        'type' => $fee['type'],
+                        'currency_type' => 'fiat',
+                        'currency' => strtoupper($fee['currency']),
+                        'value' => (float) $fee['value'],
+                    ],
+                    $validated['fees'] ?? [],
+                ));
+
+                foreach ($this->attachmentFiles as $file) {
+                    /** @var UploadedFile $file */
+                    $path = $file->store('transaction-attachments', 'local');
+                    $storedAttachmentPaths[] = $path;
+
+                    $transaction->attachments()->create([
+                        'type' => $validated['attachmentType'],
+                        'disk' => 'local',
+                        'path' => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                        'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+                        'size' => $file->getSize(),
+                        'hash' => hash_file('sha256', $file->getRealPath()),
+                    ]);
+                }
+            });
+        } catch (Throwable $exception) {
+            Storage::disk('local')->delete($storedAttachmentPaths);
+
+            throw $exception;
+        }
 
         session()->flash('success', $this->editingTransactionId !== null ? 'Transaction updated.' : 'Transaction created.');
 
@@ -247,6 +293,8 @@ class TransactionFormModal extends Component
         $this->date = now()->format('Y-m-d');
         $this->notes = null;
         $this->fees = [];
+        $this->attachmentFiles = [];
+        $this->attachmentType = 'other';
         $this->resetValidation();
     }
 

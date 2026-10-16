@@ -11,6 +11,13 @@ class Transaction extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Transaction $transaction): void {
+            $transaction->attachments()->get()->each->delete();
+        });
+    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -46,6 +53,11 @@ class Transaction extends Model
     public function fees(): HasMany
     {
         return $this->hasMany(Fee::class);
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(Attachment::class);
     }
 
     public function walletLedgers(): HasMany
