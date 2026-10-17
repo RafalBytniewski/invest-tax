@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire\MyWallet;
+namespace App\Livewire\Wallet;
 
-use Livewire\Component;
 use App\Models\Wallet;
 use App\Services\MarketData\StockPriceService;
+use Livewire\Component;
 
 class Index extends Component
 {
@@ -20,8 +20,8 @@ class Index extends Component
         $this->price[$symbol] = $stockPriceService->getTodayOpenPrice($symbol, $exchange);
     }
 
-
     public $wallets;
+
     public $visibleTransactions = [];
 
     public function mount(StockPriceService $stockPriceService)
@@ -29,7 +29,6 @@ class Index extends Component
         $this->wallets = Wallet::with('transactions.asset.exchange')->get();
         $this->stockPriceService = $stockPriceService;
     }
-
 
     public function toggleTransactions($assetId)
     {
@@ -42,6 +41,6 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.my-wallet.index');
+        return view('livewire.wallet.index');
     }
 }

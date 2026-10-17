@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Transaction;
 
 use App\Models\Asset;
 use App\Models\Fee;
@@ -15,7 +15,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Throwable;
 
-class TransactionFormModal extends Component
+class FormModal extends Component
 {
     use WithFileUploads;
 
@@ -314,7 +314,7 @@ class TransactionFormModal extends Component
 
     public function render()
     {
-        return view('livewire.transaction-form-modal', [
+        return view('livewire.transaction.form-modal', [
             'wallets' => $this->wallets,
             'assets' => $this->assets,
         ]);

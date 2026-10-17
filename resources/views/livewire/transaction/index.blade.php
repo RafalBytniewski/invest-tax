@@ -99,7 +99,7 @@
                             <td class="whitespace-nowrap px-2 py-3 text-gray-700 dark:text-zinc-200">{{ $transaction->date->format('Y-m-d') }}</td>
                             <td class="whitespace-nowrap px-2 py-3 text-center">
                                 <div class="flex justify-center gap-1">
-                                    <button type="button" wire:click="$dispatchTo('transaction-form-modal', 'openTransactionFormModal', { transactionId: {{ $transaction->id }} })" aria-label="Edit transaction" class="rounded p-1 text-emerald-600 transition-colors hover:bg-emerald-100 dark:text-emerald-400 dark:hover:bg-emerald-800">
+                                    <button type="button" wire:click="$dispatchTo('transaction.form-modal', 'openTransactionFormModal', { transactionId: {{ $transaction->id }} })" aria-label="Edit transaction" class="rounded p-1 text-emerald-600 transition-colors hover:bg-emerald-100 dark:text-emerald-400 dark:hover:bg-emerald-800">
                                         <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor"><path d="M216-144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-30.11 21-51.56Q186-817 216-816h346l-72 72H216v528h528v-274l72-72v346q0 29.7-21.15 50.85Q773.7-144 744-144H216Zm264-336Zm-96 96v-153l354-354q11-11 24-16t26.5-5q14.4 0 27.45 5 13.05 5 23.99 15.78L891-840q11 11 16 24t5 27q0 14-5.02 27.09Q901.96-748.83 891-738L537-384H384Zm456-405-51-51 51 51ZM456-456h51l231-231-25-26-26-25-231 231v51Zm257-257-26-25 26 25 25 26-25-26Z" /></svg>
                                     </button>
                                     <button type="button" wire:click="deleteTransaction({{ $transaction->id }})" wire:confirm="Delete this transaction?" aria-label="Delete transaction" class="rounded p-1 text-rose-600 transition-colors hover:bg-rose-100 dark:text-rose-400 dark:hover:bg-rose-800">
@@ -134,5 +134,5 @@
         </div>
     </section>
 
-    <livewire:transaction-form-modal />
+    <livewire:transaction.form-modal />
 </div>

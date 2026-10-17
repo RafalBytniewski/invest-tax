@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Transaction;
 
 use App\Models\Asset;
 use App\Models\Transaction;
@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class MyTransactions extends Component
+class Index extends Component
 {
     use WithPagination;
 
@@ -180,7 +180,7 @@ class MyTransactions extends Component
         $transactions = $this->applySorting($this->baseQuery())
             ->paginate($this->perPage);
 
-        return view('livewire.my-transactions', [
+        return view('livewire.transaction.index', [
             'transactions' => $transactions,
             'contextTitle' => $this->wallet?->name ?? $this->asset?->name,
         ]);

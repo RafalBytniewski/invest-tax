@@ -23,7 +23,7 @@
             </div>
 
             <div>
-                <button type="button" wire:click="$dispatchTo('transaction-form-modal', 'openNewTransactionModal', { assetId: {{ $asset->id }} })"
+                <button type="button" wire:click="$dispatchTo('transaction.form-modal', 'openNewTransactionModal', { assetId: {{ $asset->id }} })"
                     class="inline-flex h-10 items-center justify-center rounded-lg bg-gray-900 px-4 text-sm font-semibold text-white transition hover:bg-gray-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300">
                     Add transaction
                 </button>
@@ -182,7 +182,7 @@
         </div>
     </section>
 
-    <livewire:transaction-form-modal />
+        <livewire:transaction.form-modal />
     {{-- CHARTS --}}
     <section
         class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-6"

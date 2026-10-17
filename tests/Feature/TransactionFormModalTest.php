@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\TransactionFormModal;
+use App\Livewire\Transaction\FormModal;
 use App\Models\Asset;
 use App\Models\Broker;
 use App\Models\User;
@@ -25,7 +25,7 @@ class TransactionFormModalTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(TransactionFormModal::class)
+        Livewire::test(FormModal::class)
             ->call('openCreateModal', $wallet->id, $asset->id)
             ->assertSet('showModal', true)
             ->assertSet('wallet', $wallet->id)
@@ -43,7 +43,7 @@ class TransactionFormModalTest extends TestCase
 
         $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
 
-        Livewire::test(TransactionFormModal::class)
+        Livewire::test(FormModal::class)
             ->call('openCreateModal', $foreignWallet->id);
     }
 
@@ -55,7 +55,7 @@ class TransactionFormModalTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(TransactionFormModal::class)
+        Livewire::test(FormModal::class)
             ->set('wallet', $wallet->id)
             ->set('asset', $asset->id)
             ->set('type', 'sell')
@@ -89,7 +89,7 @@ class TransactionFormModalTest extends TestCase
 
         $proof = UploadedFile::fake()->create('purchase-proof.pdf', 100, 'application/pdf');
 
-        Livewire::test(TransactionFormModal::class)
+        Livewire::test(FormModal::class)
             ->set('wallet', $wallet->id)
             ->set('asset', $asset->id)
             ->set('type', 'buy')

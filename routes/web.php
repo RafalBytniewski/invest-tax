@@ -3,12 +3,12 @@
 use App\Livewire\Asset\Dividends;
 use App\Livewire\Asset\Index;
 use App\Livewire\Asset\Show;
-use App\Livewire\MyTransactions;
-use App\Livewire\MyWallet\Index as MyWalletIndex;
-use App\Livewire\MyWallet\Show as MyWalletShow;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use App\Livewire\Transaction\Index as TransactionIndex;
+use App\Livewire\Wallet\Index as WalletIndex;
+use App\Livewire\Wallet\Show as WalletShow;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -24,14 +24,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/profile', Profile::class)->name('settings.profile');
     Route::get('settings/password', Password::class)->name('settings.password');
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
-    Route::get('/my-transactions', MyTransactions::class)->name('my-transactions');
-    Route::get('/my-wallet/{wallet}/transactions', MyTransactions::class)->name('my-wallet.transactions');
+    Route::get('/my-transactions', TransactionIndex::class)->name('my-transactions');
+    Route::get('/my-wallet/{wallet}/transactions', TransactionIndex::class)->name('my-wallet.transactions');
     Route::get('/assets', Index::class)->name('assets');
     Route::get('/assets/{asset}', Show::class)->name('assets.show');
     Route::get('/assets/{asset}/dividend', Dividends::class)->name('assets.dividends');
-    Route::get('/assets/{asset}/transactions', MyTransactions::class)->name('assets.transactions');
-    Route::get('/my-wallet/{wallet}', MyWalletShow::class)->name('my-wallet.show');
-    Route::get('/my-wallets', MyWalletIndex::class)->name('my-wallets');
+    Route::get('/assets/{asset}/transactions', TransactionIndex::class)->name('assets.transactions');
+    Route::get('/my-wallet/{wallet}', WalletShow::class)->name('my-wallet.show');
+    Route::get('/my-wallets', WalletIndex::class)->name('my-wallets');
 
 });
 

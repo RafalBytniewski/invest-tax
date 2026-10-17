@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\MyWallet;
+namespace App\Livewire\Wallet;
 
 use App\Models\Wallet;
 use App\Models\WalletLedger;
@@ -121,7 +121,7 @@ class Show extends Component
         // calculated value must be restored after every component request.
         $this->wallet->setAttribute('cash_balance', $this->wallet->cashBalance());
 
-        return view('livewire.my-wallet.show', [
+        return view('livewire.wallet.show', [
             'transactions' => $this->wallet->transactions->take(10),
             'walletLedgers' => $this->wallet->walletLedgers->take(15),
         ]);

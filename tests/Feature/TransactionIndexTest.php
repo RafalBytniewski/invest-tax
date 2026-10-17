@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\MyTransactions;
+use App\Livewire\Transaction\Index;
 use App\Models\Asset;
 use App\Models\Broker;
 use App\Models\Transaction;
@@ -12,7 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
-class MyTransactionsTest extends TestCase
+class TransactionIndexTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -35,13 +35,13 @@ class MyTransactionsTest extends TestCase
         $this->assertDatabaseHas('transactions', ['id' => $walletTransaction->id]);
         $this->actingAs($user);
 
-        Livewire::test(MyTransactions::class, ['wallet' => $wallet])
+        Livewire::test(Index::class, ['wallet' => $wallet])
             ->assertSet('wallet.id', $wallet->id)
             ->assertSee('2026-01-15')
             ->assertDontSee('2026-02-15')
             ->assertDontSee('2026-03-15');
 
-        Livewire::test(MyTransactions::class, ['asset' => $asset])
+        Livewire::test(Index::class, ['asset' => $asset])
             ->assertSee('2026-01-15')
             ->assertDontSee('2026-02-15')
             ->assertDontSee('2026-03-15');

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\MyWallet\Show;
+use App\Livewire\Wallet\Show;
 use App\Models\Broker;
 use App\Models\User;
 use App\Models\Wallet;
