@@ -22,10 +22,15 @@ class AssetPrice extends Model
         'close_price',
         'source',
         'date',
-        'asset_id'
+        'asset_id',
     ];
 
-    public function asset(): BelongsTo{
+    protected $casts = [
+        'date' => 'date',
+    ];
+
+    public function asset(): BelongsTo
+    {
         return $this->belongsTo(Asset::class);
     }
 }

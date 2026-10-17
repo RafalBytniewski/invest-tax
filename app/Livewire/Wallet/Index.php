@@ -2,41 +2,17 @@
 
 namespace App\Livewire\Wallet;
 
-use App\Models\Wallet;
-use App\Services\MarketData\StockPriceService;
+use App\Services\Wallet\WalletOverviewService;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Index extends Component
 {
-    public $price = [];
+    public array $wallets = [];
 
-    protected $stockPriceService;
-
-    public function loadPrice(
-        StockPriceService $stockPriceService,
-        $symbol,
-        $exchange
-    ) {
-        $this->price[$symbol] = $stockPriceService->getTodayOpenPrice($symbol, $exchange);
-    }
-
-    public $wallets;
-
-    public $visibleTransactions = [];
-
-    public function mount(StockPriceService $stockPriceService)
+    public function mount(WalletOverviewService $walletOverviewService): void
     {
-        $this->wallets = Wallet::with('transactions.asset.exchange')->get();
-        $this->stockPriceService = $stockPriceService;
-    }
-
-    public function toggleTransactions($assetId)
-    {
-        if (isset($this->visibleTransactions[$assetId])) {
-            unset($this->visibleTransactions[$assetId]);
-        } else {
-            $this->visibleTransactions[$assetId] = true;
-        }
+        $this->wallets = $walletOverviewService->forUser(Auth::user());
     }
 
     public function render()
