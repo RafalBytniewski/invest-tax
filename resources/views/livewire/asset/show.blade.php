@@ -59,8 +59,7 @@
                 class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
                 <div>
                     <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-zinc-400">
-                        Position Value</p>
-
+                        Position Value</p>{{$quantity}}
                     @if ($positionValue !== null && $walletCurrency !== null)
                         <p class="mt-1 text-2xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-zinc-50">
                             {{ number_format($positionValue, 2, '.', ' ') }}
@@ -78,7 +77,7 @@
                         <span class="font-medium text-gray-700 dark:text-zinc-300">{{ $quantity }}
                             {{ $asset->symbol }}</span>
                         @if ($latestPrice?->date)
-                            <span>{{ $latestPrice->date }}</span>
+                            <span>{{ $latestPrice->date->format('Y-m-d') }}</span>
                         @endif
                     </div>
                 @endif
@@ -143,7 +142,7 @@
                 <div
                     class="mt-3 border-t border-gray-200/60 pt-2 text-xs text-gray-500 dark:border-zinc-800/60 dark:text-zinc-400">
                     @if ($latestPrice?->date)
-                        <span>{{ $latestPrice->date }}</span>
+                        <span>{{ $latestPrice->date->format('Y-m-d') }}</span>
                     @else
                         <span>No market price</span>
                     @endif

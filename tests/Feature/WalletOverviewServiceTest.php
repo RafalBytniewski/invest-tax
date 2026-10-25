@@ -5,14 +5,19 @@ namespace Tests\Feature;
 use App\Models\Asset;
 use App\Models\AssetPrice;
 use App\Models\Broker;
+use App\Models\Exchange;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\Wallet\WalletOverviewService;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class WalletOverviewServiceTest extends TestCase
 {
+    use LazilyRefreshDatabase;
+
     public function test_overview_uses_fifo_prices_from_database_and_only_returns_user_wallets(): void
     {
         $user = User::factory()->create();
@@ -94,8 +99,15 @@ class WalletOverviewServiceTest extends TestCase
     public function test_missing_close_price_does_not_break_overview_calculations(): void
     {
         $user = User::factory()->create();
+        $broker = Broker::create([
+            'name' => 'Test Broker',
+            'type' => 'broker',
+            'image' => 'broker.png',
+            'url' => 'https://example.test',
+        ]);
         $wallet = Wallet::create([
             'user_id' => $user->id,
+            'broker_id' => $broker->id,
             'name' => 'Wallet without price',
             'currency' => 'PLN',
         ]);
@@ -120,5 +132,75 @@ class WalletOverviewServiceTest extends TestCase
         $this->assertNull($overview['portfolio_value']);
         $this->assertNull($overview['unrealized_pl']);
         $this->assertSame([], $overview['allocation']);
+    }
+
+    public function test_it_fetches_one_exchange_rate_for_multiple_assets_in_the_same_currency(): void
+    {
+        Http::preventStrayRequests();
+        $this->travelTo('2026-10-23 12:00:00');
+        Http::fake([
+            'https://api.nbp.pl/api/exchangerates/rates/a/USD/2026-10-23/?format=json' => Http::response([
+                'rates' => [['mid' => 4.0]],
+            ]),
+        ]);
+
+        $user = User::factory()->create();
+        $broker = Broker::create([
+            'name' => 'Test Broker',
+            'type' => 'broker',
+            'image' => 'broker.png',
+            'url' => 'https://example.test',
+        ]);
+        $wallet = Wallet::create([
+            'user_id' => $user->id,
+            'broker_id' => $broker->id,
+            'name' => 'USD assets wallet',
+            'currency' => 'PLN',
+        ]);
+        $exchange = Exchange::create([
+            'name' => 'NYSE',
+            'symbol' => 'NYSE',
+            'country' => 'United States',
+            'currency' => 'USD',
+            'timezone' => 'America/New_York',
+            'url' => 'https://example.test',
+            'trading_hours' => '09:30-16:00',
+        ]);
+        $firstAsset = Asset::create([
+            'symbol' => 'AAA',
+            'name' => 'First asset',
+            'asset_type' => 'stock',
+            'exchange_id' => $exchange->id,
+        ]);
+        $secondAsset = Asset::create([
+            'symbol' => 'BBB',
+            'name' => 'Second asset',
+            'asset_type' => 'stock',
+            'exchange_id' => $exchange->id,
+        ]);
+
+        foreach ([[$firstAsset, 1], [$secondAsset, 2]] as [$asset, $quantity]) {
+            Transaction::create([
+                'wallet_id' => $wallet->id,
+                'asset_id' => $asset->id,
+                'type' => 'buy',
+                'currency' => 'PLN',
+                'quantity' => $quantity,
+                'price_per_unit' => 10,
+                'total_value' => $quantity * 10,
+                'date' => '2026-01-01',
+            ]);
+            AssetPrice::create([
+                'asset_id' => $asset->id,
+                'close_price' => 10,
+                'source' => 'test',
+                'date' => '2026-01-02',
+            ]);
+        }
+
+        $overview = app(WalletOverviewService::class)->forWallet($wallet);
+
+        Http::assertSentCount(1);
+        $this->assertSame(120.0, $overview['portfolio_value']);
     }
 }

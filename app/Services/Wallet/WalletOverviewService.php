@@ -6,13 +6,17 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\Asset\AssetCalculator;
+use App\Services\Currency\ExchangeRateService;
 use Illuminate\Support\Collection;
 
 class WalletOverviewService
 {
     private const EPSILON = 0.00000001;
 
-    public function __construct(private AssetCalculator $assetCalculator) {}
+    public function __construct(
+        private AssetCalculator $assetCalculator,
+        private ExchangeRateService $exchangeRateService
+    ) {}
 
     /**
      * @return list<array{wallet: Wallet, overview: array<string, mixed>}>
@@ -44,7 +48,10 @@ class WalletOverviewService
     public function forWallet(Wallet $wallet): array
     {
         $wallet->loadMissing($this->walletRelations());
-
+        $walletCurrency = $wallet->currency;
+        $exchangeRateDate = now()->format('Y-m-d');
+        /** @var array<string, float|null> $exchangeRates */
+        $exchangeRates = [];
         $transactions = $wallet->transactions->sortBy(
             fn (Transaction $transaction): string => sprintf(
                 '%020d-%020d',
@@ -57,7 +64,7 @@ class WalletOverviewService
         $positions = $transactions
             ->filter(fn (Transaction $transaction): bool => in_array($transaction->type, ['buy', 'sell'], true))
             ->groupBy('asset_id')
-            ->map(function (Collection $assetTransactions): ?array {
+            ->map(function (Collection $assetTransactions) use ($walletCurrency, $exchangeRateDate, &$exchangeRates): ?array {
                 $calculation = $this->assetCalculator->calculate($assetTransactions);
 
                 if ($calculation['quantity'] <= self::EPSILON) {
@@ -65,7 +72,21 @@ class WalletOverviewService
                 }
 
                 $asset = $assetTransactions->first()->asset;
-                $closePrice = $asset?->latestPrice?->close_price;
+                $assetCurrency = $asset->exchange?->currency;
+
+                if ($assetCurrency === null || $assetCurrency === $walletCurrency) {
+                    $closePrice = $asset?->latestPrice?->close_price;
+                } else {
+                    if (! array_key_exists($assetCurrency, $exchangeRates)) {
+                        $exchangeRates[$assetCurrency] = $this->exchangeRateService
+                            ->getCurrencyPrice($assetCurrency, $exchangeRateDate);
+                    }
+
+                    $rate = $exchangeRates[$assetCurrency];
+                    $closePrice = $rate === null || $asset?->latestPrice?->close_price === null
+                        ? null
+                        : $rate * $asset->latestPrice->close_price;
+                }
 
                 return [
                     'name' => (string) ($asset?->name ?? $asset?->symbol ?? 'Unknown asset'),
