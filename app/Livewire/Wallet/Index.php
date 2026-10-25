@@ -3,40 +3,15 @@
 namespace App\Livewire\Wallet;
 
 use App\Models\Wallet;
-use App\Services\MarketData\StockPriceService;
 use Livewire\Component;
 
 class Index extends Component
 {
-    public $price = [];
-
-    protected $stockPriceService;
-
-    public function loadPrice(
-        StockPriceService $stockPriceService,
-        $symbol,
-        $exchange
-    ) {
-        $this->price[$symbol] = $stockPriceService->getTodayOpenPrice($symbol, $exchange);
-    }
-
     public $wallets;
 
-    public $visibleTransactions = [];
-
-    public function mount(StockPriceService $stockPriceService)
+    public function mount()
     {
         $this->wallets = Wallet::with('transactions.asset.exchange')->get();
-        $this->stockPriceService = $stockPriceService;
-    }
-
-    public function toggleTransactions($assetId)
-    {
-        if (isset($this->visibleTransactions[$assetId])) {
-            unset($this->visibleTransactions[$assetId]);
-        } else {
-            $this->visibleTransactions[$assetId] = true;
-        }
     }
 
     public function render()
