@@ -23,6 +23,7 @@ class CheckWalletLedgers extends Command
             'mismatched' => 0,
             'fixed_mismatched' => 0,
             'duplicates' => 0,
+            'fixed_duplicates' => 0,
             'unsupported' => 0,
         ];
         $fix = (bool) $this->option('fix');
@@ -56,6 +57,7 @@ class CheckWalletLedgers extends Command
                 ['Mismatched entries', $stats['mismatched']],
                 ['Mismatched entries fixed', $stats['fixed_mismatched']],
                 ['Duplicate entries', $stats['duplicates']],
+                ['Duplicate entries fixed', $stats['fixed_duplicates']],
                 ['Unsupported transaction types', $stats['unsupported']],
             ]
         );

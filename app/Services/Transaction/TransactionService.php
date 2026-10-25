@@ -65,10 +65,20 @@ class TransactionService
             : $transaction->walletLedgers()->oldest('id')->get();
 
         if ($ledgers->count() > 1) {
+            if ($fix) {
+                $ledgers->skip(1)->each->delete();
+
+                $ledger = $ledgers->first();
+
+                if (! $this->walletLedgerMatches($ledger, $ledgerData)) {
+                    $ledger->update($ledgerData);
+                }
+            }
+
             return [
                 'status' => 'duplicate',
                 'duplicate_count' => $ledgers->count() - 1,
-                'changed' => false,
+                'changed' => $fix,
             ];
         }
 
@@ -115,9 +125,16 @@ class TransactionService
             return;
         }
 
-        $ledger = $transaction->walletLedgers()->oldest('id')->first() ?? new WalletLedger([
-            'transaction_id' => $transaction->id,
-        ]);
+        $ledgers = $transaction->walletLedgers()->oldest('id')->get();
+        $ledger = $ledgers->first();
+
+        if ($ledger === null) {
+            $ledger = new WalletLedger([
+                'transaction_id' => $transaction->id,
+            ]);
+        } else {
+            $ledgers->skip(1)->each->delete();
+        }
 
         $ledger->fill($ledgerData);
         $ledger->save();
