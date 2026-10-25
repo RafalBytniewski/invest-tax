@@ -76,6 +76,14 @@ class TransactionFormModalTest extends TestCase
             'price_per_unit' => 125.50,
             'total_value' => -251,
         ]);
+
+        $transaction = $wallet->transactions()->firstOrFail();
+
+        $this->assertDatabaseHas('wallet_ledgers', [
+            'transaction_id' => $transaction->id,
+            'type' => 'sell',
+            'amount' => 251,
+        ]);
     }
 
     public function test_transaction_uses_a_manual_total_value_and_saves_multiple_fees(): void

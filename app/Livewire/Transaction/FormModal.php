@@ -6,6 +6,7 @@ use App\Models\Asset;
 use App\Models\Fee;
 use App\Models\Transaction;
 use App\Models\Wallet;
+use App\Services\Transaction\TransactionService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -236,10 +237,10 @@ class FormModal extends Component
             DB::transaction(function () use ($payload, $validated, &$storedAttachmentPaths): void {
                 if ($this->editingTransactionId !== null) {
                     $transaction = $this->ownedTransactionsQuery()->findOrFail($this->editingTransactionId);
-                    $transaction->update($payload);
+                    app(TransactionService::class)->update($transaction, $payload);
                     $transaction->fees()->get()->each->delete();
                 } else {
-                    $transaction = Transaction::create($payload);
+                    $transaction = app(TransactionService::class)->create($payload);
                 }
 
                 $transaction->fees()->createMany(array_map(
