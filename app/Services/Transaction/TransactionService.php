@@ -45,7 +45,105 @@ class TransactionService
         });
     }
 
+    /**
+     * @return array{status: string, duplicate_count: int, changed: bool}
+     */
+    public function reconcileWalletLedger(Transaction $transaction, bool $fix = false): array
+    {
+        $ledgerData = $this->walletLedgerData($transaction);
+
+        if ($ledgerData === null) {
+            return [
+                'status' => 'unsupported',
+                'duplicate_count' => 0,
+                'changed' => false,
+            ];
+        }
+
+        $ledgers = $transaction->relationLoaded('walletLedgers')
+            ? $transaction->walletLedgers->sortBy('id')->values()
+            : $transaction->walletLedgers()->oldest('id')->get();
+
+        if ($ledgers->count() > 1) {
+            if ($fix) {
+                $ledgers->skip(1)->each->delete();
+
+                $ledger = $ledgers->first();
+
+                if (! $this->walletLedgerMatches($ledger, $ledgerData)) {
+                    $ledger->update($ledgerData);
+                }
+            }
+
+            return [
+                'status' => 'duplicate',
+                'duplicate_count' => $ledgers->count() - 1,
+                'changed' => $fix,
+            ];
+        }
+
+        $ledger = $ledgers->first();
+
+        if ($ledger === null) {
+            if ($fix) {
+                WalletLedger::create($ledgerData);
+            }
+
+            return [
+                'status' => 'missing',
+                'duplicate_count' => 0,
+                'changed' => $fix,
+            ];
+        }
+
+        if ($this->walletLedgerMatches($ledger, $ledgerData)) {
+            return [
+                'status' => 'ok',
+                'duplicate_count' => 0,
+                'changed' => false,
+            ];
+        }
+
+        if ($fix) {
+            $ledger->update($ledgerData);
+        }
+
+        return [
+            'status' => 'mismatched',
+            'duplicate_count' => 0,
+            'changed' => $fix,
+        ];
+    }
+
     protected function syncWalletLedger(Transaction $transaction): void
+    {
+        $ledgerData = $this->walletLedgerData($transaction);
+
+        if ($ledgerData === null) {
+            $transaction->walletLedgers()->delete();
+
+            return;
+        }
+
+        $ledgers = $transaction->walletLedgers()->oldest('id')->get();
+        $ledger = $ledgers->first();
+
+        if ($ledger === null) {
+            $ledger = new WalletLedger([
+                'transaction_id' => $transaction->id,
+            ]);
+        } else {
+            $ledgers->skip(1)->each->delete();
+        }
+
+        $ledger->fill($ledgerData);
+        $ledger->save();
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    protected function walletLedgerData(Transaction $transaction): ?array
     {
         $ledgerType = match ($transaction->type) {
             'buy', 'sell', 'dividend' => $transaction->type,
@@ -53,27 +151,32 @@ class TransactionService
         };
 
         if ($ledgerType === null) {
-            $transaction->walletLedgers()->delete();
-
-            return;
+            return null;
         }
 
-        $amount = match ($transaction->type) {
-            'buy' => -abs((float) $transaction->total_value),
-            'sell', 'dividend' => abs((float) $transaction->total_value),
-        };
-
-        $ledger = WalletLedger::query()->firstOrNew([
-            'transaction_id' => $transaction->id,
-        ]);
-
-        $ledger->fill([
+        return [
             'wallet_id' => $transaction->wallet_id,
+            'transaction_id' => $transaction->id,
             'type' => $ledgerType,
-            'amount' => $amount,
+            'amount' => match ($transaction->type) {
+                'buy' => -abs((float) $transaction->total_value),
+                'sell', 'dividend' => abs((float) $transaction->total_value),
+            },
             'date' => $transaction->date,
             'notes' => $transaction->notes,
-        ]);
-        $ledger->save();
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $ledgerData
+     */
+    protected function walletLedgerMatches(WalletLedger $ledger, array $ledgerData): bool
+    {
+        return $ledger->wallet_id === $ledgerData['wallet_id']
+            && $ledger->transaction_id === $ledgerData['transaction_id']
+            && $ledger->type === $ledgerData['type']
+            && abs((float) $ledger->amount - (float) $ledgerData['amount']) < 0.00000001
+            && $ledger->date?->format('Y-m-d H:i:s') === $ledgerData['date']?->format('Y-m-d H:i:s')
+            && $ledger->notes === $ledgerData['notes'];
     }
 }

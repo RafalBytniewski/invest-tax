@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Asset;
 use App\Models\Broker;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Models\WalletLedger;
 use App\Services\Transaction\TransactionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -92,6 +94,128 @@ class TransactionLedgerServiceTest extends TestCase
 
         $this->assertDatabaseMissing('transactions', ['id' => $transaction->id]);
         $this->assertDatabaseMissing('wallet_ledgers', ['transaction_id' => $transaction->id]);
+    }
+
+    public function test_it_removes_duplicate_ledger_entries_when_a_transaction_is_updated(): void
+    {
+        $wallet = $this->createWallet();
+        $asset = $this->createAsset();
+        $service = app(TransactionService::class);
+
+        $transaction = $service->create([
+            'wallet_id' => $wallet->id,
+            'asset_id' => $asset->id,
+            'type' => 'buy',
+            'currency' => 'PLN',
+            'quantity' => 1,
+            'price_per_unit' => 100,
+            'total_value' => 100,
+            'date' => '2026-10-14',
+        ]);
+
+        WalletLedger::create([
+            'wallet_id' => $wallet->id,
+            'transaction_id' => $transaction->id,
+            'type' => 'buy',
+            'amount' => -100,
+            'date' => '2026-10-14',
+        ]);
+
+        $service->update($transaction, ['notes' => 'Updated']);
+
+        $this->assertDatabaseCount('wallet_ledgers', 1);
+        $this->assertDatabaseHas('wallet_ledgers', [
+            'transaction_id' => $transaction->id,
+            'notes' => 'Updated',
+        ]);
+    }
+
+    public function test_direct_transaction_deletion_cascades_to_its_ledger_entry(): void
+    {
+        $wallet = $this->createWallet();
+        $asset = $this->createAsset();
+        $transaction = app(TransactionService::class)->create([
+            'wallet_id' => $wallet->id,
+            'asset_id' => $asset->id,
+            'type' => 'buy',
+            'currency' => 'PLN',
+            'quantity' => 1,
+            'price_per_unit' => 100,
+            'total_value' => 100,
+            'date' => '2026-10-14',
+        ]);
+
+        $transaction->delete();
+
+        $this->assertDatabaseMissing('wallet_ledgers', [
+            'transaction_id' => $transaction->id,
+        ]);
+    }
+
+    public function test_the_command_reports_and_repairs_a_missing_ledger_entry(): void
+    {
+        $wallet = $this->createWallet();
+        $asset = $this->createAsset();
+        $transaction = Transaction::create([
+            'wallet_id' => $wallet->id,
+            'asset_id' => $asset->id,
+            'type' => 'buy',
+            'currency' => 'PLN',
+            'quantity' => 1,
+            'price_per_unit' => 100,
+            'total_value' => 100,
+            'date' => '2026-10-14',
+        ]);
+
+        $this->artisan('wallet-ledger:check')
+            ->expectsOutputToContain('dry run')
+            ->assertExitCode(0);
+
+        $this->assertDatabaseMissing('wallet_ledgers', [
+            'transaction_id' => $transaction->id,
+        ]);
+
+        $this->artisan('wallet-ledger:check --fix')
+            ->expectsOutputToContain('with fixes')
+            ->assertExitCode(0);
+
+        $this->assertDatabaseHas('wallet_ledgers', [
+            'transaction_id' => $transaction->id,
+            'type' => 'buy',
+            'amount' => -100,
+        ]);
+    }
+
+    public function test_the_command_repairs_a_mismatched_ledger_entry_without_creating_a_second_one(): void
+    {
+        $wallet = $this->createWallet();
+        $asset = $this->createAsset();
+        $transaction = Transaction::create([
+            'wallet_id' => $wallet->id,
+            'asset_id' => $asset->id,
+            'type' => 'sell',
+            'currency' => 'PLN',
+            'quantity' => -1,
+            'price_per_unit' => 100,
+            'total_value' => -100,
+            'date' => '2026-10-14',
+        ]);
+        WalletLedger::create([
+            'wallet_id' => $wallet->id,
+            'transaction_id' => $transaction->id,
+            'type' => 'sell',
+            'amount' => -100,
+            'date' => '2026-10-13',
+        ]);
+
+        $this->artisan('wallet-ledger:check --fix')->assertExitCode(0);
+
+        $this->assertDatabaseCount('wallet_ledgers', 1);
+        $this->assertDatabaseHas('wallet_ledgers', [
+            'transaction_id' => $transaction->id,
+            'amount' => 100,
+            'date' => '2026-10-14 00:00:00',
+        ]);
     }
 
     private function createWallet(): Wallet
