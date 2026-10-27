@@ -104,7 +104,7 @@ class Show extends Component
         }
 
         $currencies = $transactions
-            ->pluck('currency')
+            ->pluck('wallet.currency')
             ->filter()
             ->map(fn ($currency) => strtoupper((string) $currency))
             ->unique()
