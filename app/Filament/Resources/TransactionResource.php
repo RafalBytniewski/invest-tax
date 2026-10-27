@@ -302,7 +302,7 @@ class TransactionResource extends Resource
                 TextColumn::make('total_value')
                     ->label('Total Value')
                     ->sortable()
-                    ->suffix(fn ($record) => ' '.strtoupper($record->currency ?? ''))
+                    ->suffix(fn ($record) => ' '.strtoupper($record->wallet?->currency ?? ''))
                     ->formatStateUsing(fn ($state) => number_format($state, 2, '.', ' ')),
 
             ])

@@ -72,17 +72,6 @@
                     </div>
 
                     <div>
-                        <label for="transaction-currency" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Currency</label>
-                        <select id="transaction-currency" wire:model="currency" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
-                            <option value="">Select currency</option>
-                            @foreach ($currencies as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        @error('currency') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
                         <label for="transaction-quantity" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Quantity</label>
                         <input id="transaction-quantity" type="number" step="0.00000001" min="0" wire:model.live="quantity" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
                         @error('quantity') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
@@ -90,14 +79,32 @@
 
                     <div>
                         <label for="transaction-price" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Price per unit</label>
-                        <input id="transaction-price" type="number" step="0.01" min="0" wire:model.live="price_per_unit" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                        <div class="relative">
+                            <input id="transaction-price" type="number" step="0.00000001" min="0" wire:model.live="price_per_unit" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 pr-16 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                            <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-semibold text-gray-500 dark:text-zinc-400">{{ $priceCurrency ?? '—' }}</span>
+                        </div>
                         @error('price_per_unit') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
                     </div>
 
+                    @if ($priceCurrency && $walletCurrency && $priceCurrency !== $walletCurrency)
+                        <div>
+                            <label for="transaction-exchange-rate" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Exchange rate</label>
+                            <div class="relative">
+                                <input id="transaction-exchange-rate" type="number" step="0.00000001" min="0" wire:model.live="exchange_rate" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 pr-24 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                                <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-semibold text-gray-500 dark:text-zinc-400">{{ $walletCurrency }}/{{ $priceCurrency }}</span>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500 dark:text-zinc-400">1 {{ $priceCurrency }} = {{ $exchange_rate ?: '—' }} {{ $walletCurrency }}</p>
+                            @error('exchange_rate') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
+                        </div>
+                    @endif
+
                     <div>
                         <label for="transaction-total" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Total value</label>
-                        <input id="transaction-total" type="number" step="0.01" min="0" wire:model="total_value" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
-                        @error('total_value') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
+                        <div class="relative">
+                            <input id="transaction-total" type="number" step="0.00000001" min="0" wire:model.live="total_value" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 pr-16 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                            <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-semibold text-gray-500 dark:text-zinc-400">{{ $walletCurrency ?? '—' }}</span>
+                        </div>
+                        <p class="mt-2 text-xs text-gray-500 dark:text-zinc-400">Enter a total to calculate the exchange rate, or edit the rate manually.</p>
                     </div>
 
                     <div>

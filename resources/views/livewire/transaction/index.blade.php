@@ -94,7 +94,7 @@
                             </td>
                             <td class="whitespace-nowrap px-2 py-3 tabular-nums text-gray-700 dark:text-zinc-200">
                                 {{ number_format(abs($transaction->total_value), 2, ',', ' ') }}
-                                <span class="text-xs text-gray-500 dark:text-zinc-400">{{ $transaction->currency }}</span>
+                                <span class="text-xs text-gray-500 dark:text-zinc-400">{{ $transaction->wallet?->currency }}</span>
                             </td>
                             <td class="whitespace-nowrap px-2 py-3 text-gray-700 dark:text-zinc-200">{{ $transaction->date->format('Y-m-d') }}</td>
                             <td class="whitespace-nowrap px-2 py-3 text-center">

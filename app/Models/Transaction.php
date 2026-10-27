@@ -29,6 +29,7 @@ class Transaction extends Model
         'currency',
         'quantity',
         'price_per_unit',
+        'exchange_rate',
         'total_value',
         'date',
         'notes',
@@ -38,6 +39,7 @@ class Transaction extends Model
 
     protected $casts = [
         'date' => 'datetime',
+        'exchange_rate' => 'decimal:8',
     ];
 
     public function wallet(): BelongsTo

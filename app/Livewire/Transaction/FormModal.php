@@ -32,13 +32,17 @@ class FormModal extends Component
 
     public $type = null;
 
-    public $currency = null;
+    public ?string $walletCurrency = null;
+
+    public ?string $priceCurrency = null;
 
     public $quantity = null;
 
     public $price_per_unit = null;
 
     public $total_value = 0;
+
+    public $exchange_rate = null;
 
     public $date = null;
 
@@ -93,11 +97,27 @@ class FormModal extends Component
         $this->assets = Asset::pluck('name', 'id')->toArray();
     }
 
-    public function updated($field): void
+    public function updated(string $field): void
     {
-        if (in_array($field, ['quantity', 'price_per_unit'], true)) {
+        if ($field === 'total_value') {
+            $this->recalculateExchangeRate();
+
+            return;
+        }
+
+        if (in_array($field, ['quantity', 'price_per_unit', 'exchange_rate'], true)) {
             $this->recalculateTotalValue();
         }
+    }
+
+    public function updatedWallet(): void
+    {
+        $this->syncCurrencyContext(true);
+    }
+
+    public function updatedAsset(): void
+    {
+        $this->syncCurrencyContext(true);
     }
 
     public function openTransactionFormModal(?int $transactionId = null): void
@@ -118,15 +138,15 @@ class FormModal extends Component
 
         if ($walletId !== null) {
             $wallet = Wallet::query()->findOrFail($walletId);
-            abort_unless($wallet->user_id === Auth::id(), 403);
+            abort_unless((int) $wallet->user_id === (int) Auth::id(), 403);
             $this->wallet = $wallet->id;
-            $this->currency = strtoupper((string) $wallet->currency);
         }
 
         if ($assetId !== null) {
             $this->asset = Asset::query()->findOrFail($assetId)->id;
         }
 
+        $this->syncCurrencyContext(true);
         $this->showModal = true;
     }
 
@@ -139,12 +159,16 @@ class FormModal extends Component
         $this->wallet = $transaction->wallet_id;
         $this->asset = $transaction->asset_id;
         $this->type = $transaction->type;
-        $this->currency = strtoupper((string) $transaction->currency);
+        $this->walletCurrency = strtoupper((string) $transaction->wallet->currency);
+        $this->priceCurrency = strtoupper((string) ($transaction->currency ?: $this->resolvePriceCurrency($transaction->asset, $this->walletCurrency)));
         $this->quantity = abs((float) $transaction->quantity);
         $this->price_per_unit = (float) $transaction->price_per_unit;
         $this->date = optional($transaction->date)->format('Y-m-d');
         $this->notes = $transaction->notes;
         $this->total_value = abs((float) $transaction->total_value);
+        $this->exchange_rate = $transaction->exchange_rate !== null
+            ? (float) $transaction->exchange_rate
+            : $this->legacyExchangeRate();
         $this->fees = $transaction->fees
             ->map(fn (Fee $fee): array => [
                 'type' => $fee->type,
@@ -161,7 +185,7 @@ class FormModal extends Component
     {
         $this->fees[] = [
             'type' => 'exchange/broker',
-            'currency' => $this->currency ?? 'PLN',
+            'currency' => $this->walletCurrency ?? 'PLN',
             'value' => null,
         ];
     }
@@ -183,8 +207,6 @@ class FormModal extends Component
 
     public function save(): void
     {
-        $this->currency = strtoupper((string) $this->currency);
-
         foreach ($this->fees as $index => $fee) {
             $this->fees[$index]['currency'] = strtoupper((string) ($fee['currency'] ?? ''));
         }
@@ -196,10 +218,10 @@ class FormModal extends Component
             ],
             'asset' => 'required|exists:assets,id',
             'type' => 'required|in:buy,sell',
-            'currency' => ['required', 'string', 'size:3', Rule::in(array_keys($this->currencies))],
             'quantity' => 'required|numeric|gt:0',
             'price_per_unit' => 'required|numeric|gte:0',
             'total_value' => 'required|numeric|gte:0',
+            'exchange_rate' => 'nullable|numeric|gt:0',
             'date' => 'required|date',
             'notes' => 'nullable|string|max:500',
             'fees' => 'array',
@@ -211,21 +233,48 @@ class FormModal extends Component
             'attachmentFiles.*' => 'file|max:10240|mimes:pdf,jpg,jpeg,png,csv',
         ]);
 
+        $wallet = Wallet::query()
+            ->where('user_id', Auth::id())
+            ->findOrFail((int) $validated['wallet']);
+        $asset = Asset::query()->with('exchange')->findOrFail((int) $validated['asset']);
+
+        $this->walletCurrency = strtoupper((string) $wallet->currency);
+        $this->priceCurrency = $this->resolvePriceCurrency($asset, $this->walletCurrency);
+
+        if ($this->walletCurrency === $this->priceCurrency && $this->exchange_rate === null) {
+            $this->exchange_rate = 1;
+        } elseif ($this->exchange_rate === null) {
+            $this->addError('exchange_rate', 'An exchange rate is required when the currencies differ.');
+
+            return;
+        }
+
+        $validated['exchange_rate'] = (float) $this->exchange_rate;
+
+        $calculatedTotalValue = abs(
+            (float) $validated['quantity']
+            * (float) $validated['price_per_unit']
+            * (float) $validated['exchange_rate']
+        );
+
         if ($validated['type'] === 'sell') {
             $validated['quantity'] = -abs((float) $validated['quantity']);
-            $validated['total_value'] = -abs((float) $validated['total_value']);
+            $validated['total_value'] = -$calculatedTotalValue;
         } else {
             $validated['quantity'] = abs((float) $validated['quantity']);
-            $validated['total_value'] = abs((float) $validated['total_value']);
+            $validated['total_value'] = $calculatedTotalValue;
         }
+
+        $this->total_value = abs($validated['total_value']);
 
         $payload = [
             'wallet_id' => (int) $validated['wallet'],
             'asset_id' => (int) $validated['asset'],
             'type' => $validated['type'],
-            'currency' => strtoupper($validated['currency']),
+            'currency' => $this->priceCurrency,
             'quantity' => $validated['quantity'],
             'price_per_unit' => (float) $validated['price_per_unit'],
+            'exchange_rate' => (float) $validated['exchange_rate'],
             'total_value' => $validated['total_value'],
             'date' => $validated['date'],
             'notes' => $validated['notes'] ?? null,
@@ -287,10 +336,12 @@ class FormModal extends Component
         $this->wallet = null;
         $this->asset = null;
         $this->type = null;
-        $this->currency = null;
+        $this->walletCurrency = null;
+        $this->priceCurrency = null;
         $this->quantity = null;
         $this->price_per_unit = null;
         $this->total_value = 0;
+        $this->exchange_rate = null;
         $this->date = now()->format('Y-m-d');
         $this->notes = null;
         $this->fees = [];
@@ -303,7 +354,67 @@ class FormModal extends Component
     {
         $quantity = (float) ($this->quantity ?? 0);
         $price = (float) ($this->price_per_unit ?? 0);
-        $this->total_value = $quantity * $price;
+        $exchangeRate = (float) ($this->exchange_rate ?? 0);
+        $this->total_value = $quantity * $price * $exchangeRate;
+    }
+
+    protected function recalculateExchangeRate(): void
+    {
+        $marketValue = (float) ($this->quantity ?? 0) * (float) ($this->price_per_unit ?? 0);
+
+        if ($marketValue > 0 && (float) ($this->total_value ?? 0) > 0) {
+            $this->exchange_rate = (float) $this->total_value / $marketValue;
+        }
+    }
+
+    protected function syncCurrencyContext(bool $resetExchangeRate = false): void
+    {
+        $wallet = $this->wallet
+            ? Wallet::query()->where('user_id', Auth::id())->find($this->wallet)
+            : null;
+        $asset = $this->asset
+            ? Asset::query()->with('exchange')->find($this->asset)
+            : null;
+
+        $this->walletCurrency = $wallet?->currency
+            ? strtoupper((string) $wallet->currency)
+            : null;
+        $this->priceCurrency = $this->resolvePriceCurrency($asset, $this->walletCurrency);
+
+        if ($resetExchangeRate || $this->walletCurrency === $this->priceCurrency) {
+            $this->exchange_rate = $this->walletCurrency !== null
+                && $this->walletCurrency === $this->priceCurrency
+                ? 1
+                : null;
+        }
+
+        $this->recalculateTotalValue();
+    }
+
+    protected function resolvePriceCurrency(?Asset $asset, ?string $walletCurrency): ?string
+    {
+        if ($asset === null) {
+            return null;
+        }
+
+        $currency = $asset->exchange?->currency;
+
+        if ($currency === null && $asset->asset_type === 'crypto') {
+            $currency = 'USD';
+        }
+
+        return strtoupper((string) ($currency ?: $walletCurrency)) ?: null;
+    }
+
+    protected function legacyExchangeRate(): float
+    {
+        $marketValue = (float) $this->quantity * (float) $this->price_per_unit;
+
+        if ($marketValue <= 0) {
+            return $this->walletCurrency === $this->priceCurrency ? 1 : 0;
+        }
+
+        return abs((float) $this->total_value) / $marketValue;
     }
 
     protected function ownedTransactionsQuery()
