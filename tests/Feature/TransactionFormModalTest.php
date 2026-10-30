@@ -36,6 +36,21 @@ class TransactionFormModalTest extends TestCase
             ->assertSet('exchange_rate', 1);
     }
 
+    public function test_asset_can_be_searched_and_selected_from_the_transaction_form(): void
+    {
+        $user = User::factory()->create();
+        $asset = $this->createAsset('Apple');
+
+        $this->actingAs($user);
+
+        Livewire::test(FormModal::class)
+            ->set('assetSearch', 'app')
+            ->call('selectAsset', $asset->id)
+            ->assertSet('asset', $asset->id)
+            ->assertSet('assetSearch', 'Apple')
+            ->assertSet('selectedAssetSearch', 'Apple');
+    }
+
     public function test_user_cannot_open_a_foreign_wallet_in_the_transaction_form(): void
     {
         $user = User::factory()->create();

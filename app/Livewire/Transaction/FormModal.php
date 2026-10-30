@@ -7,7 +7,9 @@ use App\Models\Fee;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Services\Transaction\TransactionService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -29,6 +31,10 @@ class FormModal extends Component
     public $wallet = null;
 
     public $asset = null;
+
+    public string $assetSearch = '';
+
+    public string $selectedAssetSearch = '';
 
     public $type = null;
 
@@ -56,7 +62,11 @@ class FormModal extends Component
 
     public array $wallets = [];
 
-    public array $assets = [];
+    public array $assetTypeLabels = [
+        'stock' => 'Stocks',
+        'etf' => 'ETF',
+        'crypto' => 'Crypto',
+    ];
 
     public array $types = [
         'buy' => 'Buy',
@@ -94,7 +104,6 @@ class FormModal extends Component
             ->pluck('name', 'id')
             ->toArray();
 
-        $this->assets = Asset::pluck('name', 'id')->toArray();
     }
 
     public function updated(string $field): void
@@ -117,6 +126,34 @@ class FormModal extends Component
 
     public function updatedAsset(): void
     {
+        $this->syncCurrencyContext(true);
+    }
+
+    public function updatedAssetSearch(): void
+    {
+        if ($this->asset !== null && trim($this->assetSearch) !== $this->selectedAssetSearch) {
+            $this->asset = null;
+            $this->selectedAssetSearch = '';
+            $this->syncCurrencyContext(true);
+        }
+    }
+
+    public function selectAsset(int $assetId): void
+    {
+        $asset = Asset::query()->with('exchange')->findOrFail($assetId);
+
+        $this->asset = $asset->id;
+        $this->assetSearch = $asset->name;
+        $this->selectedAssetSearch = $asset->name;
+        $this->syncCurrencyContext(true);
+        $this->resetValidation('asset');
+    }
+
+    public function clearAssetSelection(): void
+    {
+        $this->asset = null;
+        $this->assetSearch = '';
+        $this->selectedAssetSearch = '';
         $this->syncCurrencyContext(true);
     }
 
@@ -143,7 +180,10 @@ class FormModal extends Component
         }
 
         if ($assetId !== null) {
-            $this->asset = Asset::query()->findOrFail($assetId)->id;
+            $asset = Asset::query()->findOrFail($assetId);
+            $this->asset = $asset->id;
+            $this->assetSearch = $asset->name;
+            $this->selectedAssetSearch = $asset->name;
         }
 
         $this->syncCurrencyContext(true);
@@ -158,6 +198,8 @@ class FormModal extends Component
         $this->editingTransactionId = $transaction->id;
         $this->wallet = $transaction->wallet_id;
         $this->asset = $transaction->asset_id;
+        $this->assetSearch = $transaction->asset->name;
+        $this->selectedAssetSearch = $transaction->asset->name;
         $this->type = $transaction->type;
         $this->walletCurrency = strtoupper((string) $transaction->wallet->currency);
         $this->priceCurrency = strtoupper((string) ($transaction->currency ?: $this->resolvePriceCurrency($transaction->asset, $this->walletCurrency)));
@@ -335,6 +377,8 @@ class FormModal extends Component
         $this->editingTransactionId = null;
         $this->wallet = null;
         $this->asset = null;
+        $this->assetSearch = '';
+        $this->selectedAssetSearch = '';
         $this->type = null;
         $this->walletCurrency = null;
         $this->priceCurrency = null;
@@ -424,11 +468,44 @@ class FormModal extends Component
         });
     }
 
+    /**
+     * @return Collection<int, Asset>
+     */
+    protected function matchingAssets(): Collection
+    {
+        $search = trim($this->assetSearch);
+
+        if (mb_strlen($search) < 2 || $this->asset !== null) {
+            return collect();
+        }
+
+        return Asset::query()
+            ->select(['id', 'name', 'symbol', 'asset_type', 'exchange_id'])
+            ->with('exchange:id,name,symbol,currency')
+            ->whereIn('asset_type', array_keys($this->assetTypeLabels))
+            ->where(function (Builder $query) use ($search): void {
+                $query
+                    ->where('symbol', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%");
+            })
+            ->orderBy('name')
+            ->limit(10)
+            ->get();
+    }
+
     public function render()
     {
+        $assetResults = $this->matchingAssets();
+
         return view('livewire.transaction.form-modal', [
             'wallets' => $this->wallets,
-            'assets' => $this->assets,
+            'assetResults' => $assetResults,
+            'assetResultsByType' => collect(array_keys($this->assetTypeLabels))
+                ->mapWithKeys(fn (string $type): array => [$type => $assetResults->where('asset_type', $type)])
+                ->filter(fn (Collection $results): bool => $results->isNotEmpty()),
+            'selectedAsset' => $this->asset
+                ? Asset::query()->with('exchange')->find($this->asset)
+                : null,
         ]);
     }
 }
