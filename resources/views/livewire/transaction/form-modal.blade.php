@@ -37,6 +37,138 @@
             </div>
 
             <form wire:submit="save" class="space-y-5 p-5 sm:p-6">
+                <div
+                    x-data="{
+                        highlightedIndex: -1,
+                        showAssetResults: true,
+                        moveHighlight(direction) {
+                            const options = this.$refs.assetResults?.querySelectorAll('[data-asset-option]') ?? [];
+
+                            if (options.length === 0) {
+                                return;
+                            }
+
+                            this.highlightedIndex = (this.highlightedIndex + direction + options.length) % options.length;
+                            options[this.highlightedIndex]?.scrollIntoView({ block: 'nearest' });
+                        },
+                        selectHighlighted() {
+                            const options = this.$refs.assetResults?.querySelectorAll('[data-asset-option]') ?? [];
+
+                            if (this.highlightedIndex >= 0 && options[this.highlightedIndex]) {
+                                options[this.highlightedIndex].click();
+                            }
+                        }
+                    }"
+                    class="relative mb-1"
+                >
+                    <label for="transaction-asset" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Asset</label>
+
+                    @if ($asset === null)
+                        <div class="relative">
+                            <input
+                                id="transaction-asset"
+                                type="search"
+                                wire:model.live.debounce.300ms="assetSearch"
+                                x-on:focus="showAssetResults = true"
+                                x-on:keydown.arrow-down.prevent="moveHighlight(1)"
+                                x-on:keydown.arrow-up.prevent="moveHighlight(-1)"
+                                x-on:keydown.enter.prevent="selectHighlighted()"
+                                x-on:keydown.escape.prevent="showAssetResults = false; highlightedIndex = -1"
+                                x-on:keydown.home.prevent="highlightedIndex = 0"
+                                x-on:keydown.end.prevent="highlightedIndex = (($refs.assetResults?.querySelectorAll('[data-asset-option]').length ?? 1) - 1)"
+                                autocomplete="off"
+                                role="combobox"
+                                aria-autocomplete="list"
+                                aria-controls="transaction-asset-results"
+                                :aria-expanded="showAssetResults"
+                                placeholder="Search by symbol or name..."
+                                class="h-14 w-full rounded-lg border border-gray-300 bg-white px-4 text-base text-gray-900 shadow-sm focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"
+                            >
+
+                            @if (mb_strlen(trim($assetSearch)) >= 2)
+                                <div
+                                    id="transaction-asset-results"
+                                    x-ref="assetResults"
+                                    x-show="showAssetResults"
+                                    x-cloak
+                                    role="listbox"
+                                    class="absolute inset-x-0 top-full z-20 mt-2 max-h-80 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+                                >
+                                    @if ($assetResultsByType->isNotEmpty())
+                                        <div>
+                                            @php $assetOptionIndex = 0; @endphp
+                                            @foreach ($assetResultsByType as $assetType => $assetTypeResults)
+                                                <section class="border-b border-gray-200 last:border-b-0 dark:border-zinc-800">
+                                                    <div class="flex items-center gap-2 bg-gray-50 px-4 py-2.5 dark:bg-zinc-950/70">
+                                                        <span class="h-1.5 w-1.5 rounded-full bg-gray-400 dark:bg-zinc-500"></span>
+                                                        <p class="text-xs font-bold uppercase tracking-[0.14em] text-gray-600 dark:text-zinc-300">
+                                                            {{ $assetTypeLabels[$assetType] }}
+                                                        </p>
+                                                        <span class="text-xs text-gray-400 dark:text-zinc-500">{{ $assetTypeResults->count() }}</span>
+                                                    </div>
+
+                                                    <div class="divide-y divide-gray-100 dark:divide-zinc-800">
+                                                        @foreach ($assetTypeResults as $assetResult)
+                                                            <button
+                                                                type="button"
+                                                                data-asset-option
+                                                                role="option"
+                                                                wire:key="transaction-asset-result-{{ $assetResult->id }}"
+                                                                wire:click="selectAsset({{ $assetResult->id }})"
+                                                                x-on:mouseenter="highlightedIndex = {{ $assetOptionIndex }}"
+                                                                x-on:click="showAssetResults = false"
+                                                                x-bind:class="highlightedIndex === {{ $assetOptionIndex }} ? 'bg-gray-100 dark:bg-zinc-800' : ''"
+                                                                class="flex w-full items-center justify-between gap-4 px-4 py-3 text-left transition hover:bg-gray-50 dark:hover:bg-zinc-800/70"
+                                                            >
+                                                                <span class="min-w-0">
+                                                                    <span class="block truncate text-sm font-semibold text-gray-900 dark:text-white">
+                                                                        <span class="mr-2 text-gray-600 dark:text-zinc-300">{{ $assetResult->symbol }}</span>{{ $assetResult->name }}
+                                                                    </span>
+                                                                </span>
+                                                                <span
+                                                                    class="shrink-0 text-xs font-semibold uppercase text-gray-500 dark:text-zinc-400"
+                                                                    title="{{ $assetResult->exchange?->name ?? 'No exchange' }}"
+                                                                    aria-label="Exchange: {{ $assetResult->exchange?->name ?? 'No exchange' }}"
+                                                                >
+                                                                    {{ $assetResult->exchange?->symbol ?? '—' }}
+                                                                </span>
+                                                            </button>
+                                                            @php $assetOptionIndex++; @endphp
+                                                        @endforeach
+                                                    </div>
+                                                </section>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <p class="px-4 py-4 text-sm text-gray-500 dark:text-zinc-400">No assets found for “{{ $assetSearch }}”.</p>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        <div class="flex min-h-14 items-center justify-between gap-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 dark:border-emerald-900/70 dark:bg-emerald-950/30">
+                            <div class="min-w-0">
+                                <p class="truncate text-base font-semibold text-gray-900 dark:text-white">
+                                    {{ $selectedAsset?->symbol }} · {{ $selectedAsset?->name }}
+                                </p>
+                                <p class="mt-1 text-xs text-gray-600 dark:text-zinc-300">
+                                    {{ $assetTypeLabels[$selectedAsset?->asset_type] ?? $selectedAsset?->asset_type }}
+                                    · {{ $selectedAsset?->exchange?->name ?? 'No exchange' }}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                wire:click="clearAssetSelection"
+                                class="shrink-0 rounded-lg border border-emerald-300 px-3 py-2 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100 dark:border-emerald-800 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    @endif
+
+                    @error('asset') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
+                </div>
+
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="transaction-wallet" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Wallet</label>
@@ -47,17 +179,6 @@
                             @endforeach
                         </select>
                         @error('wallet') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <label for="transaction-asset" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Asset</label>
-                        <select id="transaction-asset" wire:model="asset" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
-                            <option value="">Select asset</option>
-                            @foreach ($assets as $id => $label)
-                                <option value="{{ $id }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        @error('asset') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
