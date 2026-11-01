@@ -120,8 +120,7 @@ class TransactionFormModalTest extends TestCase
     {
         $user = User::factory()->create();
         $wallet = $this->createWallet($user, 'Main wallet');
-        $exchange = $this->createExchange('USD');
-        $asset = $this->createAsset('Apple', $exchange);
+        $asset = $this->createAsset('Apple');
 
         Transaction::create([
             'wallet_id' => $wallet->id,
