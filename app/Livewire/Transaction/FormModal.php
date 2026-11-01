@@ -44,6 +44,8 @@ class FormModal extends Component
 
     public $quantity = null;
 
+    public ?float $availableQuantity = null;
+
     public $price_per_unit = null;
 
     public $total_value = 0;
@@ -122,6 +124,11 @@ class FormModal extends Component
     public function updatedWallet(): void
     {
         $this->syncCurrencyContext(true);
+    }
+
+    public function updatedType(): void
+    {
+        $this->refreshAvailableQuantity();
     }
 
     public function updatedAsset(): void
@@ -211,6 +218,7 @@ class FormModal extends Component
         $this->exchange_rate = $transaction->exchange_rate !== null
             ? (float) $transaction->exchange_rate
             : $this->legacyExchangeRate();
+        $this->refreshAvailableQuantity();
         $this->fees = $transaction->fees
             ->map(fn (Fee $fee): array => [
                 'type' => $fee->type,
@@ -279,6 +287,20 @@ class FormModal extends Component
             ->where('user_id', Auth::id())
             ->findOrFail((int) $validated['wallet']);
         $asset = Asset::query()->with('exchange')->findOrFail((int) $validated['asset']);
+
+        $this->availableQuantity = $this->calculateAvailableQuantity(
+            (int) $validated['wallet'],
+            (int) $validated['asset'],
+        );
+
+        if ($validated['type'] === 'sell' && (float) $validated['quantity'] > $this->availableQuantity + 0.00000001) {
+            $this->addError(
+                'quantity',
+                'You can sell up to '.rtrim(rtrim(number_format($this->availableQuantity, 8, '.', ''), '0'), '.').' units.',
+            );
+
+            return;
+        }
 
         $this->walletCurrency = strtoupper((string) $wallet->currency);
         $this->priceCurrency = $this->resolvePriceCurrency($asset, $this->walletCurrency);
@@ -380,6 +402,7 @@ class FormModal extends Component
         $this->assetSearch = '';
         $this->selectedAssetSearch = '';
         $this->type = null;
+        $this->availableQuantity = null;
         $this->walletCurrency = null;
         $this->priceCurrency = null;
         $this->quantity = null;
@@ -433,6 +456,35 @@ class FormModal extends Component
         }
 
         $this->recalculateTotalValue();
+        $this->refreshAvailableQuantity();
+    }
+
+    protected function refreshAvailableQuantity(): void
+    {
+        if (! $this->wallet || ! $this->asset || $this->type !== 'sell') {
+            $this->availableQuantity = null;
+
+            return;
+        }
+
+        $this->availableQuantity = $this->calculateAvailableQuantity(
+            (int) $this->wallet,
+            (int) $this->asset,
+        );
+    }
+
+    protected function calculateAvailableQuantity(int $walletId, int $assetId): float
+    {
+        $quantity = Transaction::query()
+            ->where('wallet_id', $walletId)
+            ->where('asset_id', $assetId)
+            ->when(
+                $this->editingTransactionId !== null,
+                fn (Builder $query): Builder => $query->where('id', '!=', $this->editingTransactionId),
+            )
+            ->sum('quantity');
+
+        return max(0.0, (float) $quantity);
     }
 
     protected function resolvePriceCurrency(?Asset $asset, ?string $walletCurrency): ?string

@@ -194,7 +194,10 @@
 
                     <div>
                         <label for="transaction-quantity" class="mb-2 block text-sm font-medium text-gray-800 dark:text-zinc-200">Quantity</label>
-                        <input id="transaction-quantity" type="number" step="0.00000001" min="0" wire:model.live="quantity" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                        <input id="transaction-quantity" type="number" step="0.00000001" min="0" @if ($type === 'sell' && $availableQuantity !== null) max="{{ $availableQuantity }}" @endif wire:model.live="quantity" class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-500 focus:outline-hidden focus:ring-2 focus:ring-gray-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700">
+                        @if ($type === 'sell' && $availableQuantity !== null)
+                            <p class="mt-2 text-xs text-gray-500 dark:text-zinc-400">Available quantity: {{ rtrim(rtrim(number_format($availableQuantity, 8, '.', ''), '0'), '.') }}</p>
+                        @endif
                         @error('quantity') <p class="mt-2 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p> @enderror
                     </div>
 
