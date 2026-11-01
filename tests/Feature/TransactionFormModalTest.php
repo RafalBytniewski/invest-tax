@@ -6,6 +6,7 @@ use App\Livewire\Transaction\FormModal;
 use App\Models\Asset;
 use App\Models\Broker;
 use App\Models\Exchange;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -71,6 +72,18 @@ class TransactionFormModalTest extends TestCase
         $wallet = $this->createWallet($user, 'Main wallet');
         $asset = $this->createAsset('Apple');
 
+        Transaction::create([
+            'wallet_id' => $wallet->id,
+            'asset_id' => $asset->id,
+            'type' => 'buy',
+            'currency' => 'PLN',
+            'quantity' => 5,
+            'price_per_unit' => 100,
+            'exchange_rate' => 1,
+            'total_value' => 500,
+            'date' => '2026-10-13',
+        ]);
+
         $this->actingAs($user);
 
         Livewire::test(FormModal::class)
@@ -94,13 +107,48 @@ class TransactionFormModalTest extends TestCase
             'total_value' => -251,
         ]);
 
-        $transaction = $wallet->transactions()->firstOrFail();
+        $transaction = $wallet->transactions()->where('type', 'sell')->firstOrFail();
 
         $this->assertDatabaseHas('wallet_ledgers', [
             'transaction_id' => $transaction->id,
             'type' => 'sell',
             'amount' => 251,
         ]);
+    }
+
+    public function test_sell_quantity_cannot_exceed_the_available_asset_quantity(): void
+    {
+        $user = User::factory()->create();
+        $wallet = $this->createWallet($user, 'Main wallet');
+        $exchange = $this->createExchange('USD');
+        $asset = $this->createAsset('Apple', $exchange);
+
+        Transaction::create([
+            'wallet_id' => $wallet->id,
+            'asset_id' => $asset->id,
+            'type' => 'buy',
+            'currency' => 'PLN',
+            'quantity' => 5,
+            'price_per_unit' => 100,
+            'exchange_rate' => 1,
+            'total_value' => 500,
+            'date' => '2026-10-13',
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(FormModal::class)
+            ->set('wallet', $wallet->id)
+            ->set('asset', $asset->id)
+            ->set('type', 'sell')
+            ->assertSet('availableQuantity', 5.0)
+            ->set('quantity', 6)
+            ->set('price_per_unit', 125.50)
+            ->set('date', '2026-10-14')
+            ->call('save')
+            ->assertHasErrors(['quantity']);
+
+        $this->assertDatabaseCount('transactions', 1);
     }
 
     public function test_transaction_converts_price_currency_to_wallet_currency_and_saves_multiple_fees(): void
