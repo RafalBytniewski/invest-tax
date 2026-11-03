@@ -10,16 +10,38 @@ use Illuminate\Support\Collection;
 
 class WalletSnapshotService
 {
-    public function captureDaily(Wallet $wallet, CarbonInterface $snapshotAt): WalletSnapshot
-    {
+    public function captureDaily(
+        Wallet $wallet,
+        CarbonInterface $snapshotAt,
+        bool $onlyIfMissing = false,
+    ): ?WalletSnapshot {
+        $snapshotAt = $snapshotAt->copy()->endOfDay();
+
+        if ($snapshotAt->isBefore($wallet->created_at->copy()->startOfDay())) {
+            return null;
+        }
+
+        if (! $wallet->transactions()->where('date', '<=', $snapshotAt)->exists()) {
+            return null;
+        }
+
+        $snapshotKey = [
+            'wallet_id' => $wallet->id,
+            'snapshot_type' => 'daily',
+            'snapshot_at' => $snapshotAt,
+        ];
+
+        if ($onlyIfMissing) {
+            return WalletSnapshot::query()->firstOrCreate(
+                $snapshotKey,
+                $this->buildSnapshot($wallet, $snapshotAt),
+            );
+        }
+
         $snapshot = $this->buildSnapshot($wallet, $snapshotAt);
 
         return WalletSnapshot::updateOrCreate(
-            [
-                'wallet_id' => $wallet->id,
-                'snapshot_type' => 'daily',
-                'snapshot_at' => $snapshotAt->copy()->endOfDay(),
-            ],
+            $snapshotKey,
             $snapshot,
         );
     }
