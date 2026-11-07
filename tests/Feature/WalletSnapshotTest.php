@@ -21,7 +21,6 @@ class WalletSnapshotTest extends TestCase
     public function test_it_captures_a_daily_portfolio_value_snapshot(): void
     {
         $wallet = $this->createWallet();
-        $wallet->forceFill(['created_at' => '2026-10-01 00:00:00'])->save();
         $asset = Asset::create([
             'symbol' => 'ABC',
             'name' => 'Test asset',
@@ -32,7 +31,7 @@ class WalletSnapshotTest extends TestCase
             'asset_id' => $asset->id,
             'close_price' => 120,
             'source' => 'test',
-            'date' => '2026-10-14',
+            'date' => '2026-10-13',
         ]);
 
         app(TransactionService::class)->create([
@@ -55,14 +54,14 @@ class WalletSnapshotTest extends TestCase
         $this->assertDatabaseHas('wallet_snapshots', [
             'wallet_id' => $wallet->id,
             'snapshot_type' => 'daily',
-            'cash_value' => -100,
+            'cash_value' => 0,
             'positions_value' => 120,
-            'total_value' => 20,
+            'total_value' => 120,
             'valuation_status' => 'complete',
         ]);
     }
 
-    public function test_it_does_not_capture_a_snapshot_before_wallet_existed_or_before_its_first_transaction(): void
+    public function test_it_does_not_capture_a_snapshot_before_the_first_transaction(): void
     {
         $wallet = $this->createWallet();
         $asset = Asset::create([
@@ -70,11 +69,9 @@ class WalletSnapshotTest extends TestCase
             'name' => 'Test asset',
             'asset_type' => 'stock',
         ]);
-        $wallet->forceFill(['created_at' => '2026-10-10 00:00:00'])->save();
-
         $service = app(WalletSnapshotService::class);
 
-        $this->assertNull($service->captureDaily($wallet, CarbonImmutable::parse('2026-10-09')));
+        $this->assertNull($service->captureDaily($wallet, CarbonImmutable::parse('2026-10-13')));
 
         app(TransactionService::class)->create([
             'wallet_id' => $wallet->id,
@@ -88,14 +85,13 @@ class WalletSnapshotTest extends TestCase
             'date' => '2026-10-14',
         ]);
 
-        $this->assertNull($service->captureDaily($wallet, CarbonImmutable::parse('2026-10-13')));
-        $this->assertDatabaseCount('wallet_snapshots', 0);
+        $this->assertNotNull($service->captureDaily($wallet, CarbonImmutable::parse('2026-10-14')));
+        $this->assertDatabaseCount('wallet_snapshots', 1);
     }
 
     public function test_update_fills_only_missing_daily_snapshots_and_reset_deletes_them(): void
     {
         $wallet = $this->createWallet();
-        $wallet->forceFill(['created_at' => '2026-10-10 00:00:00'])->save();
         $asset = Asset::create([
             'symbol' => 'ABC',
             'name' => 'Test asset',
@@ -125,7 +121,7 @@ class WalletSnapshotTest extends TestCase
 
         $this->artisan('wallet-snapshots:capture --update')->assertSuccessful();
 
-        $expectedSnapshotCount = CarbonImmutable::parse('2026-10-14')->diffInDays(CarbonImmutable::today()) + 1;
+        $expectedSnapshotCount = CarbonImmutable::parse('2026-10-14')->diffInDays(CarbonImmutable::yesterday()) + 1;
 
         $this->assertDatabaseCount('wallet_snapshots', $expectedSnapshotCount);
         $this->assertDatabaseHas('wallet_snapshots', [

@@ -17,10 +17,6 @@ class WalletSnapshotService
     ): ?WalletSnapshot {
         $snapshotAt = $snapshotAt->copy()->endOfDay();
 
-        if ($snapshotAt->isBefore($wallet->created_at->copy()->startOfDay())) {
-            return null;
-        }
-
         if (! $wallet->transactions()->where('date', '<=', $snapshotAt)->exists()) {
             return null;
         }
@@ -51,10 +47,6 @@ class WalletSnapshotService
      */
     private function buildSnapshot(Wallet $wallet, CarbonInterface $snapshotAt): array
     {
-        $cashValue = (float) $wallet->walletLedgers()
-            ->where('date', '<=', $snapshotAt)
-            ->sum('amount');
-
         $positions = $wallet->transactions()
             ->where('date', '<=', $snapshotAt)
             ->selectRaw('asset_id, SUM(quantity) as quantity')
@@ -88,9 +80,9 @@ class WalletSnapshotService
         }
 
         return [
-            'cash_value' => $cashValue,
+            'cash_value' => 0,
             'positions_value' => $positionsValue,
-            'total_value' => $cashValue + $positionsValue,
+            'total_value' => $positionsValue,
             'valuation_status' => $isComplete ? 'complete' : 'partial',
             'price_as_of' => $snapshotAt->toDateString(),
         ];

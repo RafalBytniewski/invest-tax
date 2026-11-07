@@ -16,7 +16,7 @@ class CaptureWalletSnapshots extends Command
                             {--date= : Capture a specific date in Y-m-d format}
                             {--from= : Capture every day from this date}
                             {--to= : Capture every day through this date}
-                            {--update : Fill missing daily snapshots from wallet creation to today}
+                            {--update : Fill missing daily snapshots from the first transaction to yesterday}
                             {--reset : Delete all wallet snapshots}';
 
     protected $description = 'Capture daily wallet value snapshots';
@@ -38,32 +38,37 @@ class CaptureWalletSnapshots extends Command
                 return self::FAILURE;
             }
 
-            $today = CarbonImmutable::today();
+            $yesterday = CarbonImmutable::yesterday();
 
             Wallet::query()
+                ->withMin('transactions', 'date')
                 ->orderBy('id')
-                ->chunkById(100, function (Collection $wallets) use ($snapshotService, $today): void {
+                ->chunkById(100, function (Collection $wallets) use ($snapshotService, $yesterday): void {
                     foreach ($wallets as $wallet) {
-                        $from = CarbonImmutable::instance($wallet->created_at)->startOfDay();
-
-                        if ($from->isAfter($today)) {
+                        if ($wallet->transactions_min_date === null) {
                             continue;
                         }
 
-                        foreach (CarbonPeriod::create($from, $today) as $date) {
+                        $from = CarbonImmutable::parse($wallet->transactions_min_date)->startOfDay();
+
+                        if ($from->isAfter($yesterday)) {
+                            continue;
+                        }
+
+                        foreach (CarbonPeriod::create($from, $yesterday) as $date) {
                             $snapshotService->captureDaily($wallet, $date, onlyIfMissing: true);
                         }
                     }
                 });
 
-            $this->info('Missing wallet snapshots filled from wallet creation to '.$today->toDateString().'.');
+            $this->info('Missing wallet snapshots filled from the first transaction to '.$yesterday->toDateString().'.');
 
             return self::SUCCESS;
         }
 
         $from = $this->option('from')
             ? CarbonImmutable::parse($this->option('from'))
-            : CarbonImmutable::parse($this->option('date') ?: 'today');
+            : CarbonImmutable::parse($this->option('date') ?: 'yesterday');
         $to = $this->option('to')
             ? CarbonImmutable::parse($this->option('to'))
             : $from;
