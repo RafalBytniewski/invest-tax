@@ -45,4 +45,8 @@ return [
     'eodhd' => [
         'key' => env('EODHD_KEY'),
     ],
+
+    'nbp' => [
+        'base_url' => env('NBP_BASE_URL', 'https://api.nbp.pl'),
+    ],
 ];
