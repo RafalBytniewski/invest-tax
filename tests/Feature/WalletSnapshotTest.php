@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Asset;
 use App\Models\AssetPrice;
 use App\Models\Broker;
+use App\Models\Exchange;
+use App\Models\ExchangeRate;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletSnapshot;
@@ -21,11 +23,7 @@ class WalletSnapshotTest extends TestCase
     public function test_it_captures_a_daily_portfolio_value_snapshot(): void
     {
         $wallet = $this->createWallet();
-        $asset = Asset::create([
-            'symbol' => 'ABC',
-            'name' => 'Test asset',
-            'asset_type' => 'stock',
-        ]);
+        $asset = $this->createAsset('PLN');
 
         AssetPrice::create([
             'asset_id' => $asset->id,
@@ -64,11 +62,7 @@ class WalletSnapshotTest extends TestCase
     public function test_it_does_not_capture_a_snapshot_before_the_first_transaction(): void
     {
         $wallet = $this->createWallet();
-        $asset = Asset::create([
-            'symbol' => 'ABC',
-            'name' => 'Test asset',
-            'asset_type' => 'stock',
-        ]);
+        $asset = $this->createAsset('PLN');
         $service = app(WalletSnapshotService::class);
 
         $this->assertNull($service->captureDaily($wallet, CarbonImmutable::parse('2026-10-13')));
@@ -92,11 +86,7 @@ class WalletSnapshotTest extends TestCase
     public function test_update_fills_only_missing_daily_snapshots_and_reset_deletes_them(): void
     {
         $wallet = $this->createWallet();
-        $asset = Asset::create([
-            'symbol' => 'ABC',
-            'name' => 'Test asset',
-            'asset_type' => 'stock',
-        ]);
+        $asset = $this->createAsset('PLN');
 
         app(TransactionService::class)->create([
             'wallet_id' => $wallet->id,
@@ -135,6 +125,51 @@ class WalletSnapshotTest extends TestCase
         $this->assertDatabaseCount('wallet_snapshots', 0);
     }
 
+    public function test_it_converts_asset_value_to_the_wallet_currency_using_the_stored_rate(): void
+    {
+        $wallet = $this->createWallet();
+        $asset = $this->createAsset('EUR');
+
+        AssetPrice::create([
+            'asset_id' => $asset->id,
+            'close_price' => 100,
+            'source' => 'test',
+            'date' => '2026-10-13',
+        ]);
+
+        ExchangeRate::create([
+            'base_currency' => 'EUR',
+            'quote_currency' => 'PLN',
+            'rate' => 4.5,
+            'date' => '2026-10-13',
+            'source' => 'nbp',
+        ]);
+
+        app(TransactionService::class)->create([
+            'wallet_id' => $wallet->id,
+            'asset_id' => $asset->id,
+            'type' => 'buy',
+            'currency' => 'EUR',
+            'quantity' => 2,
+            'price_per_unit' => 90,
+            'exchange_rate' => 1,
+            'total_value' => 180,
+            'date' => '2026-10-14',
+        ]);
+
+        app(WalletSnapshotService::class)->captureDaily(
+            $wallet,
+            CarbonImmutable::parse('2026-10-14'),
+        );
+
+        $this->assertDatabaseHas('wallet_snapshots', [
+            'wallet_id' => $wallet->id,
+            'positions_value' => 900,
+            'total_value' => 900,
+            'valuation_status' => 'complete',
+        ]);
+    }
+
     public function test_wallet_index_only_loads_wallets_owned_by_the_authenticated_user(): void
     {
         $wallet = $this->createWallet();
@@ -163,6 +198,28 @@ class WalletSnapshotTest extends TestCase
             'broker_id' => $broker->id,
             'name' => 'Wallet '.$user->id,
             'currency' => 'PLN',
+        ]);
+    }
+
+    private function createAsset(string $currency): Asset
+    {
+        $exchange = Exchange::create([
+            'name' => 'Test exchange',
+            'symbol' => 'TEST',
+            'type' => 'broker',
+            'image' => 'exchange.png',
+            'url' => 'https://example.test',
+            'country' => 'PL',
+            'currency' => $currency,
+            'timezone' => 'UTC',
+            'trading_hours' => '09:00-17:00',
+        ]);
+
+        return Asset::create([
+            'symbol' => 'ABC',
+            'name' => 'Test asset',
+            'asset_type' => 'stock',
+            'exchange_id' => $exchange->id,
         ]);
     }
 }

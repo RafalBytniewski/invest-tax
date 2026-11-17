@@ -9,5 +9,5 @@ interface ExchangeRateProvider
     /**
      * @return list<array{date: string, rate: float}>
      */
-    public function rates(CarbonImmutable $from, CarbonImmutable $to): array;
+    public function rates(string $currency, CarbonImmutable $from, CarbonImmutable $to): array;
 }

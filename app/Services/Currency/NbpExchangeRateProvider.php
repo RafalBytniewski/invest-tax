@@ -11,14 +11,16 @@ class NbpExchangeRateProvider implements ExchangeRateProvider
     /**
      * @return list<array{date: string, rate: float}>
      */
-    public function rates(CarbonImmutable $from, CarbonImmutable $to): array
+    public function rates(string $currency, CarbonImmutable $from, CarbonImmutable $to): array
     {
+        $currency = strtolower($currency);
+
         $response = Http::baseUrl(config('services.nbp.base_url'))
             ->acceptJson()
             ->connectTimeout(3)
             ->timeout(10)
             ->retry([100, 500, 1000], 0, throw: false)
-            ->get("/api/exchangerates/rates/a/eur/{$from->toDateString()}/{$to->toDateString()}/");
+            ->get("/api/exchangerates/rates/a/{$currency}/{$from->toDateString()}/{$to->toDateString()}/");
 
         if ($response->failed()) {
             throw new RuntimeException('NBP exchange rate request failed with status '.$response->status().'.');

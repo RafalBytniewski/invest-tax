@@ -27,7 +27,7 @@ class ExchangeRateSyncTest extends TestCase
             ->expectsOutputToContain('Exchange rates synchronized')
             ->assertExitCode(0);
 
-        $this->assertDatabaseCount('exchange_rates', 2);
+        $this->assertDatabaseCount('exchange_rates', 4);
         $this->assertDatabaseHas('exchange_rates', [
             'base_currency' => 'EUR',
             'quote_currency' => 'PLN',
@@ -43,9 +43,22 @@ class ExchangeRateSyncTest extends TestCase
             'source' => 'nbp',
         ]);
 
+        $this->assertDatabaseHas('exchange_rates', [
+            'base_currency' => 'USD',
+            'quote_currency' => 'PLN',
+            'rate' => '4.2500000000',
+            'date' => '2026-11-10',
+            'source' => 'nbp',
+        ]);
+
         Http::assertSent(fn (Request $request): bool => str_contains(
             $request->url(),
             '/api/exchangerates/rates/a/eur/2026-11-10/2026-11-11/'
+        ));
+
+        Http::assertSent(fn (Request $request): bool => str_contains(
+            $request->url(),
+            '/api/exchangerates/rates/a/usd/2026-11-10/2026-11-11/'
         ));
     }
 
@@ -62,7 +75,7 @@ class ExchangeRateSyncTest extends TestCase
         $this->artisan('exchange-rates:sync --from=2026-11-10 --to=2026-11-10')->assertExitCode(0);
         $this->artisan('exchange-rates:sync --from=2026-11-10 --to=2026-11-10')->assertExitCode(0);
 
-        $this->assertDatabaseCount('exchange_rates', 2);
+        $this->assertDatabaseCount('exchange_rates', 4);
     }
 
     public function test_it_returns_the_latest_available_rate_before_the_requested_date(): void

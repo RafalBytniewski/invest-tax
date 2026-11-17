@@ -157,10 +157,10 @@ class Show extends Component
         if ($this->walletCurrency === $this->assetCurrency) {
             $this->positionValue = $calculator->positionValue($marketPrice, $this->quantity);
         } elseif ($this->walletCurrency === 'PLN' && $this->assetCurrency !== null) {
-            $currencyRate = $rate->getCurrencyPrice($this->assetCurrency, $this->latestPrice->date);
+            $currencyRate = $rate->getRate($this->assetCurrency, 'PLN', $this->latestPrice->date);
             $this->positionValue = $currencyRate === null
                 ? null
-                : $calculator->positionValue($marketPrice * $currencyRate, $this->quantity);
+                : $calculator->positionValue($marketPrice * (float) $currencyRate, $this->quantity);
         }
 
         $this->currentPL = $calculator->unrealizedPL($this->positionValue, $this->costBasis);

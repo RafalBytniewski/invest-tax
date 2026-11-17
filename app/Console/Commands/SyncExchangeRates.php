@@ -14,7 +14,7 @@ class SyncExchangeRates extends Command
         {--to= : Last date to synchronize, in YYYY-MM-DD format}
         {--buffer=10 : Number of days to subtract from the first transaction date}';
 
-    protected $description = 'Synchronize historical EUR/PLN exchange rates from NBP';
+    protected $description = 'Synchronize historical EUR/USD exchange rates against PLN from NBP';
 
     public function handle(ExchangeRateService $exchangeRateService): int
     {

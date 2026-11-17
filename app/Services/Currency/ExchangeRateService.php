@@ -5,7 +5,6 @@ namespace App\Services\Currency;
 use App\Models\ExchangeRate;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Facades\Http;
 
 class ExchangeRateService
 {
@@ -19,21 +18,25 @@ class ExchangeRateService
         $stored = 0;
         $requested = 0;
         $periodStart = $from;
+        $currencies = ['EUR', 'USD'];
 
         while ($periodStart->lessThanOrEqualTo($to)) {
             $periodEnd = $periodStart->addDays(92)->min($to);
-            $rates = $this->provider->rates($periodStart, $periodEnd);
             $requested += $periodEnd->diffInDays($periodStart) + 1;
 
-            foreach ($rates as $rate) {
-                $baseRate = $rate['rate'];
+            foreach ($currencies as $currency) {
+                $rates = $this->provider->rates($currency, $periodStart, $periodEnd);
 
-                ExchangeRate::query()->upsert([
-                    $this->record('EUR', 'PLN', $rate['date'], $baseRate),
-                    $this->record('PLN', 'EUR', $rate['date'], 1 / $baseRate),
-                ], ['base_currency', 'quote_currency', 'date', 'source'], ['rate', 'updated_at']);
+                foreach ($rates as $rate) {
+                    $baseRate = $rate['rate'];
 
-                $stored += 2;
+                    ExchangeRate::query()->upsert([
+                        $this->record($currency, 'PLN', $rate['date'], $baseRate),
+                        $this->record('PLN', $currency, $rate['date'], 1 / $baseRate),
+                    ], ['base_currency', 'quote_currency', 'date', 'source'], ['rate', 'updated_at']);
+
+                    $stored += 2;
+                }
             }
 
             $periodStart = $periodEnd->addDay();
@@ -71,20 +74,5 @@ class ExchangeRateService
             'created_at' => now(),
             'updated_at' => now(),
         ];
-    }
-
-    public function getCurrencyPrice(string $symbol, CarbonInterface|string $date): ?float
-    {
-        $url = "https://api.nbp.pl/api/exchangerates/rates/a/{$symbol}/{$date}/?format=json";
-
-        $response = Http::connectTimeout(3)->timeout(10)->get($url);
-
-        if (! $response->ok()) {
-            return null;
-        }
-
-        $data = $response->json();
-
-        return isset($data['rates'][0]['mid']) ? (float) $data['rates'][0]['mid'] : null;
     }
 }

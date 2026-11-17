@@ -2,14 +2,19 @@
 
 namespace App\Services\Wallet;
 
+use App\Models\Asset;
 use App\Models\AssetPrice;
 use App\Models\Wallet;
 use App\Models\WalletSnapshot;
+use App\Services\Currency\ExchangeRateService;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
 class WalletSnapshotService
 {
+    public function __construct(private readonly ExchangeRateService $exchangeRateService) {}
+
     public function captureDaily(
         Wallet $wallet,
         CarbonInterface $snapshotAt,
@@ -57,9 +62,15 @@ class WalletSnapshotService
             ->where('quantity', '>', 0)
             ->pluck('asset_id');
 
+        $assets = Asset::query()
+            ->with('exchange')
+            ->whereIn('id', $assetIds)
+            ->get()
+            ->keyBy('id');
         $prices = $this->latestPrices($assetIds, $snapshotAt);
         $positionsValue = 0.0;
         $isComplete = true;
+        $walletCurrency = strtoupper((string) $wallet->currency);
 
         foreach ($positions as $position) {
             $quantity = (float) $position->quantity;
@@ -76,7 +87,30 @@ class WalletSnapshotService
                 continue;
             }
 
-            $positionsValue += $quantity * (float) $price->close_price;
+            $asset = $assets->get($position->asset_id);
+            $assetCurrency = $asset?->asset_type === 'crypto'
+                ? 'USD'
+                : strtoupper((string) $asset?->exchange?->currency);
+
+            if ($assetCurrency === '') {
+                $isComplete = false;
+
+                continue;
+            }
+
+            $currencyRate = $this->exchangeRateService->getRate(
+                $assetCurrency,
+                $walletCurrency,
+                CarbonImmutable::parse($price->date),
+            );
+
+            if ($currencyRate === null) {
+                $isComplete = false;
+
+                continue;
+            }
+
+            $positionsValue += $quantity * (float) $price->close_price * (float) $currencyRate;
         }
 
         return [
